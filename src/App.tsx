@@ -206,13 +206,13 @@ function App() {
     else fetchProjects();
   };
 
-  const addWorkItem = async (projectId: string, type: '실측' | '시공') => {
+  const addWorkItem = async (projectId: string, count: number) => {
     if (!currentUser) return;
     const { error } = await supabase.from('work_items').insert([{
       project_id: projectId,
       user_id: currentUser.id,
-      label: type === '실측' ? '실측' : '시공',
-      type,
+      label: `공정${count + 1}`,
+      type: '시공',
       date: '',
       status: '실측예정'
     }]);
@@ -543,22 +543,25 @@ function App() {
 
                         <div className="project-body">
 
-                        {/* 공정 항목 (실측/시공) */}
+                        {/* 공정 항목 */}
                         <div className="work-items-section">
-                          <div className="work-items-label">공정 항목</div>
-                          <div className="status-timeline">
-                            {workItems.filter(w => w.project_id === project.id).map(w => (
-                              <div key={w.id} className={`status-node ${w.status === '완료' ? 'done' : ''}`}>
-                                <div className="node-header">
-                                  <span className={`node-type-badge ${w.type}`}>{w.type}</span>
-                                  <input
-                                    className="work-label-input"
-                                    value={w.label}
-                                    onChange={e => updateWorkItem(w.id, 'label', e.target.value)}
-                                    placeholder="공사명"
-                                  />
+                          <div className="work-items-header">
+                            <div className="work-items-label">공정 항목</div>
+                            <button className="btn-add-work" onClick={() => addWorkItem(project.id, workItems.filter(w => w.project_id === project.id).length)}>+ 공정 추가</button>
+                          </div>
+                          <div className="work-items-grid">
+                            {workItems.filter(w => w.project_id === project.id).map((w, idx) => (
+                              <div key={w.id} className={`work-item-chip ${w.status === '완료' ? 'done' : ''}`}>
+                                <div className="chip-top">
+                                  <span className="chip-index">공정{idx + 1}</span>
                                   <button className="btn-remove-work" onClick={() => deleteWorkItem(w.id)}>×</button>
                                 </div>
+                                <input
+                                  className="work-label-input"
+                                  value={w.label}
+                                  onChange={e => updateWorkItem(w.id, 'label', e.target.value)}
+                                  placeholder="공정명"
+                                />
                                 <select value={w.status} onChange={e => updateWorkItem(w.id, 'status', e.target.value)} className={`status-select ${w.status.replace(/ /g, '-')}`}>
                                   <option value="실측예정">실측예정</option>
                                   <option value="실측 후 대기">실측 후 대기</option>
@@ -569,10 +572,6 @@ function App() {
                                 <input type="date" value={w.date || ''} onChange={e => updateWorkItem(w.id, 'date', e.target.value)} />
                               </div>
                             ))}
-                          </div>
-                          <div className="work-item-add-buttons">
-                            <button className="btn-add-work measure" onClick={() => addWorkItem(project.id, '실측')}>+ 실측 추가</button>
-                            <button className="btn-add-work install" onClick={() => addWorkItem(project.id, '시공')}>+ 시공 추가</button>
                           </div>
                         </div>
 
@@ -598,7 +597,6 @@ function App() {
 
                         {/* 계산서/수금 - 현장 단위로 관리 */}
                         <div className="invoice-payment-section">
-                          <div className="section-title">계산서 / 수금</div>
                           <div className="invoice-payment-row">
                             <div className={`status-node ${project.invoice_status === '완료' ? 'done' : ''}`}>
                               <div className="node-label">계산서</div>
