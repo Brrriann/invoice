@@ -90,12 +90,12 @@ interface SavedMeasurement {
 }
 
 const initialProvider = {
-  name: '주미산업',
-  brandTagline: 'Industrial Solution Specialist',
-  representative: '송제홍외 1명',
-  address: '경기도 안산시 단원구 산단로 325, 3층 F-340호',
-  contact: 'Tel: 02-3439-1888 / HP: 010-4857-9660 / Fax: 02-6442-1886',
-  businessNo: '213-02-52092'
+  name: '',
+  brandTagline: '',
+  representative: '',
+  address: '',
+  contact: '',
+  businessNo: ''
 };
 
 const initialCustomer = {
@@ -117,7 +117,7 @@ function App() {
   const [invoiceFilter, setInvoiceFilter] = useState<'전체' | '미발급' | '완료'>('전체');
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [items, setItems] = useState<Item[]>([
-    { id: '1', type: 'door', name: '기본형 스피드 도어', unit: 'SET', width: 3000, height: 3000, quantity: 1, unitPrice: 2500000, remarks: '' }
+    { id: '1', type: 'door', name: '', unit: 'SET', width: 0, height: 0, quantity: 1, unitPrice: 0, remarks: '' }
   ]);
   const [provider, setProvider] = useState(initialProvider);
   const [customer, setCustomer] = useState(initialCustomer);
@@ -429,7 +429,7 @@ function App() {
   };
 
   const handleLogout = async () => await supabase.auth.signOut();
-  const addItem = (type: 'door' | 'option') => setItems([...items, { id: Math.random().toString(36).substr(2, 9), type, name: type === 'door' ? '스피드 도어 품목' : '옵션 항목 추가', unit: 'SET', width: 0, height: 0, quantity: 1, unitPrice: 0, remarks: '' }]);
+  const addItem = (type: 'door' | 'option') => setItems([...items, { id: Math.random().toString(36).substr(2, 9), type, name: type === 'door' ? '품목명 입력' : '옵션 항목', unit: 'SET', width: 0, height: 0, quantity: 1, unitPrice: 0, remarks: '' }]);
   const removeItem = (id: string) => setItems(items.filter(item => item.id !== id));
   const updateItem = (id: string, field: keyof Item, value: string | number) => setItems(items.map(item => item.id === id ? { ...item, [field]: value } : item));
   const handlePrint = () => { if (document.activeElement instanceof HTMLElement) document.activeElement.blur(); requestAnimationFrame(() => window.print()); };
@@ -726,7 +726,7 @@ function App() {
               <textarea className="remarks-input" value={greeting} onChange={e => setGreeting(e.target.value)} rows={2} />
             </div>
             <div className="items-section">
-              <h3>품목 관리 - 스피드도어</h3>
+              <h3>품목 관리</h3>
               <table>
                 <thead><tr><th>품명</th><th>단위</th><th>가로</th><th>세로</th><th>수량</th><th>단가</th><th>소계</th><th>삭제</th></tr></thead>
                 <tbody>{items.filter(i => i.type === 'door').map(i => <tr key={i.id}><td><input value={i.name} onChange={e => updateItem(i.id, 'name', e.target.value)} /></td><td><input value={i.unit} onChange={e => updateItem(i.id, 'unit', e.target.value)} /></td><td><input type="number" value={i.width} onChange={e => updateItem(i.id, 'width', parseInt(e.target.value))} /></td><td><input type="number" value={i.height} onChange={e => updateItem(i.id, 'height', parseInt(e.target.value))} /></td><td><input type="number" value={i.quantity} onChange={e => updateItem(i.id, 'quantity', parseInt(e.target.value))} /></td><td><input type="number" value={i.unitPrice} onChange={e => updateItem(i.id, 'unitPrice', parseInt(e.target.value))} /></td><td>{(i.quantity * i.unitPrice).toLocaleString()}</td><td><button onClick={() => removeItem(i.id)}>×</button></td></tr>)}</tbody>
@@ -748,7 +748,7 @@ function App() {
         ) : (
           /* 실측 템플릿 작성 화면 */
           <div className="quotation-card">
-            <h1>스피드도어 실측 리포트</h1>
+            <h1>실측 리포트</h1>
             <div className="form-section">
               <h3>기본 정보</h3>
               <div className="grid">
@@ -922,20 +922,6 @@ function App() {
 
           <div className="sheet-final"><p>견적 유효기간: 발행일로부터 15일</p><div className="signature-area"><p>위와 같이 견적 하오니, 긍정적인 검토 부탁드립니다.</p><div className="sign-box">{customer.date.split('-')[0]}년 {customer.date.split('-')[1]}월 {customer.date.split('-')[2]}일</div></div></div>
 
-          <div className="sheet-strengths-page">
-            <div className="strengths-image-top"><img src="/image.webp" alt="Happy Gate Strength" /></div>
-            <div className="strengths-header"><h3>해피게이트 문번 강점</h3><div className="header-line" /></div>
-            <ul className="strengths-list">
-              <li><span className="bullet">01</span><p>1980년 아시아 최초로 개발된 스피드도어 전문 기업으로 업계를 선도하고 있는 기업입니다.</p></li>
-              <li><span className="bullet">02</span><p>전국 A/S 망 구축으로 문제 발생시 빠른 처리가 가능합니다.</p></li>
-              <li><span className="bullet">03</span><p>차 후 A/S 발생시 합리적인 수리비청구로 유지관리비용이 저렴합니다.</p></li>
-              <li><span className="bullet">04</span><p>BLDC모터 사용으로 설치시 타사 대비 월등히 작은 크기로 공간활용성증대, 전력소비절감, 저소음 개폐가 가능합니다.</p></li>
-              <li><span className="bullet">05</span><p>합리적인 이전 설치 비용으로 공장 리모델링 시에도 부담없이 이동이 가능합니다.</p></li>
-              <li><span className="bullet">06</span><p>고장력강 파이프를 사용하여 충격에도 쉽게 변형되지 않고, 강풍에도 견고하게 버틸 수 있습니다.</p></li>
-              <li><span className="bullet">07</span><p>재난 주관 방송사인 KBS에 재난 발생 피해를 막기 위해 설치하는 비상탈출문으로 보도된 제품을 보유하고 있습니다.</p></li>
-            </ul>
-            <div className="strengths-footer"><p>{provider.name}</p></div>
-          </div>
         </div>
       )}
 
@@ -943,7 +929,7 @@ function App() {
         <div className="print-only measurement-sheet">
           <div className="sheet-border-top" />
           <header className="m-header">
-            <h1>스피드도어 실측 리포트</h1>
+            <h1>실측 리포트</h1>
             <div className="m-meta"><span>현장명: {measureData.siteName}</span><span>실측일: {measureData.date}</span></div>
           </header>
 
