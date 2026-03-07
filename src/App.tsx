@@ -552,7 +552,7 @@ function App() {
               <div className="project-grid">
                 {projects.length === 0 && <div className="empty-state">등록된 현장이 없습니다. '새 현장 추가'를 눌러 시작하세요.</div>}
                 {projects.map(project => (
-                  <div key={project.id} className="project-card">
+                  <div key={project.id} className="project-card" style={{'--card-color': getProjectColor(project.id).border} as React.CSSProperties}>
                     <div className="project-card-header">
                       <div className="project-title">
                         <h3>{project.site_name}</h3>

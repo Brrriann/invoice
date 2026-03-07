@@ -358,11 +358,11 @@
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-  border-left: 6px solid #e2e8f0;
+  border-left: 6px solid var(--card-color, #e2e8f0);
   transition: all 0.2s;
 }
 
-.project-card:hover { border-left-color: #3b82f6; box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+.project-card:hover { box-shadow: 0 8px 30px color-mix(in srgb, var(--card-color, #3b82f6) 30%, transparent); }
 
 .project-card-header {
   display: flex;
@@ -685,6 +685,7 @@
 
 .subcontract-section {
   margin-top: 8px;
+  margin-bottom: 20px;
 }
 .subcontract-header {
   display: flex;
