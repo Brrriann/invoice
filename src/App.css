@@ -657,6 +657,35 @@
   box-sizing: border-box;
 }
 
+.intro-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.intro-section-header h3 {
+  margin: 0;
+}
+.intro-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  padding: 4px 10px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  user-select: none;
+}
+.intro-toggle-label input[type="checkbox"] {
+  accent-color: #3b82f6;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
 .logo-upload-area {
   display: flex;
   align-items: center;
