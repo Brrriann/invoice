@@ -461,8 +461,8 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #eff6ff;
+  border: 1.5px solid #93c5fd;
   border-radius: 10px;
   padding: 12px 14px;
   width: 240px;
@@ -471,6 +471,15 @@
 .work-item-chip.done {
   border-color: #86efac;
   background: #f0fdf4;
+}
+.work-item-chip .chip-index {
+  color: #1d4ed8;
+}
+.work-item-chip .work-label-input {
+  border-color: #bfdbfe;
+}
+.work-item-chip input[type="date"] {
+  border-color: #bfdbfe !important;
 }
 .chip-top {
   display: flex;
