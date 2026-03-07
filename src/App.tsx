@@ -45,7 +45,7 @@ interface WorkItem {
   label: string;
   type: '실측' | '시공';
   date: string;
-  status: '예정' | '확정' | '완료';
+  status: '실측예정' | '실측 후 대기' | '시공확정' | '시공중' | '완료';
 }
 
 interface SavedQuotation {
@@ -214,7 +214,7 @@ function App() {
       label: type === '실측' ? '실측' : '시공',
       type,
       date: '',
-      status: '예정'
+      status: '실측예정'
     }]);
     if (!error) fetchWorkItems();
   };
@@ -559,9 +559,11 @@ function App() {
                                   />
                                   <button className="btn-remove-work" onClick={() => deleteWorkItem(w.id)}>×</button>
                                 </div>
-                                <select value={w.status} onChange={e => updateWorkItem(w.id, 'status', e.target.value)} className={`status-select ${w.status}`}>
-                                  <option value="예정">예정</option>
-                                  <option value="확정">확정</option>
+                                <select value={w.status} onChange={e => updateWorkItem(w.id, 'status', e.target.value)} className={`status-select ${w.status.replace(/ /g, '-')}`}>
+                                  <option value="실측예정">실측예정</option>
+                                  <option value="실측 후 대기">실측 후 대기</option>
+                                  <option value="시공확정">시공확정</option>
+                                  <option value="시공중">시공중</option>
                                   <option value="완료">완료</option>
                                 </select>
                                 <input type="date" value={w.date || ''} onChange={e => updateWorkItem(w.id, 'date', e.target.value)} />
