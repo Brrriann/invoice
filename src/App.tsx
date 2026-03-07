@@ -14,6 +14,7 @@ interface Item {
   height: number;
   quantity: number;
   unitPrice: number;
+  specialNote: string;
   remarks: string;
 }
 
@@ -117,7 +118,7 @@ function App() {
   const [invoiceFilter, setInvoiceFilter] = useState<'전체' | '미발급' | '완료'>('전체');
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [items, setItems] = useState<Item[]>([
-    { id: '1', type: 'door', name: '', unit: 'SET', width: 0, height: 0, quantity: 1, unitPrice: 0, remarks: '' }
+    { id: '1', type: 'door', name: '', unit: 'SET', width: 0, height: 0, quantity: 1, unitPrice: 0, specialNote: '', remarks: '' }
   ]);
   const [provider, setProvider] = useState(initialProvider);
   const [customer, setCustomer] = useState(initialCustomer);
@@ -429,7 +430,7 @@ function App() {
   };
 
   const handleLogout = async () => await supabase.auth.signOut();
-  const addItem = (type: 'door' | 'option') => setItems([...items, { id: Math.random().toString(36).substr(2, 9), type, name: type === 'door' ? '품목명 입력' : '옵션 항목', unit: 'SET', width: 0, height: 0, quantity: 1, unitPrice: 0, remarks: '' }]);
+  const addItem = (type: 'door' | 'option') => setItems([...items, { id: Math.random().toString(36).substr(2, 9), type, name: type === 'door' ? '품목명 입력' : '옵션 항목', unit: 'SET', width: 0, height: 0, quantity: 1, unitPrice: 0, specialNote: '', remarks: '' }]);
   const removeItem = (id: string) => setItems(items.filter(item => item.id !== id));
   const updateItem = (id: string, field: keyof Item, value: string | number) => setItems(items.map(item => item.id === id ? { ...item, [field]: value } : item));
   const handlePrint = () => { if (document.activeElement instanceof HTMLElement) document.activeElement.blur(); requestAnimationFrame(() => window.print()); };
@@ -728,16 +729,16 @@ function App() {
             <div className="items-section">
               <h3>품목 관리</h3>
               <table>
-                <thead><tr><th>품명</th><th>단위</th><th>수량</th><th>단가</th><th>소계</th><th>특이사항</th><th>삭제</th></tr></thead>
-                <tbody>{items.filter(i => i.type === 'door').map(i => <tr key={i.id}><td><input value={i.name} onChange={e => updateItem(i.id, 'name', e.target.value)} /></td><td><input value={i.unit} onChange={e => updateItem(i.id, 'unit', e.target.value)} /></td><td><input type="number" value={i.quantity} onChange={e => updateItem(i.id, 'quantity', parseInt(e.target.value))} /></td><td><input type="number" value={i.unitPrice} onChange={e => updateItem(i.id, 'unitPrice', parseInt(e.target.value))} /></td><td>{(i.quantity * i.unitPrice).toLocaleString()}</td><td><input value={i.remarks} onChange={e => updateItem(i.id, 'remarks', e.target.value)} /></td><td><button onClick={() => removeItem(i.id)}>×</button></td></tr>)}</tbody>
+                <thead><tr><th>품명</th><th>단위</th><th>수량</th><th>단가</th><th>소계</th><th>특이사항</th><th>비고</th><th>삭제</th></tr></thead>
+                <tbody>{items.filter(i => i.type === 'door').map(i => <tr key={i.id}><td><input value={i.name} onChange={e => updateItem(i.id, 'name', e.target.value)} /></td><td><input value={i.unit} onChange={e => updateItem(i.id, 'unit', e.target.value)} /></td><td><input type="number" value={i.quantity} onChange={e => updateItem(i.id, 'quantity', parseInt(e.target.value))} /></td><td><input type="number" value={i.unitPrice} onChange={e => updateItem(i.id, 'unitPrice', parseInt(e.target.value))} /></td><td>{(i.quantity * i.unitPrice).toLocaleString()}</td><td><input value={i.specialNote} onChange={e => updateItem(i.id, 'specialNote', e.target.value)} /></td><td><input value={i.remarks} onChange={e => updateItem(i.id, 'remarks', e.target.value)} /></td><td><button onClick={() => removeItem(i.id)}>×</button></td></tr>)}</tbody>
               </table>
               <button onClick={() => addItem('door')} className="btn-add">+ 추가</button>
             </div>
             <div className="items-section">
               <h3>품목 관리 - 옵션항목</h3>
               <table>
-                <thead><tr><th>품명</th><th>단위</th><th>수량</th><th>단가</th><th>소계</th><th>비고</th><th>삭제</th></tr></thead>
-                <tbody>{items.filter(i => i.type === 'option').map(i => <tr key={i.id}><td><input value={i.name} onChange={e => updateItem(i.id, 'name', e.target.value)} /></td><td><input value={i.unit} onChange={e => updateItem(i.id, 'unit', e.target.value)} /></td><td><input type="number" value={i.quantity} onChange={e => updateItem(i.id, 'quantity', parseInt(e.target.value))} /></td><td><input type="number" value={i.unitPrice} onChange={e => updateItem(i.id, 'unitPrice', parseInt(e.target.value))} /></td><td>{(i.quantity * i.unitPrice).toLocaleString()}</td><td><input value={i.remarks} onChange={e => updateItem(i.id, 'remarks', e.target.value)} /></td><td><button onClick={() => removeItem(i.id)}>×</button></td></tr>)}</tbody>
+                <thead><tr><th>품명</th><th>단위</th><th>수량</th><th>단가</th><th>소계</th><th>특이사항</th><th>비고</th><th>삭제</th></tr></thead>
+                <tbody>{items.filter(i => i.type === 'option').map(i => <tr key={i.id}><td><input value={i.name} onChange={e => updateItem(i.id, 'name', e.target.value)} /></td><td><input value={i.unit} onChange={e => updateItem(i.id, 'unit', e.target.value)} /></td><td><input type="number" value={i.quantity} onChange={e => updateItem(i.id, 'quantity', parseInt(e.target.value))} /></td><td><input type="number" value={i.unitPrice} onChange={e => updateItem(i.id, 'unitPrice', parseInt(e.target.value))} /></td><td>{(i.quantity * i.unitPrice).toLocaleString()}</td><td><input value={i.specialNote} onChange={e => updateItem(i.id, 'specialNote', e.target.value)} /></td><td><input value={i.remarks} onChange={e => updateItem(i.id, 'remarks', e.target.value)} /></td><td><button onClick={() => removeItem(i.id)}>×</button></td></tr>)}</tbody>
               </table>
               <button onClick={() => addItem('option')} className="btn-add">+ 추가</button>
             </div>
@@ -901,7 +902,7 @@ function App() {
               {items.map((item, idx) => (
                 <tr key={item.id}>
                   <td className="center">{idx + 1}</td>
-                  <td className="desc-text">{item.name} {item.type === 'door' && <><br/><small className="dim">{item.width} x {item.height} mm</small></>}</td>
+                  <td className="desc-text">{item.name}{item.specialNote && <><br/><small className="dim">{item.specialNote}</small></>}</td>
                   <td className="center">{item.unit}</td><td className="center">{item.quantity}</td><td className="right">{item.unitPrice.toLocaleString()}</td><td className="right">{(item.quantity * item.unitPrice).toLocaleString()}</td><td className="center small-text">{item.remarks}</td>
                 </tr>
               ))}
