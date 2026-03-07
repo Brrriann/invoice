@@ -614,7 +614,7 @@ function App() {
                                   <button className="btn-remove-work" onClick={() => deleteSubcontract(s.id)}>×</button>
                                 </div>
                                 <input className="work-label-input" placeholder="공정명" value={s.label} onChange={e => updateSubcontract(s.id, 'label', e.target.value)} />
-                                <input className="sub-amount-input" placeholder="금액" type="number" value={s.amount || ''} onChange={e => updateSubcontract(s.id, 'amount', parseInt(e.target.value) || 0)} />
+                                <input className="sub-amount-input" placeholder="금액" type="text" value={s.amount ? formatNumber(s.amount) : ''} onChange={e => updateSubcontract(s.id, 'amount', parseNumber(e.target.value))} />
                                 <input type="date" value={s.date || ''} onChange={e => updateSubcontract(s.id, 'date', e.target.value)} />
                                 <div className="sub-checks">
                                   <label className={`sub-check ${s.invoice_issued ? 'on' : ''}`}>
