@@ -48,6 +48,17 @@ interface WorkItem {
   status: '실측예정' | '실측 후 대기' | '시공확정' | '시공중' | '완료';
 }
 
+interface Subcontract {
+  id: string;
+  project_id: string;
+  user_id: string;
+  label: string;
+  amount: number;
+  invoice_issued: boolean;
+  payment_done: boolean;
+  date: string;
+}
+
 interface SavedQuotation {
   id: string;
   created_at: string;
@@ -168,6 +179,7 @@ function App() {
   const [savedMeasurements, setSavedMeasurements] = useState<SavedMeasurement[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [workItems, setWorkItems] = useState<WorkItem[]>([]);
+  const [subcontracts, setSubcontracts] = useState<Subcontract[]>([]);
   const [logoDataUrl, setLogoDataUrl] = useState('');
   const [companyIntro, setCompanyIntro] = useState('');
 
@@ -208,6 +220,7 @@ function App() {
       fetchMeasurements();
       fetchProjects();
       fetchWorkItems();
+      fetchSubcontracts();
     }
   }, [currentUser]);
 
@@ -220,6 +233,30 @@ function App() {
   const fetchWorkItems = async () => {
     const { data, error } = await supabase.from('work_items').select('*').order('created_at', { ascending: true });
     if (!error) setWorkItems(data || []);
+  };
+
+  const fetchSubcontracts = async () => {
+    const { data, error } = await supabase.from('subcontracts').select('*').order('created_at', { ascending: true });
+    if (!error) setSubcontracts(data || []);
+  };
+
+  const addSubcontract = async (projectId: string) => {
+    if (!currentUser) return;
+    const { error } = await supabase.from('subcontracts').insert([{
+      project_id: projectId, user_id: currentUser.id,
+      label: '', amount: 0, invoice_issued: false, payment_done: false, date: ''
+    }]);
+    if (!error) fetchSubcontracts();
+  };
+
+  const updateSubcontract = async (id: string, field: string, value: any) => {
+    setSubcontracts(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s));
+    await supabase.from('subcontracts').update({ [field]: value }).eq('id', id);
+  };
+
+  const deleteSubcontract = async (id: string) => {
+    await supabase.from('subcontracts').delete().eq('id', id);
+    setSubcontracts(prev => prev.filter(s => s.id !== id));
   };
 
   const addProject = async () => {
@@ -606,6 +643,30 @@ function App() {
                           </div>
                         </div>
 
+                        {/* 외주 관리 */}
+                        <div className="subcontract-section">
+                          <div className="subcontract-header">
+                            <div className="section-title">외주 관리</div>
+                            <button className="btn-add-sub" onClick={() => addSubcontract(project.id)}>+ 추가</button>
+                          </div>
+                          {subcontracts.filter(s => s.project_id === project.id).map(s => (
+                            <div key={s.id} className="subcontract-row">
+                              <input className="sub-label" placeholder="공정명" value={s.label} onChange={e => updateSubcontract(s.id, 'label', e.target.value)} />
+                              <input className="sub-amount" placeholder="금액" type="number" value={s.amount || ''} onChange={e => updateSubcontract(s.id, 'amount', parseInt(e.target.value) || 0)} />
+                              <input className="sub-date" type="date" value={s.date || ''} onChange={e => updateSubcontract(s.id, 'date', e.target.value)} />
+                              <label className={`sub-check ${s.invoice_issued ? 'on' : ''}`}>
+                                <input type="checkbox" checked={s.invoice_issued} onChange={e => updateSubcontract(s.id, 'invoice_issued', e.target.checked)} />
+                                계산서
+                              </label>
+                              <label className={`sub-check ${s.payment_done ? 'on' : ''}`}>
+                                <input type="checkbox" checked={s.payment_done} onChange={e => updateSubcontract(s.id, 'payment_done', e.target.checked)} />
+                                대금지급
+                              </label>
+                              <button className="btn-remove-work" onClick={() => deleteSubcontract(s.id)}>×</button>
+                            </div>
+                          ))}
+                        </div>
+
                         <div className="biz-info-section">
                           <div className="section-title">계산서 발행 정보</div>
                           <div className="biz-info-grid">
@@ -636,6 +697,7 @@ function App() {
                     const day = i + 1;
                     const dateStr = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                     const dayWorkItems = workItems.filter(w => w.date === dateStr);
+                    const daySubcontracts = subcontracts.filter(s => s.date === dateStr);
 
                     return (
                       <div key={day} className="calendar-day">
@@ -648,6 +710,15 @@ function App() {
                             return (
                               <div key={w.id} className="event" style={{ background: color.bg, color: color.text, borderColor: color.border, borderWidth: '1px', borderStyle: 'solid' }}>
                                 {customerName}:{w.label}:{w.status}
+                              </div>
+                            );
+                          })}
+                          {daySubcontracts.map(s => {
+                            const proj = projects.find(p => p.id === s.project_id);
+                            const customerName = proj?.customer_name || proj?.site_name || '';
+                            return (
+                              <div key={s.id} className="event subcontract-event">
+                                🔧 {customerName}:{s.label}{s.amount ? ` (₩${s.amount.toLocaleString()})` : ''}
                               </div>
                             );
                           })}
