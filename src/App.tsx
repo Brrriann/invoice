@@ -59,26 +59,36 @@ interface SavedQuotation {
   remarks: string;
 }
 
-interface ExtraItem {
+interface InteriorSpace {
   id: string;
-  title: string;
-  desc: string;
-}
-
-interface DoorMeasure {
-  id: string;
-  label: string;
-  installation: '내측' | '외측';
+  name: string;
   width: string;
+  depth: string;
   height: string;
-  extraItems: ExtraItem[];
+  window: string;
+  doorInfo: string;
+  floorCurrent: string;
+  floorPlan: string;
+  wallCurrent: string;
+  wallPlan: string;
+  ceilCurrent: string;
+  ceilPlan: string;
+  notes: string;
   photos: string[];
 }
 
-interface MeasureOptionItem {
-  id: string;
-  type: '루프센서' | '레이더센서' | '리모컨' | '기타';
-  remarks: string;
+interface WorkChecklist {
+  demolition: boolean;
+  flooring: boolean;
+  wallpaper: boolean;
+  carpentry: boolean;
+  electric: boolean;
+  plumbing: boolean;
+  tile: boolean;
+  lighting: boolean;
+  furniture: boolean;
+  etc: boolean;
+  etcNote: string;
 }
 
 interface SavedMeasurement {
@@ -88,11 +98,10 @@ interface SavedMeasurement {
   customer_name: string;
   date: string;
   measurer: string;
-  doors: DoorMeasure[];
-  options: MeasureOptionItem[];
+  doors: InteriorSpace[];
+  options: WorkChecklist;
   power_source: string;
   floor_condition: string;
-  obstacles: string;
   special_notes: string;
 }
 
@@ -163,18 +172,22 @@ function App() {
   const [companyIntro, setCompanyIntro] = useState('');
 
   // --- 실측 템플릿 관련 상태 ---
+  const defaultChecklist: WorkChecklist = {
+    demolition: false, flooring: false, wallpaper: false, carpentry: false,
+    electric: false, plumbing: false, tile: false, lighting: false, furniture: false,
+    etc: false, etcNote: ''
+  };
   const [measureData, setMeasureData] = useState({
     siteName: '',
     customerName: '',
+    contact: '',
+    address: '',
     date: new Date().toISOString().split('T')[0],
     measurer: '',
-    doors: [
-      { id: 'd1', label: '1번 도어', installation: '내측', width: '', height: '', extraItems: [{ id: 'e1', title: '', desc: '' }], photos: [] }
-    ] as DoorMeasure[],
-    options: [] as MeasureOptionItem[],
-    powerSource: '유',
-    floorCondition: '양호(수평)',
-    obstacles: '',
+    spaces: [
+      { id: 's1', name: '거실', width: '', depth: '', height: '', window: '', doorInfo: '', floorCurrent: '', floorPlan: '', wallCurrent: '', wallPlan: '', ceilCurrent: '', ceilPlan: '', notes: '', photos: [] }
+    ] as InteriorSpace[],
+    checklist: { ...defaultChecklist } as WorkChecklist,
     specialNotes: ''
   });
 
@@ -337,11 +350,10 @@ function App() {
       customer_name: measureData.customerName,
       date: measureData.date,
       measurer: measureData.measurer,
-      doors: measureData.doors,
-      options: measureData.options,
-      power_source: measureData.powerSource,
-      floor_condition: measureData.floorCondition,
-      obstacles: measureData.obstacles,
+      doors: measureData.spaces,
+      options: measureData.checklist,
+      power_source: measureData.contact,
+      floor_condition: measureData.address,
       special_notes: measureData.specialNotes
     }]);
     if (error) alert('저장 실패: ' + error.message);
@@ -356,101 +368,40 @@ function App() {
 
   const loadMeasurement = (m: any) => {
     if (!window.confirm('작성 중인 내용이 사라집니다. 불러오시겠습니까?')) return;
-    
-    // 이전 데이터 포맷 호환성 처리 (extraTitle/extraDesc -> extraItems)
-    const convertedDoors = m.doors?.map((d: any) => {
-      if (!d.extraItems && (d.extraTitle || d.extraDesc)) {
-        return {
-          ...d,
-          extraItems: [{ id: 'old-data', title: d.extraTitle || '', desc: d.extraDesc || '' }]
-        };
-      }
-      return d;
-    }) || [];
-
     setMeasureData({
       siteName: m.site_name,
       customerName: m.customer_name,
+      contact: m.power_source || '',
+      address: m.floor_condition || '',
       date: m.date,
       measurer: m.measurer,
-      doors: convertedDoors,
-      options: m.options || [],
-      powerSource: m.power_source,
-      floorCondition: m.floor_condition,
-      obstacles: m.obstacles,
+      spaces: m.doors || [],
+      checklist: m.options || { ...defaultChecklist },
       specialNotes: m.special_notes
     });
   };
 
-  // --- 실측 템플릿 핸들러 ---
-  const addDoor = () => {
-    const newDoor: DoorMeasure = {
+  // --- 인테리어 실측 핸들러 ---
+  const addSpace = () => {
+    const newSpace: InteriorSpace = {
       id: Math.random().toString(36).substr(2, 9),
-      label: `${measureData.doors.length + 1}번 도어`,
-      installation: '내측',
-      width: '', height: '', extraItems: [{ id: Math.random().toString(36).substr(2, 9), title: '', desc: '' }], photos: []
+      name: `공간${measureData.spaces.length + 1}`,
+      width: '', depth: '', height: '', window: '', doorInfo: '',
+      floorCurrent: '', floorPlan: '', wallCurrent: '', wallPlan: '',
+      ceilCurrent: '', ceilPlan: '', notes: '', photos: []
     };
-    setMeasureData({ ...measureData, doors: [...measureData.doors, newDoor] });
+    setMeasureData({ ...measureData, spaces: [...measureData.spaces, newSpace] });
   };
 
-  const removeDoor = (id: string) => {
-    setMeasureData({ ...measureData, doors: measureData.doors.filter(d => d.id !== id) });
+  const removeSpace = (id: string) => {
+    setMeasureData({ ...measureData, spaces: measureData.spaces.filter(s => s.id !== id) });
   };
 
-  const updateDoor = (id: string, field: keyof DoorMeasure, value: any) => {
-    setMeasureData({
-      ...measureData,
-      doors: measureData.doors.map(d => d.id === id ? { ...d, [field]: value } : d)
-    });
+  const updateSpace = (id: string, field: keyof InteriorSpace, value: any) => {
+    setMeasureData({ ...measureData, spaces: measureData.spaces.map(s => s.id === id ? { ...s, [field]: value } : s) });
   };
 
-  const addExtraItem = (doorId: string) => {
-    setMeasureData({
-      ...measureData,
-      doors: measureData.doors.map(d => d.id === doorId ? {
-        ...d,
-        extraItems: [...d.extraItems, { id: Math.random().toString(36).substr(2, 9), title: '', desc: '' }]
-      } : d)
-    });
-  };
-
-  const updateExtraItem = (doorId: string, itemId: string, field: 'title' | 'desc', value: string) => {
-    setMeasureData({
-      ...measureData,
-      doors: measureData.doors.map(d => d.id === doorId ? {
-        ...d,
-        extraItems: d.extraItems.map(item => item.id === itemId ? { ...item, [field]: value } : item)
-      } : d)
-    });
-  };
-
-  const removeExtraItem = (doorId: string, itemId: string) => {
-    setMeasureData({
-      ...measureData,
-      doors: measureData.doors.map(d => d.id === doorId ? {
-        ...d,
-        extraItems: d.extraItems.filter(item => item.id !== itemId)
-      } : d)
-    });
-  };
-
-  const addMeasureOption = () => {
-    const newOption: MeasureOptionItem = {
-      id: Math.random().toString(36).substr(2, 9),
-      type: '루프센서',
-      remarks: ''
-    };
-    setMeasureData({ ...measureData, options: [...measureData.options, newOption] });
-  };
-
-  const updateMeasureOption = (id: string, field: keyof MeasureOptionItem, value: any) => {
-    setMeasureData({
-      ...measureData,
-      options: measureData.options.map(o => o.id === id ? { ...o, [field]: value } : o)
-    });
-  };
-
-  const handleDoorPhotoUpload = (doorId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSpacePhotoUpload = (spaceId: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
       Array.from(files).forEach(file => {
@@ -458,12 +409,16 @@ function App() {
         reader.onloadend = () => {
           setMeasureData(prev => ({
             ...prev,
-            doors: prev.doors.map(d => d.id === doorId ? { ...d, photos: [...d.photos, reader.result as string] } : d)
+            spaces: prev.spaces.map(s => s.id === spaceId ? { ...s, photos: [...s.photos, reader.result as string] } : s)
           }));
         };
         reader.readAsDataURL(file);
       });
     }
+  };
+
+  const toggleChecklist = (field: keyof WorkChecklist, value: any) => {
+    setMeasureData({ ...measureData, checklist: { ...measureData.checklist, [field]: value } });
   };
 
   // --- 기타 핸들러 ---
@@ -780,18 +735,6 @@ function App() {
               </div>
             </div>
             <div className="form-section">
-              <h3>로고 및 자사 소개</h3>
-              <div className="logo-upload-area">
-                {logoDataUrl && <img src={logoDataUrl} alt="logo-preview" className="logo-preview" />}
-                <label className="btn-logo-upload">
-                  {logoDataUrl ? '로고 변경' : '🖼 로고 업로드'}
-                  <input type="file" accept="image/*" onChange={handleLogoUpload} style={{display:'none'}} />
-                </label>
-                {logoDataUrl && <button className="btn-logo-remove" onClick={() => setLogoDataUrl('')}>로고 제거</button>}
-              </div>
-              <textarea className="remarks-input" placeholder="자사 소개 내용을 입력하세요 (출력 시 견적서 하단에 디자인 카드로 표시됩니다)" value={companyIntro} onChange={e => setCompanyIntro(e.target.value)} rows={5} />
-            </div>
-            <div className="form-section">
               <h3>수요자 및 견적 정보</h3>
               <div className="grid">
                 <input type="text" placeholder="고객명" value={customer.name} onChange={e => setCustomer({...customer, name: e.target.value})} />
@@ -818,99 +761,105 @@ function App() {
               <button onClick={() => addItem('option')} className="btn-add">+ 추가</button>
             </div>
             <div className="form-section"><h3>특이사항</h3><textarea className="remarks-input" value={remarks} onChange={e => setRemarks(e.target.value)} rows={4} /></div>
+            <div className="form-section">
+              <h3>로고 및 자사 소개</h3>
+              <div className="logo-upload-area">
+                {logoDataUrl && <img src={logoDataUrl} alt="logo-preview" className="logo-preview" />}
+                <label className="btn-logo-upload">
+                  {logoDataUrl ? '로고 변경' : '🖼 로고 업로드'}
+                  <input type="file" accept="image/*" onChange={handleLogoUpload} style={{display:'none'}} />
+                </label>
+                {logoDataUrl && <button className="btn-logo-remove" onClick={() => setLogoDataUrl('')}>로고 제거</button>}
+              </div>
+              <textarea className="remarks-input" placeholder="자사 소개 내용을 입력하세요 (출력 시 견적서 하단에 디자인 카드로 표시됩니다)" value={companyIntro} onChange={e => setCompanyIntro(e.target.value)} rows={5} />
+            </div>
             <div className="summary-section"><div className="row total">합계금액: ₩{(items.reduce((s, i) => s + (i.quantity * i.unitPrice), 0) * 1.1).toLocaleString()}</div></div>
             <div className="btn-group-main"><button onClick={saveCurrentQuotation} className="btn-save">클라우드 저장</button><button onClick={handlePrint} className="btn-print">인쇄 / PDF</button></div>
           </div>
         ) : (
-          /* 실측 템플릿 작성 화면 */
+          /* 인테리어 실측 템플릿 */
           <div className="quotation-card">
-            <h1>실측 리포트</h1>
+            <h1>인테리어 실측 리포트</h1>
+
             <div className="form-section">
               <h3>기본 정보</h3>
               <div className="grid">
-                <input placeholder="현장명" value={measureData.siteName} onChange={e => setMeasureData({...measureData, siteName: e.target.value})} />
-                <input placeholder="고객사" value={measureData.customerName} onChange={e => setMeasureData({...measureData, customerName: e.target.value})} />
+                <input placeholder="현장명 / 프로젝트명" value={measureData.siteName} onChange={e => setMeasureData({...measureData, siteName: e.target.value})} />
+                <input placeholder="고객명" value={measureData.customerName} onChange={e => setMeasureData({...measureData, customerName: e.target.value})} />
+                <input placeholder="연락처" value={measureData.contact} onChange={e => setMeasureData({...measureData, contact: e.target.value})} />
+                <input placeholder="현장 주소" value={measureData.address} onChange={e => setMeasureData({...measureData, address: e.target.value})} />
                 <input type="date" value={measureData.date} onChange={e => setMeasureData({...measureData, date: e.target.value})} />
                 <input placeholder="실측자" value={measureData.measurer} onChange={e => setMeasureData({...measureData, measurer: e.target.value})} />
               </div>
             </div>
 
             <div className="form-section">
-              <h3>개구부 및 설치 공간</h3>
-              {measureData.doors.map((door, idx) => (
-                <div key={door.id} className="door-input-box">
+              <h3>공간별 실측</h3>
+              {measureData.spaces.map((space, idx) => (
+                <div key={space.id} className="door-input-box">
                   <div className="door-header">
-                    <h4>{door.label}</h4>
-                    {idx > 0 && <button className="btn-remove-door" onClick={() => removeDoor(door.id)}>삭제</button>}
+                    <input className="space-name-input" placeholder="공간명 (예: 거실, 주방, 침실1)" value={space.name} onChange={e => updateSpace(space.id, 'name', e.target.value)} />
+                    {idx > 0 && <button className="btn-remove-door" onClick={() => removeSpace(space.id)}>삭제</button>}
                   </div>
+                  <div className="measure-section-label">📐 규격 (mm)</div>
                   <div className="grid">
-                    <select value={door.installation} onChange={e => updateDoor(door.id, 'installation', e.target.value as any)}>
-                      <option value="내측">내측 설치</option>
-                      <option value="외측">외측 설치</option>
-                    </select>
-                    <input type="number" placeholder="폭(W)" value={door.width} onChange={e => updateDoor(door.id, 'width', e.target.value)} />
-                    <input type="number" placeholder="높이(H)" value={door.height} onChange={e => updateDoor(door.id, 'height', e.target.value)} />
+                    <input type="number" placeholder="가로(W)" value={space.width} onChange={e => updateSpace(space.id, 'width', e.target.value)} />
+                    <input type="number" placeholder="세로(D)" value={space.depth} onChange={e => updateSpace(space.id, 'depth', e.target.value)} />
+                    <input type="number" placeholder="천장고(H)" value={space.height} onChange={e => updateSpace(space.id, 'height', e.target.value)} />
+                    <input placeholder="창문 위치/크기" value={space.window} onChange={e => updateSpace(space.id, 'window', e.target.value)} />
+                    <input placeholder="출입문 위치/크기" value={space.doorInfo} onChange={e => updateSpace(space.id, 'doorInfo', e.target.value)} />
                   </div>
-
-                  <div className="extra-items-section">
-                    <label className="section-label">도어 추가설명</label>
-                    {door.extraItems?.map((item) => (
-                      <div key={item.id} className="extra-item-row">
-                        <div className="extra-item-inputs">
-                          <input type="text" placeholder="항목 제목 (예: 센서)" value={item.title} onChange={e => updateExtraItem(door.id, item.id, 'title', e.target.value)} className="extra-title" />
-                          <input type="text" placeholder="항목 내용 (예: 레이더센서 2개)" value={item.desc} onChange={e => updateExtraItem(door.id, item.id, 'desc', e.target.value)} className="extra-desc" />
-                        </div>
-                        <button className="btn-remove-extra" onClick={() => removeExtraItem(door.id, item.id)}>×</button>
-                      </div>
-                    ))}
-                    <button className="btn-add-extra" onClick={() => addExtraItem(door.id)}>+ 설명 추가</button>
+                  <div className="measure-section-label">🪵 마감재</div>
+                  <div className="finish-grid">
+                    <div className="finish-row-header"><span/><span>현재 상태</span><span>제안/교체</span></div>
+                    <div className="finish-row"><span>바닥재</span><input placeholder="현재" value={space.floorCurrent} onChange={e => updateSpace(space.id, 'floorCurrent', e.target.value)} /><input placeholder="제안" value={space.floorPlan} onChange={e => updateSpace(space.id, 'floorPlan', e.target.value)} /></div>
+                    <div className="finish-row"><span>벽면</span><input placeholder="현재" value={space.wallCurrent} onChange={e => updateSpace(space.id, 'wallCurrent', e.target.value)} /><input placeholder="제안" value={space.wallPlan} onChange={e => updateSpace(space.id, 'wallPlan', e.target.value)} /></div>
+                    <div className="finish-row"><span>천장</span><input placeholder="현재" value={space.ceilCurrent} onChange={e => updateSpace(space.id, 'ceilCurrent', e.target.value)} /><input placeholder="제안" value={space.ceilPlan} onChange={e => updateSpace(space.id, 'ceilPlan', e.target.value)} /></div>
                   </div>
-
+                  <textarea className="remarks-input" placeholder="공간 특이사항 메모" value={space.notes} onChange={e => updateSpace(space.id, 'notes', e.target.value)} rows={2} />
                   <div className="door-photo-section">
-                    <label>사진 업로드 (복수 선택 가능)</label>
-                    <input type="file" multiple accept="image/*" onChange={(e) => handleDoorPhotoUpload(door.id, e)} />
+                    <label>사진 업로드</label>
+                    <input type="file" multiple accept="image/*" onChange={e => handleSpacePhotoUpload(space.id, e)} />
                     <div className="photo-preview-grid">
-                      {door.photos.map((p, i) => (
+                      {space.photos.map((p, i) => (
                         <div key={i} className="photo-preview">
-                          <img src={p} alt="door-preview" />
-                          <button onClick={() => updateDoor(door.id, 'photos', door.photos.filter((_, pid) => pid !== i))}>×</button>
+                          <img src={p} alt="space" />
+                          <button onClick={() => updateSpace(space.id, 'photos', space.photos.filter((_, pi) => pi !== i))}>×</button>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
               ))}
-              <button className="btn-add-door" onClick={addDoor}>+ 도어 추가</button>
+              <button className="btn-add-door" onClick={addSpace}>+ 공간 추가</button>
             </div>
 
             <div className="form-section">
-              <h3>옵션 항목 추가</h3>
-              {measureData.options.map((opt) => (
-                <div key={opt.id} className="option-input-row">
-                  <select value={opt.type} onChange={e => updateMeasureOption(opt.id, 'type', e.target.value as any)}>
-                    <option value="루프센서">루프센서</option>
-                    <option value="레이더센서">레이더센서</option>
-                    <option value="리모컨">리모컨</option>
-                    <option value="기타">기타</option>
-                  </select>
-                  <input type="text" placeholder="특이사항 입력" value={opt.remarks} onChange={e => updateMeasureOption(opt.id, 'remarks', e.target.value)} />
-                  <button onClick={() => setMeasureData({...measureData, options: measureData.options.filter(o => o.id !== opt.id)})}>×</button>
-                </div>
-              ))}
-              <button className="btn-add-option" onClick={addMeasureOption}>+ 옵션 추가</button>
-            </div>
-
-            <div className="form-section">
-              <h3>기타 현장 환경</h3>
-              <div className="grid">
-                <select value={measureData.powerSource} onChange={e => setMeasureData({...measureData, powerSource: e.target.value})}>
-                  <option value="유">전원 있음</option>
-                  <option value="무">전원 없음</option>
-                </select>
-                <input type="text" placeholder="바닥 상태" value={measureData.floorCondition} onChange={e => setMeasureData({...measureData, floorCondition: e.target.value})} />
+              <h3>공사 항목 체크리스트</h3>
+              <div className="checklist-grid">
+                {([
+                  ['demolition','철거'], ['flooring','바닥재'], ['wallpaper','도배/도장'],
+                  ['carpentry','목공'], ['electric','전기'], ['plumbing','배관/위생'],
+                  ['tile','타일'], ['lighting','조명'], ['furniture','가구/붙박이']
+                ] as [keyof WorkChecklist, string][]).map(([key, label]) => (
+                  <label key={key} className={`checklist-item ${measureData.checklist[key] ? 'checked' : ''}`}>
+                    <input type="checkbox" checked={!!measureData.checklist[key]} onChange={e => toggleChecklist(key, e.target.checked)} />
+                    {label}
+                  </label>
+                ))}
+                <label className={`checklist-item ${measureData.checklist.etc ? 'checked' : ''}`}>
+                  <input type="checkbox" checked={measureData.checklist.etc} onChange={e => toggleChecklist('etc', e.target.checked)} />
+                  기타
+                </label>
               </div>
-              <textarea className="remarks-input" placeholder="장애물 유무 및 위치" value={measureData.obstacles} onChange={e => setMeasureData({...measureData, obstacles: e.target.value})} rows={2} />
-              <textarea className="remarks-input" placeholder="추가 종합 비고" value={measureData.specialNotes} onChange={e => setMeasureData({...measureData, specialNotes: e.target.value})} rows={3} />
+              {measureData.checklist.etc && (
+                <input className="etc-note-input" placeholder="기타 공사 내용 입력" value={measureData.checklist.etcNote} onChange={e => toggleChecklist('etcNote', e.target.value)} />
+              )}
+            </div>
+
+            <div className="form-section">
+              <h3>종합 메모</h3>
+              <textarea className="remarks-input" placeholder="고객 요청사항, 특이사항, 주의사항 등" value={measureData.specialNotes} onChange={e => setMeasureData({...measureData, specialNotes: e.target.value})} rows={4} />
             </div>
 
             <div className="btn-group-main"><button onClick={saveCurrentMeasurement} className="btn-save">실측 리포트 저장</button><button onClick={handlePrint} className="btn-print">인쇄 / PDF</button></div>
@@ -1032,61 +981,70 @@ function App() {
         <div className="print-only measurement-sheet">
           <div className="sheet-border-top" />
           <header className="m-header">
-            <h1>실측 리포트</h1>
-            <div className="m-meta"><span>현장명: {measureData.siteName}</span><span>실측일: {measureData.date}</span></div>
+            <div className="m-header-top">
+              {logoDataUrl && <img src={logoDataUrl} alt="logo" className="m-logo" />}
+              <div>
+                <h1>인테리어 실측 리포트</h1>
+                <div className="m-meta">
+                  <span>프로젝트: {measureData.siteName}</span>
+                  <span>실측일: {measureData.date}</span>
+                  <span>실측자: {measureData.measurer}</span>
+                </div>
+              </div>
+            </div>
           </header>
 
           <table className="m-table">
             <tbody>
-              <tr><th>고객사</th><td>{measureData.customerName}</td><th>실측자</th><td>{measureData.measurer}</td></tr>
-              {measureData.doors.map((door) => (
-                <React.Fragment key={door.id}>
-                  <tr className="m-door-row"><th colSpan={4} style={{ background: '#1e3a8a', color: 'white', textAlign: 'left', paddingLeft: '15px' }}>{door.label} ({door.installation})</th></tr>
-                  <tr>
-                    <th>폭(W) x 높이(H)</th>
-                    <td>{door.width} x {door.height} mm</td>
-                    <th colSpan={1}>도어 추가설명</th>
-                    <td colSpan={1}>
-                      {door.extraItems?.map((item) => (
-                        <div key={item.id} style={{ fontSize: '9pt', marginBottom: '2px' }}>
-                          <strong>{item.title}:</strong> {item.desc}
-                        </div>
-                      ))}
-                    </td>
-                  </tr>
-                </React.Fragment>
-              ))}
-              {measureData.options.length > 0 && (
-                <>
-                  <tr className="m-door-row"><th colSpan={4} style={{ background: '#334155', color: 'white', textAlign: 'left', paddingLeft: '15px' }}>옵션 항목</th></tr>
-                  {measureData.options.map(opt => (
-                    <tr key={opt.id}><th>{opt.type}</th><td colSpan={3}>{opt.remarks}</td></tr>
-                  ))}
-                </>
-              )}
-              <tr className="m-door-row"><th colSpan={4} style={{ background: '#334155', color: 'white', textAlign: 'left', paddingLeft: '15px' }}>현장 환경</th></tr>
-              <tr><th>전원 유무</th><td>{measureData.powerSource === '유' ? '있음' : '없음'}</td><th>바닥 상태</th><td>{measureData.floorCondition}</td></tr>
-              <tr><th>장애물 정보</th><td colSpan={3}>{measureData.obstacles}</td></tr>
-              <tr><th>종합 비고</th><td colSpan={3} className="m-notes">{measureData.specialNotes}</td></tr>
+              <tr><th>고객명</th><td>{measureData.customerName}</td><th>연락처</th><td>{measureData.contact}</td></tr>
+              <tr><th>현장 주소</th><td colSpan={3}>{measureData.address}</td></tr>
             </tbody>
           </table>
 
-          <div className="m-photos">
-            <h3>실측 현장 사진</h3>
-            {measureData.doors.map(door => (
-              <div key={door.id} className="m-door-photo-group">
-                {door.photos.length > 0 && (
-                  <>
-                    <h4>{door.label} 사진</h4>
-                    <div className="m-photo-grid">
-                      {door.photos.map((p, i) => <div key={i} className="m-photo-item"><img src={p} alt="site" /></div>)}
-                    </div>
-                  </>
+          {measureData.spaces.map((space, idx) => (
+            <div key={space.id} className="m-space-block">
+              <div className="m-space-title">공간 {idx + 1}. {space.name}</div>
+              <table className="m-table">
+                <tbody>
+                  <tr>
+                    <th>규격 (W×D×H)</th>
+                    <td>{space.width && space.depth && space.height ? `${space.width} × ${space.depth} × ${space.height} mm` : '-'}</td>
+                    <th>창문</th><td>{space.window || '-'}</td>
+                  </tr>
+                  <tr><th>출입문</th><td>{space.doorInfo || '-'}</td><th/><td/></tr>
+                  <tr><th>바닥재</th><td>현재: {space.floorCurrent || '-'}</td><th>→ 제안</th><td>{space.floorPlan || '-'}</td></tr>
+                  <tr><th>벽면</th><td>현재: {space.wallCurrent || '-'}</td><th>→ 제안</th><td>{space.wallPlan || '-'}</td></tr>
+                  <tr><th>천장</th><td>현재: {space.ceilCurrent || '-'}</td><th>→ 제안</th><td>{space.ceilPlan || '-'}</td></tr>
+                  {space.notes && <tr><th>특이사항</th><td colSpan={3}>{space.notes}</td></tr>}
+                </tbody>
+              </table>
+              {space.photos.length > 0 && (
+                <div className="m-photo-grid">
+                  {space.photos.map((p, i) => <div key={i} className="m-photo-item"><img src={p} alt="space" /></div>)}
+                </div>
+              )}
+            </div>
+          ))}
+
+          {Object.values(measureData.checklist).some(v => v === true) && (
+            <div className="m-checklist-section">
+              <div className="m-space-title">공사 항목</div>
+              <div className="m-checklist-grid">
+                {([['demolition','철거'],['flooring','바닥재'],['wallpaper','도배/도장'],['carpentry','목공'],['electric','전기'],['plumbing','배관/위생'],['tile','타일'],['lighting','조명'],['furniture','가구/붙박이'],['etc','기타']] as [keyof WorkChecklist, string][]).map(([key, label]) =>
+                  measureData.checklist[key] ? <span key={key} className="m-check-badge">✓ {label}{key === 'etc' && measureData.checklist.etcNote ? `: ${measureData.checklist.etcNote}` : ''}</span> : null
                 )}
               </div>
-            ))}
-          </div>
-          <footer className="m-footer"><p>위 실측 데이터는 현장 설치 환경을 기준으로 작성되었습니다.</p><p className="m-company">{provider.name}</p></footer>
+            </div>
+          )}
+
+          {measureData.specialNotes && (
+            <div className="m-notes-section">
+              <div className="m-space-title">종합 메모</div>
+              <p className="m-notes-content">{measureData.specialNotes}</p>
+            </div>
+          )}
+
+          <footer className="m-footer"><p>본 실측 리포트는 현장 방문 실측을 기준으로 작성되었습니다.</p>{provider.name && <p className="m-company">{provider.name}</p>}</footer>
         </div>
       )}
     </div>

@@ -543,6 +543,85 @@
   margin-top: 4px;
 }
 
+.space-name-input {
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  flex: 1;
+}
+.measure-section-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748b;
+  margin: 10px 0 4px;
+}
+.finish-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.finish-row-header {
+  display: grid;
+  grid-template-columns: 60px 1fr 1fr;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94a3b8;
+  padding: 0 4px;
+}
+.finish-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 1fr;
+  gap: 6px;
+  align-items: center;
+}
+.finish-row span {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+}
+.finish-row input {
+  padding: 4px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+.checklist-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  background: white;
+  transition: all 0.15s;
+}
+.checklist-item.checked {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #1e40af;
+  font-weight: 600;
+}
+.etc-note-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  box-sizing: border-box;
+}
+
 .logo-upload-area {
   display: flex;
   align-items: center;
@@ -1056,6 +1135,17 @@ input:focus, textarea:focus { outline: none; border-color: #3b82f6; background: 
   .m-photo-item img { width: 100%; display: block; height: 200px; object-fit: cover; }
   .m-footer { margin-top: 40px; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 20px; }
   .m-company { font-size: 16pt; font-weight: 900; color: #1e3a8a; margin-top: 10px; }
+
+  /* 인테리어 실측 리포트 */
+  .m-header-top { display: flex; align-items: center; gap: 16px; }
+  .m-logo { height: 48px; object-fit: contain; }
+  .m-space-block { margin-top: 20px; }
+  .m-space-title { font-size: 12pt; font-weight: 800; color: #1e3a8a; background: #eff6ff; border-left: 4px solid #1e3a8a; padding: 6px 12px; margin-bottom: 8px; }
+  .m-checklist-section { margin-top: 20px; }
+  .m-checklist-grid { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; }
+  .m-check-badge { background: #dbeafe; color: #1e3a8a; padding: 4px 10px; border-radius: 20px; font-size: 9pt; font-weight: 600; }
+  .m-notes-section { margin-top: 20px; }
+  .m-notes-content { font-size: 11pt; line-height: 1.8; padding: 12px; background: #f8fafc; border-radius: 4px; min-height: 60px; }
 
   /* 자사 소개 페이지 */
   .company-intro-page { margin-top: 40px; padding: 30px; border: 1px solid #e2e8f0; border-radius: 12px; page-break-before: always; }
