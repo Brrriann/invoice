@@ -600,6 +600,37 @@ function App() {
                           </div>
                         </div>
 
+                        {/* 외주 관리 */}
+                        <div className="subcontract-section">
+                          <div className="subcontract-header">
+                            <div className="section-title">외주</div>
+                            <button className="btn-add-sub" onClick={() => addSubcontract(project.id)}>+ 외주 추가</button>
+                          </div>
+                          <div className="sub-cards-grid">
+                            {subcontracts.filter(s => s.project_id === project.id).map((s, idx) => (
+                              <div key={s.id} className={`sub-card ${s.payment_done ? 'done' : ''}`}>
+                                <div className="chip-top">
+                                  <span className="chip-index">외주{idx + 1}</span>
+                                  <button className="btn-remove-work" onClick={() => deleteSubcontract(s.id)}>×</button>
+                                </div>
+                                <input className="work-label-input" placeholder="공정명" value={s.label} onChange={e => updateSubcontract(s.id, 'label', e.target.value)} />
+                                <input className="sub-amount-input" placeholder="금액" type="number" value={s.amount || ''} onChange={e => updateSubcontract(s.id, 'amount', parseInt(e.target.value) || 0)} />
+                                <input type="date" value={s.date || ''} onChange={e => updateSubcontract(s.id, 'date', e.target.value)} />
+                                <div className="sub-checks">
+                                  <label className={`sub-check ${s.invoice_issued ? 'on' : ''}`}>
+                                    <input type="checkbox" checked={s.invoice_issued} onChange={e => updateSubcontract(s.id, 'invoice_issued', e.target.checked)} />
+                                    계산서
+                                  </label>
+                                  <label className={`sub-check ${s.payment_done ? 'on' : ''}`}>
+                                    <input type="checkbox" checked={s.payment_done} onChange={e => updateSubcontract(s.id, 'payment_done', e.target.checked)} />
+                                    대금지급
+                                  </label>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
                         <div className="project-info-row">
                           <div className="amount-field">
                             <span>계약금액:</span>
@@ -641,30 +672,6 @@ function App() {
                               <input type="date" value={project.payment_date || ''} onChange={e => handleProjectUpdateImmediate(project.id, 'payment_date', e.target.value)} />
                             </div>
                           </div>
-                        </div>
-
-                        {/* 외주 관리 */}
-                        <div className="subcontract-section">
-                          <div className="subcontract-header">
-                            <div className="section-title">외주 관리</div>
-                            <button className="btn-add-sub" onClick={() => addSubcontract(project.id)}>+ 추가</button>
-                          </div>
-                          {subcontracts.filter(s => s.project_id === project.id).map(s => (
-                            <div key={s.id} className="subcontract-row">
-                              <input className="sub-label" placeholder="공정명" value={s.label} onChange={e => updateSubcontract(s.id, 'label', e.target.value)} />
-                              <input className="sub-amount" placeholder="금액" type="number" value={s.amount || ''} onChange={e => updateSubcontract(s.id, 'amount', parseInt(e.target.value) || 0)} />
-                              <input className="sub-date" type="date" value={s.date || ''} onChange={e => updateSubcontract(s.id, 'date', e.target.value)} />
-                              <label className={`sub-check ${s.invoice_issued ? 'on' : ''}`}>
-                                <input type="checkbox" checked={s.invoice_issued} onChange={e => updateSubcontract(s.id, 'invoice_issued', e.target.checked)} />
-                                계산서
-                              </label>
-                              <label className={`sub-check ${s.payment_done ? 'on' : ''}`}>
-                                <input type="checkbox" checked={s.payment_done} onChange={e => updateSubcontract(s.id, 'payment_done', e.target.checked)} />
-                                대금지급
-                              </label>
-                              <button className="btn-remove-work" onClick={() => deleteSubcontract(s.id)}>×</button>
-                            </div>
-                          ))}
                         </div>
 
                         <div className="biz-info-section">
