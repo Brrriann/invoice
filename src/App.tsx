@@ -96,6 +96,29 @@ interface SavedMeasurement {
   special_notes: string;
 }
 
+const PROJECT_COLORS = [
+  { bg: '#dbeafe', text: '#1e3a8a', border: '#93c5fd' },
+  { bg: '#dcfce7', text: '#14532d', border: '#86efac' },
+  { bg: '#fce7f3', text: '#9d174d', border: '#f9a8d4' },
+  { bg: '#fef3c7', text: '#78350f', border: '#fcd34d' },
+  { bg: '#ede9fe', text: '#4c1d95', border: '#c4b5fd' },
+  { bg: '#ffedd5', text: '#7c2d12', border: '#fdba74' },
+  { bg: '#e0f2fe', text: '#0c4a6e', border: '#7dd3fc' },
+  { bg: '#fdf4ff', text: '#701a75', border: '#e879f9' },
+  { bg: '#ecfdf5', text: '#064e3b', border: '#34d399' },
+  { bg: '#fff1f2', text: '#881337', border: '#fda4af' },
+  { bg: '#f0fdf4', text: '#166534', border: '#4ade80' },
+  { bg: '#fafafa', text: '#27272a', border: '#a1a1aa' },
+];
+
+const getProjectColor = (projectId: string) => {
+  let hash = 0;
+  for (let i = 0; i < projectId.length; i++) {
+    hash = projectId.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return PROJECT_COLORS[Math.abs(hash) % PROJECT_COLORS.length];
+};
+
 const initialProvider = {
   name: '',
   brandTagline: '',
@@ -655,8 +678,9 @@ function App() {
                           {dayWorkItems.map(w => {
                             const proj = projects.find(p => p.id === w.project_id);
                             const customerName = proj?.customer_name || proj?.site_name || '';
+                            const color = getProjectColor(w.project_id);
                             return (
-                              <div key={w.id} className={`event ${w.type === '실측' ? 'measure' : 'install'}`}>
+                              <div key={w.id} className="event" style={{ background: color.bg, color: color.text, borderColor: color.border, borderWidth: '1px', borderStyle: 'solid' }}>
                                 {customerName}:{w.label}:{w.status}
                               </div>
                             );
