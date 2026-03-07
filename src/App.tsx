@@ -159,6 +159,8 @@ function App() {
   const [savedMeasurements, setSavedMeasurements] = useState<SavedMeasurement[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [workItems, setWorkItems] = useState<WorkItem[]>([]);
+  const [logoDataUrl, setLogoDataUrl] = useState('');
+  const [companyIntro, setCompanyIntro] = useState('');
 
   // --- 실측 템플릿 관련 상태 ---
   const [measureData, setMeasureData] = useState({
@@ -485,6 +487,15 @@ function App() {
   };
 
   const handleLogout = async () => await supabase.auth.signOut();
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setLogoDataUrl(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
   const addItem = (type: 'door' | 'option') => setItems([...items, { id: Math.random().toString(36).substr(2, 9), type, name: type === 'door' ? '품목명 입력' : '옵션 항목', unit: 'SET', width: 0, height: 0, quantity: 1, unitPrice: 0, specialNote: '', remarks: '' }]);
   const removeItem = (id: string) => setItems(items.filter(item => item.id !== id));
   const updateItem = (id: string, field: keyof Item, value: string | number) => setItems(items.map(item => item.id === id ? { ...item, [field]: value } : item));
@@ -769,6 +780,18 @@ function App() {
               </div>
             </div>
             <div className="form-section">
+              <h3>로고 및 자사 소개</h3>
+              <div className="logo-upload-area">
+                {logoDataUrl && <img src={logoDataUrl} alt="logo-preview" className="logo-preview" />}
+                <label className="btn-logo-upload">
+                  {logoDataUrl ? '로고 변경' : '🖼 로고 업로드'}
+                  <input type="file" accept="image/*" onChange={handleLogoUpload} style={{display:'none'}} />
+                </label>
+                {logoDataUrl && <button className="btn-logo-remove" onClick={() => setLogoDataUrl('')}>로고 제거</button>}
+              </div>
+              <textarea className="remarks-input" placeholder="자사 소개 내용을 입력하세요 (출력 시 견적서 하단에 디자인 카드로 표시됩니다)" value={companyIntro} onChange={e => setCompanyIntro(e.target.value)} rows={5} />
+            </div>
+            <div className="form-section">
               <h3>수요자 및 견적 정보</h3>
               <div className="grid">
                 <input type="text" placeholder="고객명" value={customer.name} onChange={e => setCustomer({...customer, name: e.target.value})} />
@@ -912,8 +935,10 @@ function App() {
           <header className="sheet-header">
             <div className="header-top">
               <div className="company-branding">
-                <h2 className="brand-name">{provider.name}</h2>
-                <p className="brand-tagline">{provider.brandTagline}</p>
+                {logoDataUrl
+                  ? <img src={logoDataUrl} alt="logo" className="print-logo" />
+                  : <><h2 className="brand-name">{provider.name}</h2><p className="brand-tagline">{provider.brandTagline}</p></>
+                }
               </div>
               <div className="doc-title-wrapper">
                 <h1 className="doc-title">견 적 서</h1>
@@ -974,6 +999,31 @@ function App() {
           </div>
 
           <div className="sheet-final"><p>견적 유효기간: 발행일로부터 15일</p><div className="signature-area"><p>위와 같이 견적 하오니, 긍정적인 검토 부탁드립니다.</p><div className="sign-box">{customer.date.split('-')[0]}년 {customer.date.split('-')[1]}월 {customer.date.split('-')[2]}일</div></div></div>
+
+          {companyIntro && (
+            <div className="company-intro-page">
+              <div className="intro-header">
+                <div className="intro-header-left">
+                  {logoDataUrl && <img src={logoDataUrl} alt="logo" className="intro-logo" />}
+                  <div>
+                    <h2 className="intro-company-name">{provider.name}</h2>
+                    {provider.brandTagline && <p className="intro-tagline">{provider.brandTagline}</p>}
+                  </div>
+                </div>
+                <div className="intro-title-badge">회 사 소 개</div>
+              </div>
+              <div className="intro-divider" />
+              <div className="intro-content">
+                {companyIntro.split('\n').map((line, i) => <p key={i}>{line || <br />}</p>)}
+              </div>
+              <div className="intro-footer">
+                <div className="intro-footer-info">
+                  {provider.address && <span>📍 {provider.address}</span>}
+                  {provider.contact && <span>📞 {provider.contact}</span>}
+                </div>
+              </div>
+            </div>
+          )}
 
         </div>
       )}
