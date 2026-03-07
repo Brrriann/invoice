@@ -693,13 +693,14 @@
   margin-bottom: 8px;
 }
 .btn-add-sub {
-  font-size: 0.72rem;
-  padding: 3px 8px;
-  background: #475569;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  background: #7c3aed;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
+  white-space: nowrap;
 }
 .sub-cards-grid {
   display: flex;

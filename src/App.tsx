@@ -565,6 +565,7 @@ function App() {
                             onBlur={e => syncProjectToDB(project.id, 'customer_name', e.target.value)}
                           />
                           <button className="btn-add-work" onClick={() => addWorkItem(project.id, workItems.filter(w => w.project_id === project.id).length)}>+ 공정 추가</button>
+                          <button className="btn-add-sub" onClick={() => addSubcontract(project.id)}>+ 외주 추가</button>
                         </div>
                       </div>
                       <button className="btn-delete-project" onClick={() => deleteProject(project.id)}>×</button>
@@ -602,10 +603,6 @@ function App() {
 
                         {/* 외주 관리 */}
                         <div className="subcontract-section">
-                          <div className="subcontract-header">
-                            <div className="section-title">외주</div>
-                            <button className="btn-add-sub" onClick={() => addSubcontract(project.id)}>+ 외주 추가</button>
-                          </div>
                           <div className="sub-cards-grid">
                             {subcontracts.filter(s => s.project_id === project.id).map((s, idx) => (
                               <div key={s.id} className={`sub-card ${s.payment_done ? 'done' : ''}`}>
