@@ -532,6 +532,17 @@
   border: 1px solid #e2e8f0;
 }
 
+.work-items-section {
+  margin-bottom: 16px;
+}
+
+.customer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
 .invoice-payment-section {
   margin-top: 10px;
 }

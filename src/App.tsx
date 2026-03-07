@@ -530,25 +530,24 @@ function App() {
                     <div className="project-card-header">
                       <div className="project-title">
                         <h3>{project.site_name}</h3>
-                        <input 
-                          className="customer-input" 
-                          placeholder="고객사명 입력"
-                          value={project.customer_name || ''} 
-                          onChange={e => updateProjectLocal(project.id, 'customer_name', e.target.value)} 
-                          onBlur={e => syncProjectToDB(project.id, 'customer_name', e.target.value)}
-                        />
+                        <div className="customer-row">
+                          <input
+                            className="customer-input"
+                            placeholder="고객사명 입력"
+                            value={project.customer_name || ''}
+                            onChange={e => updateProjectLocal(project.id, 'customer_name', e.target.value)}
+                            onBlur={e => syncProjectToDB(project.id, 'customer_name', e.target.value)}
+                          />
+                          <button className="btn-add-work" onClick={() => addWorkItem(project.id, workItems.filter(w => w.project_id === project.id).length)}>+ 공정 추가</button>
                         </div>
-                        <button className="btn-delete-project" onClick={() => deleteProject(project.id)}>×</button>
-                        </div>
+                      </div>
+                      <button className="btn-delete-project" onClick={() => deleteProject(project.id)}>×</button>
+                    </div>
 
                         <div className="project-body">
 
                         {/* 공정 항목 */}
                         <div className="work-items-section">
-                          <div className="work-items-header">
-                            <div className="work-items-label">공정 항목</div>
-                            <button className="btn-add-work" onClick={() => addWorkItem(project.id, workItems.filter(w => w.project_id === project.id).length)}>+ 공정 추가</button>
-                          </div>
                           <div className="work-items-grid">
                             {workItems.filter(w => w.project_id === project.id).map((w, idx) => (
                               <div key={w.id} className={`work-item-chip ${w.status === '완료' ? 'done' : ''}`}>
