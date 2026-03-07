@@ -1039,8 +1039,8 @@ input:focus, textarea:focus { outline: none; border-color: #3b82f6; background: 
 .form-section input,
 .form-section textarea,
 .form-section select {
-  background: #f0f6ff;
-  border: 1.5px solid #bfdbfe;
+  background: #f8fafc;
+  border: 1.5px solid #e2eaf4;
   color: #1e293b;
 }
 .form-section input:focus,
@@ -1064,8 +1064,8 @@ input:focus, textarea:focus { outline: none; border-color: #3b82f6; background: 
 .items-section td { padding: 8px; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
 .items-section input,
 .items-section select {
-  border: 1.5px solid #bfdbfe;
-  background: #f0f6ff;
+  border: 1.5px solid #e2eaf4;
+  background: #f8fafc;
   padding: 6px 8px;
   width: 100%;
   border-radius: 6px;
