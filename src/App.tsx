@@ -25,10 +25,6 @@ interface Project {
   site_name: string;
   customer_name: string;
   total_amount: number;
-  measure_date: string;
-  measure_status: '예정' | '완료';
-  install_date: string;
-  install_status: '대기' | '확정' | '완료';
   invoice_date: string;
   invoice_status: '미발급' | '완료';
   payment_date: string;
@@ -40,6 +36,16 @@ interface Project {
   biz_type: string;
   biz_item: string;
   biz_email: string;
+}
+
+interface WorkItem {
+  id: string;
+  project_id: string;
+  user_id: string;
+  label: string;
+  type: '실측' | '시공';
+  date: string;
+  status: '예정' | '확정' | '완료';
 }
 
 interface SavedQuotation {
@@ -129,6 +135,7 @@ function App() {
   const [savedQuotations, setSavedQuotations] = useState<SavedQuotation[]>([]);
   const [savedMeasurements, setSavedMeasurements] = useState<SavedMeasurement[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [workItems, setWorkItems] = useState<WorkItem[]>([]);
 
   // --- 실측 템플릿 관련 상태 ---
   const [measureData, setMeasureData] = useState({
@@ -162,6 +169,7 @@ function App() {
       fetchQuotations();
       fetchMeasurements();
       fetchProjects();
+      fetchWorkItems();
     }
   }, [currentUser]);
 
@@ -171,18 +179,20 @@ function App() {
     if (!error) setProjects(data || []);
   };
 
+  const fetchWorkItems = async () => {
+    const { data, error } = await supabase.from('work_items').select('*').order('created_at', { ascending: true });
+    if (!error) setWorkItems(data || []);
+  };
+
   const addProject = async () => {
     if (!currentUser) return;
     const siteName = prompt('신규 현장명을 입력하세요:');
     if (!siteName) return;
-    
     const { error } = await supabase.from('projects').insert([{
       user_id: currentUser.id,
       site_name: siteName,
       customer_name: '',
       total_amount: 0,
-      measure_status: '예정',
-      install_status: '대기',
       invoice_status: '미발급',
       payment_status: '미수금',
       biz_name: '',
@@ -192,9 +202,31 @@ function App() {
       biz_item: '',
       biz_email: ''
     }]);
-    
     if (error) alert('생성 실패: ' + error.message);
     else fetchProjects();
+  };
+
+  const addWorkItem = async (projectId: string, type: '실측' | '시공') => {
+    if (!currentUser) return;
+    const { error } = await supabase.from('work_items').insert([{
+      project_id: projectId,
+      user_id: currentUser.id,
+      label: type === '실측' ? '실측' : '시공',
+      type,
+      date: '',
+      status: '예정'
+    }]);
+    if (!error) fetchWorkItems();
+  };
+
+  const updateWorkItem = async (id: string, field: string, value: string) => {
+    setWorkItems(prev => prev.map(w => w.id === id ? { ...w, [field]: value } : w));
+    await supabase.from('work_items').update({ [field]: value }).eq('id', id);
+  };
+
+  const deleteWorkItem = async (id: string) => {
+    await supabase.from('work_items').delete().eq('id', id);
+    setWorkItems(prev => prev.filter(w => w.id !== id));
   };
 
   const exportFilteredProjectsToExcel = (filteredProjects: Project[]) => {
@@ -510,96 +542,92 @@ function App() {
                         </div>
 
                         <div className="project-body">
-                        <div className="status-timeline">
-                        {/* 1. 실측 섹션 */}
-                        <div className={`status-node ${project.measure_status === '완료' ? 'done' : ''}`}>
-                          <div className="node-label">실측</div>
-                          <select 
-                            value={project.measure_status} 
-                            onChange={e => handleProjectUpdateImmediate(project.id, 'measure_status', e.target.value)}
-                            className={`status-select ${project.measure_status}`}
-                          >
-                            <option value="예정">예정</option>
-                            <option value="완료">완료</option>
-                          </select>
-                          <input type="date" value={project.measure_date || ''} onChange={e => handleProjectUpdateImmediate(project.id, 'measure_date', e.target.value)} />
-                        </div>
 
-                        {/* 2. 설치 섹션 */}
-                        <div className={`status-node ${project.install_status === '완료' ? 'done' : ''}`}>
-                          <div className="node-label">설치</div>
-                          <select 
-                            value={project.install_status} 
-                            onChange={e => handleProjectUpdateImmediate(project.id, 'install_status', e.target.value)}
-                            className={`status-select ${project.install_status}`}
-                          >
-                            <option value="대기">대기</option>
-                            <option value="확정">확정</option>
-                            <option value="완료">완료</option>
-                          </select>
-                          <input type="date" value={project.install_date || ''} onChange={e => handleProjectUpdateImmediate(project.id, 'install_date', e.target.value)} />
-                        </div>
-
-                        {/* 3. 계산서 섹션 */}
-                        <div className={`status-node ${project.invoice_status === '완료' ? 'done' : ''}`}>
-                          <div className="node-label">계산서</div>
-                          <select 
-                            value={project.invoice_status} 
-                            onChange={e => handleProjectUpdateImmediate(project.id, 'invoice_status', e.target.value)}
-                            className={`status-select ${project.invoice_status}`}
-                          >
-                            <option value="미발급">미발급</option>
-                            <option value="완료">완료</option>
-                          </select>
-                          <input type="date" value={project.invoice_date || ''} onChange={e => handleProjectUpdateImmediate(project.id, 'invoice_date', e.target.value)} />
-                        </div>
-
-                        {/* 4. 수금 섹션 */}
-                        <div className={`status-node ${project.payment_status === '완료' ? 'done' : ''}`}>
-                          <div className="node-label">수금</div>
-                          <select 
-                            value={project.payment_status} 
-                            onChange={e => handleProjectUpdateImmediate(project.id, 'payment_status', e.target.value)}
-                            className={`status-select ${project.payment_status}`}
-                          >
-                            <option value="미수금">미수금</option>
-                            <option value="일부수금">일부수금</option>
-                            <option value="완료">완료</option>
-                          </select>
-                          <input type="date" value={project.payment_date || ''} onChange={e => handleProjectUpdateImmediate(project.id, 'payment_date', e.target.value)} />
-                        </div>
+                        {/* 공정 항목 (실측/시공) */}
+                        <div className="work-items-section">
+                          <div className="work-items-label">공정 항목</div>
+                          <div className="status-timeline">
+                            {workItems.filter(w => w.project_id === project.id).map(w => (
+                              <div key={w.id} className={`status-node ${w.status === '완료' ? 'done' : ''}`}>
+                                <div className="node-header">
+                                  <span className={`node-type-badge ${w.type}`}>{w.type}</span>
+                                  <input
+                                    className="work-label-input"
+                                    value={w.label}
+                                    onChange={e => updateWorkItem(w.id, 'label', e.target.value)}
+                                    placeholder="공사명"
+                                  />
+                                  <button className="btn-remove-work" onClick={() => deleteWorkItem(w.id)}>×</button>
+                                </div>
+                                <select value={w.status} onChange={e => updateWorkItem(w.id, 'status', e.target.value)} className={`status-select ${w.status}`}>
+                                  <option value="예정">예정</option>
+                                  <option value="확정">확정</option>
+                                  <option value="완료">완료</option>
+                                </select>
+                                <input type="date" value={w.date || ''} onChange={e => updateWorkItem(w.id, 'date', e.target.value)} />
+                              </div>
+                            ))}
+                          </div>
+                          <div className="work-item-add-buttons">
+                            <button className="btn-add-work measure" onClick={() => addWorkItem(project.id, '실측')}>+ 실측 추가</button>
+                            <button className="btn-add-work install" onClick={() => addWorkItem(project.id, '시공')}>+ 시공 추가</button>
+                          </div>
                         </div>
 
                         <div className="project-info-row">
-                        <div className="amount-field">
-                          <span>계약금액:</span>
-                          <input 
-                            type="text" 
-                            value={formatNumber(project.total_amount)} 
-                            onChange={e => updateProjectLocal(project.id, 'total_amount', parseNumber(e.target.value))} 
-                            onBlur={e => syncProjectToDB(project.id, 'total_amount', parseNumber(e.target.value))}
+                          <div className="amount-field">
+                            <span>계약금액:</span>
+                            <input
+                              type="text"
+                              value={formatNumber(project.total_amount)}
+                              onChange={e => updateProjectLocal(project.id, 'total_amount', parseNumber(e.target.value))}
+                              onBlur={e => syncProjectToDB(project.id, 'total_amount', parseNumber(e.target.value))}
+                            />
+                          </div>
+                          <textarea
+                            className="project-notes"
+                            placeholder="특이사항 및 메모 입력"
+                            value={project.notes || ''}
+                            onChange={e => updateProjectLocal(project.id, 'notes', e.target.value)}
+                            onBlur={e => syncProjectToDB(project.id, 'notes', e.target.value)}
+                            rows={1}
                           />
                         </div>
-                        <textarea 
-                          className="project-notes"
-                          placeholder="특이사항 및 메모 입력" 
-                          value={project.notes || ''} 
-                          onChange={e => updateProjectLocal(project.id, 'notes', e.target.value)}
-                          onBlur={e => syncProjectToDB(project.id, 'notes', e.target.value)}
-                          rows={1}
-                        />
+
+                        {/* 계산서/수금 - 현장 단위로 관리 */}
+                        <div className="invoice-payment-section">
+                          <div className="section-title">계산서 / 수금</div>
+                          <div className="invoice-payment-row">
+                            <div className={`status-node ${project.invoice_status === '완료' ? 'done' : ''}`}>
+                              <div className="node-label">계산서</div>
+                              <select value={project.invoice_status} onChange={e => handleProjectUpdateImmediate(project.id, 'invoice_status', e.target.value)} className={`status-select ${project.invoice_status}`}>
+                                <option value="미발급">미발급</option>
+                                <option value="완료">완료</option>
+                              </select>
+                              <input type="date" value={project.invoice_date || ''} onChange={e => handleProjectUpdateImmediate(project.id, 'invoice_date', e.target.value)} />
+                            </div>
+                            <div className={`status-node ${project.payment_status === '완료' ? 'done' : ''}`}>
+                              <div className="node-label">수금</div>
+                              <select value={project.payment_status} onChange={e => handleProjectUpdateImmediate(project.id, 'payment_status', e.target.value)} className={`status-select ${project.payment_status}`}>
+                                <option value="미수금">미수금</option>
+                                <option value="일부수금">일부수금</option>
+                                <option value="완료">완료</option>
+                              </select>
+                              <input type="date" value={project.payment_date || ''} onChange={e => handleProjectUpdateImmediate(project.id, 'payment_date', e.target.value)} />
+                            </div>
+                          </div>
                         </div>
 
                         <div className="biz-info-section">
-                        <div className="section-title">계산서 발행 정보</div>
-                        <div className="biz-info-grid">
-                          <input placeholder="상호" value={project.biz_name || ''} onChange={e => updateProjectLocal(project.id, 'biz_name', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_name', e.target.value)} />
-                          <input placeholder="성명" value={project.biz_owner || ''} onChange={e => updateProjectLocal(project.id, 'biz_owner', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_owner', e.target.value)} />
-                          <input placeholder="이메일" value={project.biz_email || ''} onChange={e => updateProjectLocal(project.id, 'biz_email', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_email', e.target.value)} />
-                          <input placeholder="업태" value={project.biz_type || ''} onChange={e => updateProjectLocal(project.id, 'biz_type', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_type', e.target.value)} />
-                          <input placeholder="종목" value={project.biz_item || ''} onChange={e => updateProjectLocal(project.id, 'biz_item', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_item', e.target.value)} />
-                          <input placeholder="사업장주소" className="full-width" value={project.biz_address || ''} onChange={e => updateProjectLocal(project.id, 'biz_address', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_address', e.target.value)} />
-                        </div>
+                          <div className="section-title">계산서 발행 정보</div>
+                          <div className="biz-info-grid">
+                            <input placeholder="상호" value={project.biz_name || ''} onChange={e => updateProjectLocal(project.id, 'biz_name', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_name', e.target.value)} />
+                            <input placeholder="성명" value={project.biz_owner || ''} onChange={e => updateProjectLocal(project.id, 'biz_owner', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_owner', e.target.value)} />
+                            <input placeholder="이메일" value={project.biz_email || ''} onChange={e => updateProjectLocal(project.id, 'biz_email', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_email', e.target.value)} />
+                            <input placeholder="업태" value={project.biz_type || ''} onChange={e => updateProjectLocal(project.id, 'biz_type', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_type', e.target.value)} />
+                            <input placeholder="종목" value={project.biz_item || ''} onChange={e => updateProjectLocal(project.id, 'biz_item', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_item', e.target.value)} />
+                            <input placeholder="사업장주소" className="full-width" value={project.biz_address || ''} onChange={e => updateProjectLocal(project.id, 'biz_address', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_address', e.target.value)} />
+                          </div>
                         </div>
 
                   </div>
@@ -619,16 +647,23 @@ function App() {
                   {Array.from({ length: new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate() }).map((_, i) => {
                     const day = i + 1;
                     const dateStr = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                    const dayProjects = projects.filter(p => p.measure_date === dateStr || p.install_date === dateStr || p.invoice_date === dateStr || p.payment_date === dateStr);
-                    
+                    const dayWorkItems = workItems.filter(w => w.date === dateStr);
+                    const dayProjects = projects.filter(p => p.invoice_date === dateStr || p.payment_date === dateStr);
+
                     return (
                       <div key={day} className="calendar-day">
                         <span className="day-number">{day}</span>
                         <div className="day-events">
+                          {dayWorkItems.map(w => {
+                            const proj = projects.find(p => p.id === w.project_id);
+                            return (
+                              <div key={w.id} className={`event ${w.type === '실측' ? 'measure' : 'install'}`}>
+                                {w.type}: {proj?.site_name}{w.label ? ` (${w.label})` : ''}
+                              </div>
+                            );
+                          })}
                           {dayProjects.map(p => (
                             <div key={p.id} className="calendar-event-group">
-                              {p.measure_date === dateStr && <div className="event measure">실측: {p.site_name}</div>}
-                              {p.install_date === dateStr && <div className="event install">설치: {p.site_name}</div>}
                               {p.invoice_date === dateStr && <div className="event invoice">계산서: {p.site_name}</div>}
                               {p.payment_date === dateStr && <div className="event payment">수금: {p.site_name}</div>}
                             </div>
