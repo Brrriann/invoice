@@ -647,7 +647,6 @@ function App() {
                     const day = i + 1;
                     const dateStr = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                     const dayWorkItems = workItems.filter(w => w.date === dateStr);
-                    const dayProjects = projects.filter(p => p.invoice_date === dateStr || p.payment_date === dateStr);
 
                     return (
                       <div key={day} className="calendar-day">
@@ -662,12 +661,6 @@ function App() {
                               </div>
                             );
                           })}
-                          {dayProjects.map(p => (
-                            <div key={p.id} className="calendar-event-group">
-                              {p.invoice_date === dateStr && <div className="event invoice">계산서: {p.site_name}</div>}
-                              {p.payment_date === dateStr && <div className="event payment">수금: {p.site_name}</div>}
-                            </div>
-                          ))}
                         </div>
                       </div>
                     );
