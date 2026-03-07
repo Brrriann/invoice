@@ -916,19 +916,18 @@ function App() {
               <h3>공사 항목 체크리스트</h3>
               <div className="checklist-grid">
                 {([
-                  ['demolition','철거'], ['flooring','바닥재'], ['wallpaper','도배/도장'],
-                  ['carpentry','목공'], ['electric','전기'], ['plumbing','배관/위생'],
-                  ['tile','타일'], ['lighting','조명'], ['furniture','가구/붙박이']
-                ] as [keyof WorkChecklist, string][]).map(([key, label]) => (
+                  ['demolition','철거','🔨'], ['flooring','바닥재','🪵'], ['wallpaper','도배/도장','🎨'],
+                  ['carpentry','목공','🪚'], ['electric','전기','⚡'], ['plumbing','배관/위생','🚿'],
+                  ['tile','타일','🧱'], ['lighting','조명','💡'], ['furniture','가구/붙박이','🪑'],
+                  ['etc','기타','📝']
+                ] as [keyof WorkChecklist, string, string][]).map(([key, label, icon]) => (
                   <label key={key} className={`checklist-item ${measureData.checklist[key] ? 'checked' : ''}`}>
-                    <input type="checkbox" checked={!!measureData.checklist[key]} onChange={e => toggleChecklist(key, e.target.checked)} />
-                    {label}
+                    <input type="checkbox" checked={!!measureData.checklist[key]} onChange={e => toggleChecklist(key, e.target.checked)} style={{display:'none'}} />
+                    <span className="check-icon">{icon}</span>
+                    <span className="check-label">{label}</span>
+                    {measureData.checklist[key] && <span className="check-mark">✓</span>}
                   </label>
                 ))}
-                <label className={`checklist-item ${measureData.checklist.etc ? 'checked' : ''}`}>
-                  <input type="checkbox" checked={measureData.checklist.etc} onChange={e => toggleChecklist('etc', e.target.checked)} />
-                  기타
-                </label>
               </div>
               {measureData.checklist.etc && (
                 <input className="etc-note-input" placeholder="기타 공사 내용 입력" value={measureData.checklist.etcNote} onChange={e => toggleChecklist('etcNote', e.target.value)} />
@@ -1108,8 +1107,13 @@ function App() {
             <div className="m-checklist-section">
               <div className="m-space-title">공사 항목</div>
               <div className="m-checklist-grid">
-                {([['demolition','철거'],['flooring','바닥재'],['wallpaper','도배/도장'],['carpentry','목공'],['electric','전기'],['plumbing','배관/위생'],['tile','타일'],['lighting','조명'],['furniture','가구/붙박이'],['etc','기타']] as [keyof WorkChecklist, string][]).map(([key, label]) =>
-                  measureData.checklist[key] ? <span key={key} className="m-check-badge">✓ {label}{key === 'etc' && measureData.checklist.etcNote ? `: ${measureData.checklist.etcNote}` : ''}</span> : null
+                {([['demolition','철거','🔨'],['flooring','바닥재','🪵'],['wallpaper','도배/도장','🎨'],['carpentry','목공','🪚'],['electric','전기','⚡'],['plumbing','배관/위생','🚿'],['tile','타일','🧱'],['lighting','조명','💡'],['furniture','가구/붙박이','🪑'],['etc','기타','📝']] as [keyof WorkChecklist, string, string][]).map(([key, label, icon]) =>
+                  measureData.checklist[key] ? (
+                    <div key={key} className="m-check-badge">
+                      <span className="m-badge-icon">{icon}</span>
+                      <span className="m-badge-label">✓ {label}{key === 'etc' && measureData.checklist.etcNote ? `: ${measureData.checklist.etcNote}` : ''}</span>
+                    </div>
+                  ) : null
                 )}
               </div>
             </div>
