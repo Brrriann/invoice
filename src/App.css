@@ -657,16 +657,8 @@
   box-sizing: border-box;
 }
 
-.intro-section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-.intro-section-header h3 {
-  margin: 0;
-}
 .intro-toggle-label {
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 6px;

@@ -838,13 +838,12 @@ function App() {
             </div>
             <div className="form-section"><h3>특이사항</h3><textarea className="remarks-input" value={remarks} onChange={e => setRemarks(e.target.value)} rows={4} /></div>
             <div className="form-section">
-              <div className="intro-section-header">
-                <h3>로고 및 자사 소개</h3>
+              <h3>로고 및 자사 소개
                 <label className="intro-toggle-label">
                   <input type="checkbox" checked={showIntroInPrint} onChange={e => setShowIntroInPrint(e.target.checked)} />
                   출력에 포함
                 </label>
-              </div>
+              </h3>
               <div className="logo-upload-area">
                 {logoDataUrl && <img src={logoDataUrl} alt="logo-preview" className="logo-preview" />}
                 <label className="btn-logo-upload">
