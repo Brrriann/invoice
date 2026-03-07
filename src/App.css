@@ -1062,7 +1062,26 @@ input:focus, textarea:focus { outline: none; border-color: #3b82f6; background: 
 .items-section table { width: 100%; min-width: 850px; border-collapse: separate; border-spacing: 0; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; }
 .items-section th { background: #f1f5f9; padding: 14px; text-align: left; font-size: 13px; color: #475569; font-weight: 600; }
 .items-section td { padding: 8px; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
-.items-section input { border: none; background: transparent; padding: 8px; width: 100%; }
+.items-section input,
+.items-section select {
+  border: 1.5px solid #bfdbfe;
+  background: #f0f6ff;
+  padding: 6px 8px;
+  width: 100%;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #1e293b;
+}
+.items-section input:focus,
+.items-section select:focus {
+  background: white;
+  border-color: #3b82f6;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+.items-section input::placeholder {
+  color: #94a3b8;
+}
 
 .btn-add { margin-top: 15px; background: #f0f7ff; color: #2563eb; border: 2px dashed #bfdbfe; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: 700; }
 
