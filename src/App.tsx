@@ -725,7 +725,7 @@ function App() {
                             const customerName = proj?.customer_name || proj?.site_name || '';
                             return (
                               <div key={s.id} className="event subcontract-event">
-                                🔧 {customerName}:{s.label}{s.amount ? ` (₩${s.amount.toLocaleString()})` : ''}
+                                🔧 {customerName}:{s.label}:외주
                               </div>
                             );
                           })}
