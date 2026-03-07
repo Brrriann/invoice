@@ -1229,8 +1229,8 @@ input:focus, textarea:focus { outline: none; border-color: #3b82f6; background: 
   .m-space-block { margin-top: 20px; }
   .m-space-title { font-size: 12pt; font-weight: 800; color: #1e3a8a; background: #eff6ff; border-left: 4px solid #1e3a8a; padding: 6px 12px; margin-bottom: 8px; }
   .m-checklist-section { margin-top: 20px; }
-  .m-checklist-grid { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; }
-  .m-check-badge { background: #dbeafe; color: #1e3a8a; padding: 4px 10px; border-radius: 20px; font-size: 9pt; font-weight: 600; }
+  .m-checklist-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 12px; }
+  .m-check-badge { background: #dbeafe; color: #1e3a8a; padding: 6px 12px; border-radius: 6px; font-size: 9pt; font-weight: 600; white-space: nowrap; display: flex; align-items: center; }
   .m-notes-section { margin-top: 20px; }
   .m-notes-content { font-size: 11pt; line-height: 1.8; padding: 12px; background: #f8fafc; border-radius: 4px; min-height: 60px; }
 
