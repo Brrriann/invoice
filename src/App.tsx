@@ -172,7 +172,7 @@ function App() {
   const [provider, setProvider] = useState(initialProvider);
   const [customer, setCustomer] = useState(initialCustomer);
   const [quoteNumber, setQuoteNumber] = useState(`SD-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-01`);
-  const [greeting, setGreeting] = useState('평소 베풀어 주신 각별한 성원에 감사드리며,\n아래와 같이 견적을 제출하오니 검토 부탁드립니다.');
+  const [greeting, setGreeting] = useState('최저가보다는 최고 효율의 합리적인 견적을 \n아래와 같이 제출하오니, 긍정적인 검토 부탁드립니다.');
   const [remarks, setRemarks] = useState('※ 납기일: 발주 후 30일 이내\n※ 결제조건: 선금 50%, 잔금 설치 후 즉시\n※ 부가세 포함 금액입니다.');
   
   const [savedQuotations, setSavedQuotations] = useState<SavedQuotation[]>([]);
