@@ -703,7 +703,7 @@ function App() {
           </div>
         ) : view === 'quotation' ? (
           <div className="quotation-card">
-            <h1>주미산업 SPEEDDOOR 견적서</h1>
+            <h1>견적서 작성</h1>
             <div className="form-section">
               <h3>공급자 정보</h3>
               <div className="grid">
