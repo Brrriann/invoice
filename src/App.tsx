@@ -222,8 +222,34 @@ function App() {
       fetchProjects();
       fetchWorkItems();
       fetchSubcontracts();
+      fetchCompanyProfile();
     }
   }, [currentUser]);
+
+  // --- 회사 프로필 ---
+  const fetchCompanyProfile = async () => {
+    if (!currentUser) return;
+    const { data } = await supabase.from('company_profiles').select('*').eq('user_id', currentUser.id).single();
+    if (data) {
+      setProvider({ name: data.name || '', brandTagline: data.brand_tagline || '', representative: data.representative || '', businessNo: data.business_no || '', address: data.address || '', contact: data.contact || '' });
+    }
+  };
+
+  const saveCompanyProfile = async () => {
+    if (!currentUser) return;
+    const { error } = await supabase.from('company_profiles').upsert({
+      user_id: currentUser.id,
+      name: provider.name,
+      brand_tagline: provider.brandTagline,
+      representative: provider.representative,
+      business_no: provider.businessNo,
+      address: provider.address,
+      contact: provider.contact,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
+    if (error) alert('저장 실패: ' + error.message);
+    else alert('공급자 정보가 저장되었습니다.');
+  };
 
   // --- DB 로직 (대시보드/프로젝트) ---
   const fetchProjects = async () => {
@@ -800,7 +826,10 @@ function App() {
           <div className="quotation-card">
             <h1>견적서 작성</h1>
             <div className="form-section">
-              <h3>공급자 정보</h3>
+              <h3>공급자 정보
+                <button className="btn-save-profile" onClick={saveCompanyProfile}>💾 저장</button>
+              </h3>
+              <p className="profile-hint">저장하면 다음 로그인 시 자동으로 불러옵니다.</p>
               <div className="grid">
                 <input type="text" placeholder="상호" value={provider.name} onChange={e => setProvider({...provider, name: e.target.value})} />
                 <input type="text" placeholder="영문 상호" value={provider.brandTagline} onChange={e => setProvider({...provider, brandTagline: e.target.value})} />
