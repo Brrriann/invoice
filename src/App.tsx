@@ -450,7 +450,7 @@ function App() {
     return (
       <div className="auth-container">
         <div className="auth-card">
-          <div className="auth-header"><h2>주미산업 SPEEDDOOR</h2><p>{authView === 'login' ? '로그인이 필요합니다' : '새로운 계정을 만드세요'}</p></div>
+          <div className="auth-header"><h2>공정관리 대시보드</h2><p>{authView === 'login' ? '로그인이 필요합니다' : '새로운 계정을 만드세요'}</p></div>
           <form onSubmit={handleAuthSubmit}>
             <div className="auth-group"><label>이메일</label><input type="email" required value={authInputs.email} onChange={e => setAuthViewInputs({...authInputs, email: e.target.value})} placeholder="이메일을 입력하세요" /></div>
             <div className="auth-group"><label>비밀번호</label><input type="password" required value={authInputs.password} onChange={e => setAuthViewInputs({...authInputs, password: e.target.value})} placeholder="비밀번호를 입력하세요" /></div>
