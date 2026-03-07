@@ -533,7 +533,7 @@ function App() {
                         <div className="customer-row">
                           <input
                             className="customer-input"
-                            placeholder="고객사명 입력"
+                            placeholder="캘린더표기 고객사명"
                             value={project.customer_name || ''}
                             onChange={e => updateProjectLocal(project.id, 'customer_name', e.target.value)}
                             onBlur={e => syncProjectToDB(project.id, 'customer_name', e.target.value)}
@@ -655,9 +655,10 @@ function App() {
                         <div className="day-events">
                           {dayWorkItems.map(w => {
                             const proj = projects.find(p => p.id === w.project_id);
+                            const customerName = proj?.customer_name || proj?.site_name || '';
                             return (
                               <div key={w.id} className={`event ${w.type === '실측' ? 'measure' : 'install'}`}>
-                                {w.type}: {proj?.site_name}{w.label ? ` (${w.label})` : ''}
+                                {customerName}:{w.label}:{w.status}
                               </div>
                             );
                           })}
