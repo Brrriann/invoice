@@ -66,3 +66,98 @@ BEGIN
         CREATE POLICY "Users can delete their own measurements" ON public.measurements_v2 FOR DELETE USING (auth.uid() = user_id);
     END IF;
 END $$;
+
+-- =============================================
+-- 누락된 테이블 추가 (아래 SQL을 Supabase SQL Editor에서 실행하세요)
+-- =============================================
+
+-- 5. company_profiles 테이블 (공급자 정보 저장)
+CREATE TABLE IF NOT EXISTS public.company_profiles (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
+    name TEXT,
+    brand_tagline TEXT,
+    representative TEXT,
+    business_no TEXT,
+    address TEXT,
+    contact TEXT,
+    logo_data_url TEXT,
+    company_intro TEXT
+);
+
+-- 6. projects 테이블 (현장 관리)
+CREATE TABLE IF NOT EXISTS public.projects (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    site_name TEXT,
+    customer_name TEXT,
+    total_amount NUMERIC DEFAULT 0,
+    invoice_date TEXT,
+    invoice_status TEXT DEFAULT '미발급',
+    payment_date TEXT,
+    payment_status TEXT DEFAULT '미수금',
+    notes TEXT,
+    biz_name TEXT,
+    biz_owner TEXT,
+    biz_address TEXT,
+    biz_type TEXT,
+    biz_item TEXT,
+    biz_email TEXT
+);
+
+-- 7. work_items 테이블 (공정 항목)
+CREATE TABLE IF NOT EXISTS public.work_items (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    project_id UUID REFERENCES public.projects(id) ON DELETE CASCADE,
+    label TEXT,
+    type TEXT DEFAULT '시공',
+    date TEXT,
+    status TEXT DEFAULT '실측예정'
+);
+
+-- 8. subcontracts 테이블 (외주 관리)
+CREATE TABLE IF NOT EXISTS public.subcontracts (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    project_id UUID REFERENCES public.projects(id) ON DELETE CASCADE,
+    label TEXT,
+    amount NUMERIC DEFAULT 0,
+    invoice_issued BOOLEAN DEFAULT false,
+    payment_done BOOLEAN DEFAULT false,
+    date TEXT
+);
+
+-- RLS 활성화
+ALTER TABLE public.company_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.work_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.subcontracts ENABLE ROW LEVEL SECURITY;
+
+-- RLS 정책
+DO $$
+BEGIN
+    -- company_profiles
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can manage their own company_profiles') THEN
+        CREATE POLICY "Users can manage their own company_profiles" ON public.company_profiles FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+    END IF;
+
+    -- projects
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can manage their own projects') THEN
+        CREATE POLICY "Users can manage their own projects" ON public.projects FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+    END IF;
+
+    -- work_items
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can manage their own work_items') THEN
+        CREATE POLICY "Users can manage their own work_items" ON public.work_items FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+    END IF;
+
+    -- subcontracts
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can manage their own subcontracts') THEN
+        CREATE POLICY "Users can manage their own subcontracts" ON public.subcontracts FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+    END IF;
+END $$;

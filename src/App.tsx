@@ -157,11 +157,13 @@ const initialCustomer = {
 function App() {
   // --- 인증 관련 상태 ---
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [authView, setAuthView] = useState<'login' | 'signup'>('login');
-  const [authInputs, setAuthViewInputs] = useState({ email: '', password: '' });
+  const [authView, setAuthView] = useState<'login' | 'signup' | 'forgot' | 'reset'>('login');
+  const [authInputs, setAuthViewInputs] = useState({ email: '', password: '', confirmPassword: '', phone: '' });
+  const [newPassword, setNewPassword] = useState({ password: '', confirmPassword: '' });
   const [isLoading, setIsLoading] = useState(true);
 
   // --- 메인 앱 상태 ---
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [view, setView] = useState<'quotation' | 'measurement' | 'dashboard'>('dashboard');
   const [dashboardMode, setDashboardMode] = useState<'list' | 'calendar' | 'invoice'>('list');
   const [invoiceFilter, setInvoiceFilter] = useState<'전체' | '미발급' | '완료'>('전체');
@@ -209,7 +211,10 @@ function App() {
       setCurrentUser(session?.user ?? null);
       setIsLoading(false);
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setAuthView('reset');
+      }
       setCurrentUser(session?.user ?? null);
     });
     return () => subscription.unsubscribe();
@@ -496,13 +501,46 @@ function App() {
     e.preventDefault();
     setIsLoading(true);
     if (authView === 'signup') {
-      const { error } = await supabase.auth.signUp({ email: authInputs.email, password: authInputs.password });
+      if (authInputs.password !== authInputs.confirmPassword) {
+        alert('비밀번호가 일치하지 않습니다. 다시 확인해 주세요.');
+        setIsLoading(false);
+        return;
+      }
+      const { error } = await supabase.auth.signUp({
+        email: authInputs.email,
+        password: authInputs.password,
+        options: { data: { phone: authInputs.phone } }
+      });
       if (error) alert(error.message); else alert('회원가입 완료! 로그인을 시도해 주세요.');
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email: authInputs.email, password: authInputs.password });
       if (error) alert('로그인 실패: ' + error.message);
     }
     setIsLoading(false);
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(authInputs.email, {
+      redirectTo: 'https://invoice-2cd.pages.dev/',
+    });
+    setIsLoading(false);
+    if (error) alert('오류: ' + error.message);
+    else alert('비밀번호 재설정 링크를 이메일로 발송했습니다. 이메일을 확인해 주세요.');
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword.password !== newPassword.confirmPassword) {
+      alert('비밀번호가 일치하지 않습니다.');
+      return;
+    }
+    setIsLoading(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword.password });
+    setIsLoading(false);
+    if (error) alert('오류: ' + error.message);
+    else { alert('비밀번호가 변경되었습니다.'); setAuthView('login'); }
   };
 
   const handleLogout = async () => await supabase.auth.signOut();
@@ -532,47 +570,123 @@ function App() {
 
   if (isLoading) return <div className="loading">로딩 중...</div>;
 
+  if (authView === 'reset') {
+    return (
+      <div className="auth-container">
+        <div className="auth-card">
+          <div className="auth-header"><h2>새 비밀번호 설정</h2><p>새로운 비밀번호를 입력해 주세요</p></div>
+          <form onSubmit={handleResetPassword}>
+            <div className="auth-group"><label>새 비밀번호</label><input type="password" required value={newPassword.password} onChange={e => setNewPassword({...newPassword, password: e.target.value})} placeholder="새 비밀번호를 입력하세요" /></div>
+            <div className="auth-group"><label>새 비밀번호 확인</label><input type="password" required value={newPassword.confirmPassword} onChange={e => setNewPassword({...newPassword, confirmPassword: e.target.value})} placeholder="새 비밀번호를 한 번 더 입력하세요" /></div>
+            <button type="submit" className="btn-auth" disabled={isLoading}>비밀번호 변경</button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   if (!currentUser) {
     return (
       <div className="auth-container">
         <div className="auth-card">
-          <div className="auth-header"><h2>공정관리 대시보드</h2><p>{authView === 'login' ? '로그인이 필요합니다' : '새로운 계정을 만드세요'}</p></div>
-          <form onSubmit={handleAuthSubmit}>
-            <div className="auth-group"><label>이메일</label><input type="email" required value={authInputs.email} onChange={e => setAuthViewInputs({...authInputs, email: e.target.value})} placeholder="이메일을 입력하세요" /></div>
-            <div className="auth-group"><label>비밀번호</label><input type="password" required value={authInputs.password} onChange={e => setAuthViewInputs({...authInputs, password: e.target.value})} placeholder="비밀번호를 입력하세요" /></div>
-            <button type="submit" className="btn-auth" disabled={isLoading}>{authView === 'login' ? '로그인' : '회원가입 완료'}</button>
-          </form>
-          <div className="auth-footer">{authView === 'login' ? <p>계정이 없으신가요? <span onClick={() => setAuthView('signup')}>회원가입</span></p> : <p>이미 계정이 있으신가요? <span onClick={() => setAuthView('login')}>로그인</span></p>}</div>
+          {authView === 'forgot' ? (
+            <>
+              <div className="auth-header"><h2>비밀번호 찾기</h2><p>가입한 이메일 주소를 입력하시면 재설정 링크를 보내드립니다</p></div>
+              <form onSubmit={handleForgotPassword}>
+                <div className="auth-group"><label>이메일</label><input type="email" required value={authInputs.email} onChange={e => setAuthViewInputs({...authInputs, email: e.target.value})} placeholder="가입한 이메일을 입력하세요" /></div>
+                <button type="submit" className="btn-auth" disabled={isLoading}>재설정 링크 발송</button>
+              </form>
+              <div className="auth-footer"><p><span onClick={() => setAuthView('login')}>로그인으로 돌아가기</span></p></div>
+            </>
+          ) : (
+            <>
+              <div className="auth-header"><h2>공정관리 대시보드</h2><p>{authView === 'login' ? '로그인이 필요합니다' : '새로운 계정을 만드세요'}</p></div>
+              <form onSubmit={handleAuthSubmit}>
+                <div className="auth-group"><label>이메일</label><input type="email" required value={authInputs.email} onChange={e => setAuthViewInputs({...authInputs, email: e.target.value})} placeholder="이메일을 입력하세요" /></div>
+                <div className="auth-group"><label>비밀번호</label><input type="password" required value={authInputs.password} onChange={e => setAuthViewInputs({...authInputs, password: e.target.value})} placeholder="비밀번호를 입력하세요" /></div>
+                {authView === 'signup' && (
+                  <>
+                    <div className="auth-group"><label>비밀번호 확인</label><input type="password" required value={authInputs.confirmPassword} onChange={e => setAuthViewInputs({...authInputs, confirmPassword: e.target.value})} placeholder="비밀번호를 한 번 더 입력하세요" /></div>
+                    <div className="auth-group"><label>휴대폰 번호</label><input type="tel" required value={authInputs.phone} onChange={e => setAuthViewInputs({...authInputs, phone: e.target.value})} placeholder="예: 010-1234-5678" /></div>
+                  </>
+                )}
+                <button type="submit" className="btn-auth" disabled={isLoading}>{authView === 'login' ? '로그인' : '회원가입 완료'}</button>
+              </form>
+              <div className="auth-footer">
+                {authView === 'login' ? (
+                  <p>계정이 없으신가요? <span onClick={() => setAuthView('signup')}>회원가입</span></p>
+                ) : (
+                  <p>이미 계정이 있으신가요? <span onClick={() => setAuthView('login')}>로그인</span></p>
+                )}
+                {authView === 'login' && <p><span onClick={() => setAuthView('forgot')}>비밀번호를 잊으셨나요?</span></p>}
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container">
-      <header className="main-header no-print">
-        <div className="user-info"><strong>{currentUser.email}</strong>님 안녕하세요<button onClick={handleLogout}>로그아웃</button></div>
-      </header>
+    <div className="app-shell">
+      {/* Sidebar */}
+      <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} />
+      <aside className={`sidebar no-print ${sidebarOpen ? 'open' : ''}`}>
+        <div className="sidebar-brand">
+          <h1>공정관리시스템</h1>
+          <span>Construction Management</span>
+        </div>
+        <nav className="sidebar-nav">
+          <button className={view === 'dashboard' ? 'active' : ''} onClick={() => { setView('dashboard'); setSidebarOpen(false); }}>
+            <span className="nav-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            </span>
+            공정 대시보드
+          </button>
+          <button className={view === 'quotation' ? 'active' : ''} onClick={() => { setView('quotation'); setSidebarOpen(false); }}>
+            <span className="nav-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </span>
+            견적서 작성
+          </button>
+          <button className={view === 'measurement' ? 'active' : ''} onClick={() => { setView('measurement'); setSidebarOpen(false); }}>
+            <span className="nav-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-4h6v4"/></svg>
+            </span>
+            실측 템플릿
+          </button>
+        </nav>
+        <div className="sidebar-footer">
+          <div className="sidebar-user">
+            <div className="user-avatar">{currentUser.email?.charAt(0).toUpperCase()}</div>
+            <div className="user-detail">
+              <div className="user-email">{currentUser.email}</div>
+            </div>
+            <button className="btn-logout" onClick={handleLogout}>로그아웃</button>
+          </div>
+        </div>
+      </aside>
 
-      <nav className="main-nav no-print">
-        <button className={view === 'dashboard' ? 'active' : ''} onClick={() => setView('dashboard')}>공정 대시보드</button>
-        <button className={view === 'quotation' ? 'active' : ''} onClick={() => setView('quotation')}>견적서 작성</button>
-        <button className={view === 'measurement' ? 'active' : ''} onClick={() => setView('measurement')}>실측 템플릿</button>
-      </nav>
+      {/* Mobile toggle */}
+      <button className="sidebar-toggle no-print" onClick={() => setSidebarOpen(!sidebarOpen)}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
 
+      {/* Main Content */}
+      <main className="main-content">
       <div className="main-layout no-print">
         {view === 'dashboard' ? (
           <div className="dashboard-container">
-            <div className="dashboard-header">
-              <div className="header-left">
-                <h1>공정 관리 대시보드</h1>
+            <div className="page-header">
+              <h1>공정 관리 대시보드</h1>
+              <div className="page-header-actions">
                 <div className="dashboard-tabs">
-                  <button className={dashboardMode === 'list' ? 'active' : ''} onClick={() => setDashboardMode('list')}>리스트 보기</button>
-                  <button className={dashboardMode === 'calendar' ? 'active' : ''} onClick={() => setDashboardMode('calendar')}>캘린더 보기</button>
-                  <button className={dashboardMode === 'invoice' ? 'active' : ''} onClick={() => setDashboardMode('invoice')}>계산서 현황</button>
+                  <button className={dashboardMode === 'list' ? 'active' : ''} onClick={() => setDashboardMode('list')}>리스트</button>
+                  <button className={dashboardMode === 'calendar' ? 'active' : ''} onClick={() => setDashboardMode('calendar')}>캘린더</button>
+                  <button className={dashboardMode === 'invoice' ? 'active' : ''} onClick={() => setDashboardMode('invoice')}>계산서</button>
                 </div>
+                <button className="btn-add-project" onClick={addProject}>+ 새 현장</button>
               </div>
-              <button className="btn-add-project" onClick={addProject}>+ 새 현장 추가</button>
             </div>
 
             {dashboardMode === 'list' ? (
@@ -1161,6 +1275,7 @@ function App() {
           <footer className="m-footer"><p>본 실측 리포트는 현장 방문 실측을 기준으로 작성되었습니다.</p>{provider.name && <p className="m-company">{provider.name}</p>}</footer>
         </div>
       )}
+      </main>
     </div>
   );
 }
