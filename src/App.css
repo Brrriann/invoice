@@ -1036,13 +1036,12 @@
 
 .calendar-day {
   background: white;
-  min-height: 120px;
-  padding: 6px 4px;
+  min-height: 110px;
+  padding: 6px 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
   border-right: 1px solid var(--color-border);
-  overflow: hidden;
 }
 
 .day-number { font-size: 11px; font-weight: 700; color: var(--color-text-muted); padding-left: 6px; }
@@ -1052,8 +1051,8 @@
   flex-direction: column;
   gap: 2px;
   width: 100%;
-  flex-wrap: wrap;
-  align-content: flex-start;
+  flex: 1;
+  min-height: 0;
 }
 
 .event-bar {
@@ -1071,7 +1070,7 @@
   border-bottom: 1px solid;
   position: relative;
   z-index: 1;
-  flex-shrink: 0;
+  width: 100%;
 }
 
 .event-bar.is-start {
@@ -1095,7 +1094,7 @@
 
 .event-spacer {
   height: 18px;
-  flex-shrink: 0;
+  width: 100%;
 }
 
 /* --- Invoice Table View --- */
