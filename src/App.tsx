@@ -446,7 +446,7 @@ function App() {
       return;
     }
     const { error } = await supabase.from('quotations').insert([{
-      user_id: currentUser.id, items, provider, customer: customer.name, quoteNumber, greeting, remarks, total_amount: Math.round(items.reduce((sum, i) => sum + Math.round(i.quantity * i.unitPrice), 0) * 1.1)
+      user_id: currentUser.id, items, provider, customer: customer.name, quoteNumber, greeting, remarks, total_amount: Math.floor(items.reduce((sum, i) => sum + Math.floor(i.quantity * i.unitPrice), 0) * 1.1)
     }]);
     if (error) alert('저장 실패: ' + error.message);
     else { alert('견적서가 저장되었습니다.'); fetchQuotations(); }
@@ -773,7 +773,7 @@ function App() {
                   const projSubs = subcontracts.filter(s => s.project_id === project.id);
                   const doneCount = projWorkItems.filter(w => w.status === '완료').length;
                   const totalCount = projWorkItems.length;
-                  const progressPct = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
+                  const progressPct = totalCount > 0 ? Math.floor((doneCount / totalCount) * 100) : 0;
                   const cardColor = getProjectColor(project.id);
 
                   return (
@@ -1098,7 +1098,7 @@ function App() {
                     
                     return (
                       <div className="invoice-summary">
-                        {invoiceFilter === '발급완료' ? '발급완료 합계' : '미발급 합계'}: <span className="highlight">₩{Math.round(totalSum).toLocaleString()}</span>
+                        {invoiceFilter === '발급완료' ? '발급완료 합계' : '미발급 합계'}: <span className="highlight">₩{Math.floor(totalSum).toLocaleString()}</span>
                       </div>
                     );
                   })()}
@@ -1159,7 +1159,7 @@ function App() {
                           <tr key={p.id}>
                             <td className="bold">{p.site_name}</td>
                             <td>{p.customer_name}</td>
-                            <td className="right">{Math.round(p.total_amount || 0).toLocaleString()}원</td>
+                            <td className="right">{Math.floor(p.total_amount || 0).toLocaleString()}원</td>
                             <td>
                               <select 
                                 value={p.invoice_status} 
@@ -1215,7 +1215,7 @@ function App() {
               <h3>품목 관리</h3>
               <table>
                 <thead><tr><th>품명</th><th>단위</th><th>수량</th><th>단가</th><th>소계</th><th>특이사항</th><th>비고</th><th>삭제</th></tr></thead>
-                <tbody>{items.filter(i => i.type === 'door').map(i => <tr key={i.id}><td><input value={i.name} onChange={e => updateItem(i.id, 'name', e.target.value)} /></td><td><input value={i.unit} onChange={e => updateItem(i.id, 'unit', e.target.value)} /></td><td><input type="number" value={i.quantity} onChange={e => updateItem(i.id, 'quantity', parseInt(e.target.value))} /></td><td><input type="number" value={i.unitPrice} onChange={e => updateItem(i.id, 'unitPrice', parseInt(e.target.value))} /></td><td>{Math.round(i.quantity * i.unitPrice).toLocaleString()}</td><td><input value={i.specialNote} onChange={e => updateItem(i.id, 'specialNote', e.target.value)} /></td><td><input value={i.remarks} onChange={e => updateItem(i.id, 'remarks', e.target.value)} /></td><td><button onClick={() => removeItem(i.id)}>×</button></td></tr>)}</tbody>
+                <tbody>{items.filter(i => i.type === 'door').map(i => <tr key={i.id}><td><input value={i.name} onChange={e => updateItem(i.id, 'name', e.target.value)} /></td><td><input value={i.unit} onChange={e => updateItem(i.id, 'unit', e.target.value)} /></td><td><input type="number" value={i.quantity} onChange={e => updateItem(i.id, 'quantity', parseInt(e.target.value))} /></td><td><input type="number" value={i.unitPrice} onChange={e => updateItem(i.id, 'unitPrice', parseInt(e.target.value))} /></td><td>{Math.floor(i.quantity * i.unitPrice).toLocaleString()}</td><td><input value={i.specialNote} onChange={e => updateItem(i.id, 'specialNote', e.target.value)} /></td><td><input value={i.remarks} onChange={e => updateItem(i.id, 'remarks', e.target.value)} /></td><td><button onClick={() => removeItem(i.id)}>×</button></td></tr>)}</tbody>
               </table>
               <button onClick={() => addItem('door')} className="btn-add">+ 추가</button>
             </div>
@@ -1223,7 +1223,7 @@ function App() {
               <h3>품목 관리 - 옵션항목</h3>
               <table>
                 <thead><tr><th>품명</th><th>단위</th><th>수량</th><th>단가</th><th>소계</th><th>특이사항</th><th>비고</th><th>삭제</th></tr></thead>
-                <tbody>{items.filter(i => i.type === 'option').map(i => <tr key={i.id}><td><input value={i.name} onChange={e => updateItem(i.id, 'name', e.target.value)} /></td><td><input value={i.unit} onChange={e => updateItem(i.id, 'unit', e.target.value)} /></td><td><input type="number" value={i.quantity} onChange={e => updateItem(i.id, 'quantity', parseInt(e.target.value))} /></td><td><input type="number" value={i.unitPrice} onChange={e => updateItem(i.id, 'unitPrice', parseInt(e.target.value))} /></td><td>{Math.round(i.quantity * i.unitPrice).toLocaleString()}</td><td><input value={i.specialNote} onChange={e => updateItem(i.id, 'specialNote', e.target.value)} /></td><td><input value={i.remarks} onChange={e => updateItem(i.id, 'remarks', e.target.value)} /></td><td><button onClick={() => removeItem(i.id)}>×</button></td></tr>)}</tbody>
+                <tbody>{items.filter(i => i.type === 'option').map(i => <tr key={i.id}><td><input value={i.name} onChange={e => updateItem(i.id, 'name', e.target.value)} /></td><td><input value={i.unit} onChange={e => updateItem(i.id, 'unit', e.target.value)} /></td><td><input type="number" value={i.quantity} onChange={e => updateItem(i.id, 'quantity', parseInt(e.target.value))} /></td><td><input type="number" value={i.unitPrice} onChange={e => updateItem(i.id, 'unitPrice', parseInt(e.target.value))} /></td><td>{Math.floor(i.quantity * i.unitPrice).toLocaleString()}</td><td><input value={i.specialNote} onChange={e => updateItem(i.id, 'specialNote', e.target.value)} /></td><td><input value={i.remarks} onChange={e => updateItem(i.id, 'remarks', e.target.value)} /></td><td><button onClick={() => removeItem(i.id)}>×</button></td></tr>)}</tbody>
               </table>
               <button onClick={() => addItem('option')} className="btn-add">+ 추가</button>
             </div>
@@ -1245,7 +1245,7 @@ function App() {
               </div>
               <textarea className="remarks-input" placeholder="자사 소개 내용을 입력하세요 (출력 시 견적서 하단에 디자인 카드로 표시됩니다)" value={companyIntro} onChange={e => setCompanyIntro(e.target.value)} rows={5} />
             </div>
-            <div className="summary-section"><div className="row total">합계금액: ₩{Math.round(items.reduce((s, i) => s + Math.round(i.quantity * i.unitPrice), 0) * 1.1).toLocaleString()}</div></div>
+            <div className="summary-section"><div className="row total">합계금액: ₩{Math.floor(items.reduce((s, i) => s + Math.floor(i.quantity * i.unitPrice), 0) * 1.1).toLocaleString()}</div></div>
             <div className="btn-group-main"><button onClick={saveCurrentQuotation} className="btn-save">클라우드 저장</button><button onClick={handlePrint} className="btn-print">인쇄 / PDF</button></div>
           </div>
         ) : (
@@ -1445,7 +1445,7 @@ function App() {
 
           <section className="total-bar">
             <div className="total-label">견적 총 합계액 <span className="small">(VAT포함)</span></div>
-            <div className="total-value"><span className="currency">KRW</span><span className="amount">{Math.round(items.reduce((s, i) => s + Math.round(i.quantity * i.unitPrice), 0) * 1.1).toLocaleString()}</span></div>
+            <div className="total-value"><span className="currency">KRW</span><span className="amount">{Math.floor(items.reduce((s, i) => s + Math.floor(i.quantity * i.unitPrice), 0) * 1.1).toLocaleString()}</span></div>
             <div className="issue-date">발행일: {customer.date}</div>
           </section>
 
@@ -1458,7 +1458,7 @@ function App() {
                 <tr key={item.id}>
                   <td className="center">{idx + 1}</td>
                   <td className="desc-text">{item.name}{item.specialNote && <><br/><small className="dim">{item.specialNote}</small></>}</td>
-                  <td className="center">{item.unit}</td><td className="center">{item.quantity}</td><td className="right">{Math.round(item.unitPrice).toLocaleString()}</td><td className="right">{Math.round(item.quantity * item.unitPrice).toLocaleString()}</td><td className="center small-text">{item.remarks}</td>
+                  <td className="center">{item.unit}</td><td className="center">{item.quantity}</td><td className="right">{Math.floor(item.unitPrice).toLocaleString()}</td><td className="right">{Math.floor(item.quantity * item.unitPrice).toLocaleString()}</td><td className="center small-text">{item.remarks}</td>
                 </tr>
               ))}
               {[...Array(Math.max(0, 10 - items.length))].map((_, i) => (
@@ -1470,8 +1470,8 @@ function App() {
           <div className="sheet-footer">
             <div className="footer-left"><div className="remarks-box"><div className="label">SPECIAL NOTES / REMARKS</div><div className="remarks-content">{remarks.split('\n').map((line, i) => <p key={i}>{line}</p>)}</div></div></div>
             <div className="footer-right">
-              <div className="calc-row"><span className="c-label">공급가액 합계</span><span className="c-value">{Math.round(items.reduce((s, i) => s + Math.round(i.quantity * i.unitPrice), 0)).toLocaleString()}</span></div>              <div className="calc-row"><span className="c-label">부가가치세 (10%)</span><span className="c-value">{Math.round(items.reduce((s, i) => s + Math.round(i.quantity * i.unitPrice), 0) * 0.1).toLocaleString()}</span></div>
-              <div className="calc-total"><span className="c-label">총 합계금액</span><span className="c-value">₩ {Math.round(items.reduce((s, i) => s + Math.round(i.quantity * i.unitPrice), 0) * 1.1).toLocaleString()}</span></div>            </div>
+              <div className="calc-row"><span className="c-label">공급가액 합계</span><span className="c-value">{Math.floor(items.reduce((s, i) => s + Math.floor(i.quantity * i.unitPrice), 0)).toLocaleString()}</span></div>              <div className="calc-row"><span className="c-label">부가가치세 (10%)</span><span className="c-value">{Math.floor(items.reduce((s, i) => s + Math.floor(i.quantity * i.unitPrice), 0) * 0.1).toLocaleString()}</span></div>
+              <div className="calc-total"><span className="c-label">총 합계금액</span><span className="c-value">₩ {Math.floor(items.reduce((s, i) => s + Math.floor(i.quantity * i.unitPrice), 0) * 1.1).toLocaleString()}</span></div>            </div>
           </div>
 
           <div className="sheet-final"><p>견적 유효기간: 발행일로부터 15일</p><div className="signature-area"><p>위와 같이 견적 하오니, 긍정적인 검토 부탁드립니다.</p><div className="sign-box">{customer.date.split('-')[0]}년 {customer.date.split('-')[1]}월 {customer.date.split('-')[2]}일</div></div></div>
