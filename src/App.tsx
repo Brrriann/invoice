@@ -186,6 +186,9 @@ function App() {
   const [companyIntro, setCompanyIntro] = useState('');
   const [showIntroInPrint, setShowIntroInPrint] = useState(false);
   const [expandedBizInfo, setExpandedBizInfo] = useState<Set<string>>(new Set());
+  const [searchProject, setSearchProject] = useState('');
+  const [searchQuotation, setSearchQuotation] = useState('');
+  const [searchMeasurement, setSearchMeasurement] = useState('');
 
   // --- 실측 템플릿 관련 상태 ---
   const defaultChecklist: WorkChecklist = {
@@ -691,12 +694,24 @@ function App() {
             </div>
 
             {dashboardMode === 'list' ? (
+              <>
+              {projects.length > 0 && (
+                <div className="search-bar">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input placeholder="현장명, 고객사명으로 검색..." value={searchProject} onChange={e => setSearchProject(e.target.value)} />
+                  {searchProject && <button className="search-clear" onClick={() => setSearchProject('')}>&times;</button>}
+                </div>
+              )}
               <div className="project-grid">
                 {projects.length === 0 && <div className="empty-state">
                   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{margin:'0 auto 16px',display:'block'}}><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
                   등록된 현장이 없습니다.<br/>'+ 새 현장' 버튼을 눌러 시작하세요.
                 </div>}
-                {projects.map(project => {
+                {projects.filter(p => {
+                  if (!searchProject) return true;
+                  const q = searchProject.toLowerCase();
+                  return (p.site_name || '').toLowerCase().includes(q) || (p.customer_name || '').toLowerCase().includes(q);
+                }).map(project => {
                   const projWorkItems = workItems.filter(w => w.project_id === project.id);
                   const projSubs = subcontracts.filter(s => s.project_id === project.id);
                   const doneCount = projWorkItems.filter(w => w.status === '완료').length;
@@ -884,6 +899,7 @@ function App() {
                   );
                 })}
               </div>
+              </>
             ) : dashboardMode === 'calendar' ? (
               <div className="calendar-card">
                 <div className="calendar-header">
@@ -948,6 +964,12 @@ function App() {
                   </button>
                 </div>
 
+                <div className="search-bar" style={{marginBottom: '20px'}}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input placeholder="현장명, 고객사명으로 검색..." value={searchProject} onChange={e => setSearchProject(e.target.value)} />
+                  {searchProject && <button className="search-clear" onClick={() => setSearchProject('')}>&times;</button>}
+                </div>
+
                 <div className="invoice-list-table">
                   <table>
                     <thead>
@@ -963,6 +985,11 @@ function App() {
                     <tbody>
                       {projects
                         .filter(p => invoiceFilter === '전체' ? true : p.invoice_status === invoiceFilter)
+                        .filter(p => {
+                          if (!searchProject) return true;
+                          const q = searchProject.toLowerCase();
+                          return (p.site_name || '').toLowerCase().includes(q) || (p.customer_name || '').toLowerCase().includes(q);
+                        })
                         .map(p => (
                           <tr key={p.id}>
                             <td className="bold">{p.site_name}</td>
@@ -1148,9 +1175,63 @@ function App() {
         {view !== 'dashboard' && (
           <div className="saved-list-panel">
             {view === 'quotation' ? (
-              <><h3>견적 저장내역</h3><div className="saved-items">{savedQuotations.map(q => <div key={q.id} className="saved-item"><div className="item-info" onClick={() => loadQuotation(q)}><div className="item-name">{q.customer.name || '(무명)'}</div><div className="item-date">{new Date(q.created_at).toLocaleDateString()}</div></div><button onClick={() => deleteQuotation(q.id)} className="btn-item-delete">×</button></div>)}</div></>
+              <>
+                <h3>견적 저장내역</h3>
+                {savedQuotations.length > 0 && (
+                  <div className="search-bar-sm">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input placeholder="고객사명, 견적번호 검색..." value={searchQuotation} onChange={e => setSearchQuotation(e.target.value)} />
+                    {searchQuotation && <button className="search-clear" onClick={() => setSearchQuotation('')}>&times;</button>}
+                  </div>
+                )}
+                <div className="saved-items">
+                  {savedQuotations.filter(q => {
+                    if (!searchQuotation) return true;
+                    const s = searchQuotation.toLowerCase();
+                    return (q.customer?.name || '').toLowerCase().includes(s) || (q.quoteNumber || '').toLowerCase().includes(s);
+                  }).map(q => (
+                    <div key={q.id} className="saved-item">
+                      <div className="item-info" onClick={() => loadQuotation(q)}>
+                        <div className="item-name">{q.customer.name || '(무명)'}</div>
+                        <div className="item-date">{new Date(q.created_at).toLocaleDateString()}</div>
+                      </div>
+                      <button onClick={() => deleteQuotation(q.id)} className="btn-item-delete">&times;</button>
+                    </div>
+                  ))}
+                  {savedQuotations.length > 0 && searchQuotation && savedQuotations.filter(q => (q.customer?.name || '').toLowerCase().includes(searchQuotation.toLowerCase()) || (q.quoteNumber || '').toLowerCase().includes(searchQuotation.toLowerCase())).length === 0 && (
+                    <div className="search-no-result">검색 결과가 없습니다</div>
+                  )}
+                </div>
+              </>
             ) : (
-              <><h3>실측 저장내역</h3><div className="saved-items">{savedMeasurements.map(m => <div key={m.id} className="saved-item"><div className="item-info" onClick={() => loadMeasurement(m)}><div className="item-name">{m.site_name || '(무명현장)'}</div><div className="item-date">{new Date(m.created_at).toLocaleDateString()}</div></div><button onClick={() => deleteMeasurement(m.id)} className="btn-item-delete">×</button></div>)}</div></>
+              <>
+                <h3>실측 저장내역</h3>
+                {savedMeasurements.length > 0 && (
+                  <div className="search-bar-sm">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input placeholder="현장명, 고객사명 검색..." value={searchMeasurement} onChange={e => setSearchMeasurement(e.target.value)} />
+                    {searchMeasurement && <button className="search-clear" onClick={() => setSearchMeasurement('')}>&times;</button>}
+                  </div>
+                )}
+                <div className="saved-items">
+                  {savedMeasurements.filter(m => {
+                    if (!searchMeasurement) return true;
+                    const s = searchMeasurement.toLowerCase();
+                    return (m.site_name || '').toLowerCase().includes(s) || (m.customer_name || '').toLowerCase().includes(s);
+                  }).map(m => (
+                    <div key={m.id} className="saved-item">
+                      <div className="item-info" onClick={() => loadMeasurement(m)}>
+                        <div className="item-name">{m.site_name || '(무명현장)'}</div>
+                        <div className="item-date">{new Date(m.created_at).toLocaleDateString()}</div>
+                      </div>
+                      <button onClick={() => deleteMeasurement(m.id)} className="btn-item-delete">&times;</button>
+                    </div>
+                  ))}
+                  {savedMeasurements.length > 0 && searchMeasurement && savedMeasurements.filter(m => (m.site_name || '').toLowerCase().includes(searchMeasurement.toLowerCase()) || (m.customer_name || '').toLowerCase().includes(searchMeasurement.toLowerCase())).length === 0 && (
+                    <div className="search-no-result">검색 결과가 없습니다</div>
+                  )}
+                </div>
+              </>
             )}
           </div>
         )}
