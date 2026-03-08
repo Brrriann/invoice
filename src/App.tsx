@@ -1015,12 +1015,14 @@ function App() {
                             const proj = projects.find(p => p.id === event.project_id);
                             const customerName = proj?.customer_name || proj?.site_name || '';
                             const color = getProjectColor(event.project_id);
-                            
+
                             const isStart = event.start_date === dateStr;
                             const isEnd = (event.end_date || event.start_date) === dateStr;
                             const isSunday = new Date(dateStr).getDay() === 0;
-                            // 텍스트는 시작일이거나, 일요일(주가 바뀔 때)에만 표시 (사용자 요청에 따라 시작일에만 표시할 수도 있음)
-                            const showText = isStart || (isSunday && dateStr <= (event.end_date || event.start_date));
+                            const isMonthStart = day === 1; // 월의 첫 날
+                            const isMonthBoundary = isMonthStart && event.start_date < dateStr; // 이전달에서 이어지는 작업
+                            // 텍스트는 시작일이거나, 일요일, 또는 월 경계에서 이어지는 작업의 첫 날에 표시
+                            const showText = isStart || (isSunday && dateStr <= (event.end_date || event.start_date)) || isMonthBoundary;
 
                             return (
                               <div 
