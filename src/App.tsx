@@ -425,8 +425,8 @@ function App() {
       measurer: measureData.measurer,
       doors: measureData.spaces,
       options: measureData.checklist,
-      power_source: measureData.contact,
-      floor_condition: measureData.address,
+      contact: measureData.contact,
+      address: measureData.address,
       special_notes: measureData.specialNotes
     }]);
     if (error) alert('저장 실패: ' + error.message);
@@ -444,8 +444,8 @@ function App() {
     setMeasureData({
       siteName: m.site_name,
       customerName: m.customer_name,
-      contact: m.power_source || '',
-      address: m.floor_condition || '',
+      contact: m.contact || '',
+      address: m.address || '',
       date: m.date,
       measurer: m.measurer,
       spaces: m.doors || [],
