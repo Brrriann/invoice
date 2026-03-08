@@ -563,7 +563,7 @@
   white-space: nowrap;
 }
 
-.mini-badge.완료 { background: #dcfce7; color: #166534; }
+.mini-badge.완료, .mini-badge.발급완료 { background: #dcfce7; color: #166534; }
 .mini-badge.미발급 { background: #fff7ed; color: #c2410c; }
 .mini-badge.미수금 { background: #fee2e2; color: #991b1b; }
 .mini-badge.일부수금 { background: #ffedd5; color: #9a3412; }
@@ -830,7 +830,7 @@
 
 .status-select.대기 { background: #f1f5f9; color: #64748b; }
 .status-select.진행중 { background: #fef9c3; color: #854d0e; }
-.status-select.완료 { background: #dcfce7; color: #166534; border-color: #86efac; }
+.status-select.완료, .status-select.발급완료 { background: #dcfce7; color: #166534; border-color: #86efac; }
 .status-select.요청 { background: #dbeafe; color: #1e40af; }
 .status-select.미수금 { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
 .status-select.미발급 { background: #fff7ed; color: #c2410c; border-color: #fdba74; }
@@ -1215,7 +1215,7 @@
 
 .invoice-badge.대기 { background: #f1f5f9; color: #64748b; }
 .invoice-badge.요청 { background: #dbeafe; color: #1e40af; }
-.invoice-badge.완료 { background: #dcfce7; color: #166534; }
+.invoice-badge.완료, .invoice-badge.발급완료 { background: #dcfce7; color: #166534; }
 
 /* --- Empty State --- */
 .empty-state {
