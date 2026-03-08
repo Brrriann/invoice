@@ -185,6 +185,7 @@ function App() {
   const [logoDataUrl, setLogoDataUrl] = useState('');
   const [companyIntro, setCompanyIntro] = useState('');
   const [showIntroInPrint, setShowIntroInPrint] = useState(false);
+  const [expandedBizInfo, setExpandedBizInfo] = useState<Set<string>>(new Set());
 
   // --- 실측 템플릿 관련 상태 ---
   const defaultChecklist: WorkChecklist = {
@@ -691,129 +692,182 @@ function App() {
 
             {dashboardMode === 'list' ? (
               <div className="project-grid">
-                {projects.length === 0 && <div className="empty-state">등록된 현장이 없습니다. '새 현장 추가'를 눌러 시작하세요.</div>}
-                {projects.map(project => (
-                  <div key={project.id} className="project-card" style={{'--card-color': getProjectColor(project.id).border} as React.CSSProperties}>
-                    <div className="project-card-header">
-                      <div className="project-title">
-                        <h3>{project.site_name}</h3>
-                        <div className="customer-row">
+                {projects.length === 0 && <div className="empty-state">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{margin:'0 auto 16px',display:'block'}}><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                  등록된 현장이 없습니다.<br/>'+ 새 현장' 버튼을 눌러 시작하세요.
+                </div>}
+                {projects.map(project => {
+                  const projWorkItems = workItems.filter(w => w.project_id === project.id);
+                  const projSubs = subcontracts.filter(s => s.project_id === project.id);
+                  const doneCount = projWorkItems.filter(w => w.status === '완료').length;
+                  const totalCount = projWorkItems.length;
+                  const progressPct = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
+                  const cardColor = getProjectColor(project.id);
+
+                  return (
+                  <div key={project.id} className="project-card" style={{'--card-color': cardColor.border} as React.CSSProperties}>
+                    {/* ── 카드 헤더: 현장명 + 금액 + 진행률 ── */}
+                    <div className="card-header-bar">
+                      <div className="card-header-top">
+                        <div className="card-title-group">
+                          <h3>{project.site_name}</h3>
                           <input
                             className="customer-input"
-                            placeholder="캘린더표기 고객사명"
+                            placeholder="고객사명"
                             value={project.customer_name || ''}
                             onChange={e => updateProjectLocal(project.id, 'customer_name', e.target.value)}
                             onBlur={e => syncProjectToDB(project.id, 'customer_name', e.target.value)}
                           />
-                          <button className="btn-add-work" onClick={() => addWorkItem(project.id, workItems.filter(w => w.project_id === project.id).length)}>+ 공정 추가</button>
-                          <button className="btn-add-sub" onClick={() => addSubcontract(project.id)}>+ 외주 추가</button>
                         </div>
-                      </div>
-                      <button className="btn-delete-project" onClick={() => deleteProject(project.id)}>×</button>
-                    </div>
-
-                        <div className="project-body">
-
-                        {/* 공정 항목 */}
-                        <div className="work-items-section">
-                          <div className="work-items-grid">
-                            {workItems.filter(w => w.project_id === project.id).map((w, idx) => (
-                              <div key={w.id} className={`work-item-chip ${w.status === '완료' ? 'done' : ''}`}>
-                                <div className="chip-top">
-                                  <span className="chip-index">공정{idx + 1}</span>
-                                  <button className="btn-remove-work" onClick={() => deleteWorkItem(w.id)}>×</button>
-                                </div>
-                                <input
-                                  className="work-label-input"
-                                  value={w.label}
-                                  onChange={e => updateWorkItem(w.id, 'label', e.target.value)}
-                                  placeholder="공정명"
-                                />
-                                <select value={w.status} onChange={e => updateWorkItem(w.id, 'status', e.target.value)} className={`status-select ${w.status.replace(/ /g, '-')}`}>
-                                  <option value="실측예정">실측예정</option>
-                                  <option value="실측 후 대기">실측 후 대기</option>
-                                  <option value="시공확정">시공확정</option>
-                                  <option value="시공중">시공중</option>
-                                  <option value="완료">완료</option>
-                                </select>
-                                <input type="date" value={w.date || ''} onChange={e => updateWorkItem(w.id, 'date', e.target.value)} />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* 외주 관리 */}
-                        <div className="subcontract-section">
-                          <div className="sub-cards-grid">
-                            {subcontracts.filter(s => s.project_id === project.id).map((s, idx) => (
-                              <div key={s.id} className={`sub-card ${s.payment_done ? 'done' : ''}`}>
-                                <div className="chip-top">
-                                  <span className="chip-index">외주{idx + 1}</span>
-                                  <button className="btn-remove-work" onClick={() => deleteSubcontract(s.id)}>×</button>
-                                </div>
-                                <input className="work-label-input" placeholder="공정명" value={s.label} onChange={e => updateSubcontract(s.id, 'label', e.target.value)} />
-                                <input className="sub-amount-input" placeholder="금액" type="text" value={s.amount ? formatNumber(s.amount) : ''} onChange={e => updateSubcontract(s.id, 'amount', parseNumber(e.target.value))} />
-                                <input type="date" value={s.date || ''} onChange={e => updateSubcontract(s.id, 'date', e.target.value)} />
-                                <div className="sub-checks">
-                                  <label className={`sub-check ${s.invoice_issued ? 'on' : ''}`}>
-                                    <input type="checkbox" checked={s.invoice_issued} onChange={e => updateSubcontract(s.id, 'invoice_issued', e.target.checked)} />
-                                    계산서
-                                  </label>
-                                  <label className={`sub-check ${s.payment_done ? 'on' : ''}`}>
-                                    <input type="checkbox" checked={s.payment_done} onChange={e => updateSubcontract(s.id, 'payment_done', e.target.checked)} />
-                                    대금지급
-                                  </label>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="project-info-row">
-                          <div className="amount-field">
-                            <span>계약금액:</span>
+                        <div className="card-header-right">
+                          <div className="card-amount">
+                            <span className="card-amount-label">계약금액</span>
                             <input
+                              className="card-amount-input"
                               type="text"
                               value={formatNumber(project.total_amount)}
                               onChange={e => updateProjectLocal(project.id, 'total_amount', parseNumber(e.target.value))}
                               onBlur={e => syncProjectToDB(project.id, 'total_amount', parseNumber(e.target.value))}
                             />
                           </div>
-                          <textarea
-                            className="project-notes"
-                            placeholder="특이사항 및 메모 입력"
-                            value={project.notes || ''}
-                            onChange={e => updateProjectLocal(project.id, 'notes', e.target.value)}
-                            onBlur={e => syncProjectToDB(project.id, 'notes', e.target.value)}
-                            rows={1}
-                          />
+                          <button className="btn-delete-project" onClick={() => deleteProject(project.id)} aria-label="현장 삭제">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                          </button>
                         </div>
+                      </div>
+                      {/* 진행률 바 */}
+                      {totalCount > 0 && (
+                        <div className="progress-bar-wrap">
+                          <div className="progress-bar-bg">
+                            <div className="progress-bar-fill" style={{width: `${progressPct}%`, background: progressPct === 100 ? '#10b981' : 'var(--color-accent)'}} />
+                          </div>
+                          <span className="progress-text">{doneCount}/{totalCount} 완료 ({progressPct}%)</span>
+                        </div>
+                      )}
+                      {/* 상태 뱃지 요약 */}
+                      <div className="card-status-badges">
+                        <span className={`mini-badge ${project.invoice_status}`}>{project.invoice_status === '완료' ? '계산서 발급' : '계산서 미발급'}</span>
+                        <span className={`mini-badge ${project.payment_status}`}>{project.payment_status === '완료' ? '수금 완료' : project.payment_status}</span>
+                      </div>
+                    </div>
 
-                        {/* 계산서/수금 - 현장 단위로 관리 */}
-                        <div className="invoice-payment-section">
-                          <div className="invoice-payment-row">
-                            <div className={`status-node ${project.invoice_status === '완료' ? 'done' : ''}`}>
-                              <div className="node-label">계산서</div>
-                              <select value={project.invoice_status} onChange={e => handleProjectUpdateImmediate(project.id, 'invoice_status', e.target.value)} className={`status-select ${project.invoice_status}`}>
-                                <option value="미발급">미발급</option>
+                    <div className="project-body">
+                      {/* ── 공정 항목 ── */}
+                      <div className="card-section">
+                        <div className="card-section-header">
+                          <span className="card-section-title">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                            공정 ({projWorkItems.length})
+                          </span>
+                          <button className="btn-add-work" onClick={() => addWorkItem(project.id, projWorkItems.length)}>+ 추가</button>
+                        </div>
+                        <div className="work-items-grid">
+                          {projWorkItems.map((w, idx) => (
+                            <div key={w.id} className={`work-item-chip ${w.status === '완료' ? 'done' : ''}`}>
+                              <div className="chip-top">
+                                <span className="chip-index">{idx + 1}</span>
+                                <button className="btn-remove-work" onClick={() => deleteWorkItem(w.id)} aria-label="공정 삭제">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                              </div>
+                              <input className="work-label-input" value={w.label} onChange={e => updateWorkItem(w.id, 'label', e.target.value)} placeholder="공정명" />
+                              <select value={w.status} onChange={e => updateWorkItem(w.id, 'status', e.target.value)} className={`status-select ${w.status.replace(/ /g, '-')}`}>
+                                <option value="실측예정">실측예정</option>
+                                <option value="실측 후 대기">실측 후 대기</option>
+                                <option value="시공확정">시공확정</option>
+                                <option value="시공중">시공중</option>
                                 <option value="완료">완료</option>
                               </select>
-                              <input type="date" value={project.invoice_date || ''} onChange={e => handleProjectUpdateImmediate(project.id, 'invoice_date', e.target.value)} />
+                              <input type="date" value={w.date || ''} onChange={e => updateWorkItem(w.id, 'date', e.target.value)} />
                             </div>
-                            <div className={`status-node ${project.payment_status === '완료' ? 'done' : ''}`}>
-                              <div className="node-label">수금</div>
-                              <select value={project.payment_status} onChange={e => handleProjectUpdateImmediate(project.id, 'payment_status', e.target.value)} className={`status-select ${project.payment_status}`}>
-                                <option value="미수금">미수금</option>
-                                <option value="일부수금">일부수금</option>
-                                <option value="완료">완료</option>
-                              </select>
-                              <input type="date" value={project.payment_date || ''} onChange={e => handleProjectUpdateImmediate(project.id, 'payment_date', e.target.value)} />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* ── 외주 관리 ── */}
+                      <div className="card-section">
+                        <div className="card-section-header">
+                          <span className="card-section-title">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            외주 ({projSubs.length})
+                          </span>
+                          <button className="btn-add-sub" onClick={() => addSubcontract(project.id)}>+ 추가</button>
+                        </div>
+                        <div className="sub-cards-grid">
+                          {projSubs.map((s, idx) => (
+                            <div key={s.id} className={`sub-card ${s.payment_done ? 'done' : ''}`}>
+                              <div className="chip-top">
+                                <span className="chip-index">{idx + 1}</span>
+                                <button className="btn-remove-work" onClick={() => deleteSubcontract(s.id)} aria-label="외주 삭제">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                              </div>
+                              <input className="work-label-input" placeholder="공정명" value={s.label} onChange={e => updateSubcontract(s.id, 'label', e.target.value)} />
+                              <input className="sub-amount-input" placeholder="금액" type="text" value={s.amount ? formatNumber(s.amount) : ''} onChange={e => updateSubcontract(s.id, 'amount', parseNumber(e.target.value))} />
+                              <input type="date" value={s.date || ''} onChange={e => updateSubcontract(s.id, 'date', e.target.value)} />
+                              <div className="sub-checks">
+                                <label className={`sub-check ${s.invoice_issued ? 'on' : ''}`}>
+                                  <input type="checkbox" checked={s.invoice_issued} onChange={e => updateSubcontract(s.id, 'invoice_issued', e.target.checked)} style={{display:'none'}} />
+                                  {s.invoice_issued ? '✓ ' : ''}계산서
+                                </label>
+                                <label className={`sub-check ${s.payment_done ? 'on' : ''}`}>
+                                  <input type="checkbox" checked={s.payment_done} onChange={e => updateSubcontract(s.id, 'payment_done', e.target.checked)} style={{display:'none'}} />
+                                  {s.payment_done ? '✓ ' : ''}대금지급
+                                </label>
+                              </div>
                             </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* ── 메모 ── */}
+                      <textarea
+                        className="project-notes"
+                        placeholder="특이사항 및 메모"
+                        value={project.notes || ''}
+                        onChange={e => updateProjectLocal(project.id, 'notes', e.target.value)}
+                        onBlur={e => syncProjectToDB(project.id, 'notes', e.target.value)}
+                        rows={1}
+                      />
+
+                      {/* ── 계산서/수금 ── */}
+                      <div className="card-section">
+                        <div className="card-section-header">
+                          <span className="card-section-title">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                            계산서 / 수금
+                          </span>
+                        </div>
+                        <div className="invoice-payment-row">
+                          <div className="status-node">
+                            <div className="node-label">계산서</div>
+                            <select value={project.invoice_status} onChange={e => handleProjectUpdateImmediate(project.id, 'invoice_status', e.target.value)} className={`status-select ${project.invoice_status}`}>
+                              <option value="미발급">미발급</option>
+                              <option value="완료">완료</option>
+                            </select>
+                            <input type="date" value={project.invoice_date || ''} onChange={e => handleProjectUpdateImmediate(project.id, 'invoice_date', e.target.value)} />
+                          </div>
+                          <div className="status-node">
+                            <div className="node-label">수금</div>
+                            <select value={project.payment_status} onChange={e => handleProjectUpdateImmediate(project.id, 'payment_status', e.target.value)} className={`status-select ${project.payment_status}`}>
+                              <option value="미수금">미수금</option>
+                              <option value="일부수금">일부수금</option>
+                              <option value="완료">완료</option>
+                            </select>
+                            <input type="date" value={project.payment_date || ''} onChange={e => handleProjectUpdateImmediate(project.id, 'payment_date', e.target.value)} />
                           </div>
                         </div>
+                      </div>
 
-                        <div className="biz-info-section">
-                          <div className="section-title">계산서 발행 정보</div>
+                      {/* ── 계산서 발행 정보 (접기/펼치기) ── */}
+                      <div className="biz-info-section">
+                        <button className="biz-info-toggle" onClick={() => setExpandedBizInfo(prev => { const next = new Set(prev); next.has(project.id) ? next.delete(project.id) : next.add(project.id); return next; })}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{transform: expandedBizInfo.has(project.id) ? 'rotate(90deg)' : 'rotate(0deg)', transition:'transform 200ms'}}>
+                            <polyline points="9 18 15 12 9 6"/>
+                          </svg>
+                          계산서 발행 정보
+                        </button>
+                        {expandedBizInfo.has(project.id) && (
                           <div className="biz-info-grid">
                             <input placeholder="상호" value={project.biz_name || ''} onChange={e => updateProjectLocal(project.id, 'biz_name', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_name', e.target.value)} />
                             <input placeholder="성명" value={project.biz_owner || ''} onChange={e => updateProjectLocal(project.id, 'biz_owner', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_owner', e.target.value)} />
@@ -822,12 +876,14 @@ function App() {
                             <input placeholder="종목" value={project.biz_item || ''} onChange={e => updateProjectLocal(project.id, 'biz_item', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_item', e.target.value)} />
                             <input placeholder="사업장주소" className="full-width" value={project.biz_address || ''} onChange={e => updateProjectLocal(project.id, 'biz_address', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_address', e.target.value)} />
                           </div>
-                        </div>
+                        )}
+                      </div>
 
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
             ) : dashboardMode === 'calendar' ? (
               <div className="calendar-card">
                 <div className="calendar-header">

@@ -327,69 +327,188 @@
 .project-card {
   background: var(--color-surface);
   border-radius: var(--radius-lg);
-  padding: 22px;
+  padding: 0;
   border: 1px solid var(--color-border);
-  border-left: 5px solid var(--card-color, var(--color-border));
+  border-top: 4px solid var(--card-color, var(--color-accent));
   transition: box-shadow var(--transition);
+  overflow: hidden;
 }
 
 .project-card:hover {
   box-shadow: var(--shadow-md);
 }
 
-.project-card-header {
+/* ── Card Header Bar ── */
+.card-header-bar {
+  padding: 18px 20px 14px;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.card-header-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
-.project-title h3 {
+.card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.card-title-group h3 {
   margin: 0;
   padding: 0;
   border: none;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--color-text);
+  white-space: nowrap;
 }
-.project-title h3::before { display: none; }
-
-.customer-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 6px;
-  flex-wrap: wrap;
-}
+.card-title-group h3::before { display: none; }
 
 .customer-input {
   border: 1px solid var(--color-border);
-  background: var(--color-bg);
-  padding: 5px 10px;
-  font-size: 13px;
+  background: white;
+  padding: 4px 10px;
+  font-size: 12px;
   border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  width: 120px;
+}
+
+.card-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.card-amount {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.card-amount-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.card-amount-input {
+  width: 120px;
+  padding: 4px 8px;
+  font-size: 14px;
+  font-weight: 800;
   color: var(--color-text);
-  min-width: 180px;
+  text-align: right;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: white;
 }
 
 .btn-delete-project {
-  background: #fef2f2;
-  color: #ef4444;
+  background: transparent;
+  color: var(--color-text-muted);
   border: none;
   width: 28px;
   height: 28px;
-  border-radius: 50%;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
   transition: all var(--transition);
 }
 
 .btn-delete-project:hover {
-  background: #ef4444;
-  color: white;
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+/* ── Progress Bar ── */
+.progress-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.progress-bar-bg {
+  flex: 1;
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.progress-text {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* ── Status Badges ── */
+.card-status-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.mini-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.mini-badge.완료 { background: #dcfce7; color: #166534; }
+.mini-badge.미발급 { background: #fff7ed; color: #c2410c; }
+.mini-badge.미수금 { background: #fee2e2; color: #991b1b; }
+.mini-badge.일부수금 { background: #ffedd5; color: #9a3412; }
+
+/* ── Project Body ── */
+.project-body {
+  padding: 16px 20px 18px;
+}
+
+/* ── Card Section ── */
+.card-section {
+  margin-bottom: 14px;
+}
+
+.card-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.card-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 /* --- Work Items --- */
@@ -710,16 +829,27 @@
 
 /* --- Biz Info Section --- */
 .biz-info-section {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px dashed var(--color-border);
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border-light);
 }
 
-.biz-info-section .section-title {
-  font-size: 0.82rem;
+.biz-info-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
   font-weight: 700;
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+  transition: color var(--transition);
+}
+
+.biz-info-toggle:hover {
   color: var(--color-accent);
-  margin-bottom: 12px;
 }
 
 .biz-info-grid {
