@@ -302,7 +302,14 @@ function App() {
       }
       return s;
     }));
-    await supabase.from('subcontracts').update({ [field]: value }).eq('id', id);
+    // label은 한글 입력 완료 후에만 DB 저장 (onCompositionEnd에서 호출)
+    if (field !== 'label') {
+      await supabase.from('subcontracts').update({ [field]: value }).eq('id', id);
+    }
+  };
+
+  const saveSubcontractLabel = async (id: string, value: string) => {
+    await supabase.from('subcontracts').update({ label: value }).eq('id', id);
   };
 
   const deleteSubcontract = async (id: string) => {
@@ -359,7 +366,14 @@ function App() {
       }
       return w;
     }));
-    await supabase.from('work_items').update({ [field]: value }).eq('id', id);
+    // label은 한글 입력 완료 후에만 DB 저장 (onCompositionEnd에서 호출)
+    if (field !== 'label') {
+      await supabase.from('work_items').update({ [field]: value }).eq('id', id);
+    }
+  };
+
+  const saveWorkItemLabel = async (id: string, value: string) => {
+    await supabase.from('work_items').update({ label: value }).eq('id', id);
   };
 
   const deleteWorkItem = async (id: string) => {
@@ -812,7 +826,7 @@ function App() {
                                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                                 </button>
                               </div>
-                              <input className="work-label-input" value={w.label} onChange={e => updateWorkItem(w.id, 'label', e.target.value)} placeholder="공정명" />
+                              <input className="work-label-input" value={w.label} onChange={e => updateWorkItem(w.id, 'label', e.target.value)} onCompositionEnd={e => saveWorkItemLabel(w.id, e.currentTarget.value)} placeholder="공정명" />
                               <select value={w.status} onChange={e => updateWorkItem(w.id, 'status', e.target.value)} className={`status-select ${w.status.replace(/ /g, '-')}`}>
                                 <option value="실측예정">실측예정</option>
                                 <option value="실측 후 대기">실측 후 대기</option>
@@ -848,7 +862,7 @@ function App() {
                                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                                 </button>
                               </div>
-                              <input className="work-label-input" placeholder="공정명" value={s.label} onChange={e => updateSubcontract(s.id, 'label', e.target.value)} />
+                              <input className="work-label-input" placeholder="공정명" value={s.label} onChange={e => updateSubcontract(s.id, 'label', e.target.value)} onCompositionEnd={e => saveSubcontractLabel(s.id, e.currentTarget.value)} />
                               <input className="sub-amount-input" placeholder="금액" type="text" value={s.amount ? formatNumber(s.amount) : ''} onChange={e => updateSubcontract(s.id, 'amount', parseNumber(e.target.value))} />
                               <div className="date-range-inputs">
                                 <input type="date" value={s.start_date || ''} onChange={e => updateSubcontract(s.id, 'start_date', e.target.value)} title="시작일" />
