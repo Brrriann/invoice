@@ -289,7 +289,19 @@ function App() {
   };
 
   const updateSubcontract = async (id: string, field: string, value: any) => {
-    setSubcontracts(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s));
+    setSubcontracts(prev => prev.map(s => {
+      if (s.id === id) {
+        const updated = { ...s, [field]: value };
+        // 시작일을 변경했는데 종료일이 없으면 시작일과 동일하게 설정
+        if (field === 'start_date' && value && !s.end_date) {
+          updated.end_date = value;
+          // DB에도 함께 업데이트하기 위해 루프 밖에서 처리하거나 여기서 별도 호출
+          supabase.from('subcontracts').update({ end_date: value }).eq('id', id);
+        }
+        return updated;
+      }
+      return s;
+    }));
     await supabase.from('subcontracts').update({ [field]: value }).eq('id', id);
   };
 
@@ -335,7 +347,18 @@ function App() {
   };
 
   const updateWorkItem = async (id: string, field: string, value: string) => {
-    setWorkItems(prev => prev.map(w => w.id === id ? { ...w, [field]: value } : w));
+    setWorkItems(prev => prev.map(w => {
+      if (w.id === id) {
+        const updated = { ...w, [field]: value };
+        // 시작일을 변경했는데 종료일이 없으면 시작일과 동일하게 설정
+        if (field === 'start_date' && value && !w.end_date) {
+          updated.end_date = value;
+          supabase.from('work_items').update({ end_date: value }).eq('id', id);
+        }
+        return updated;
+      }
+      return w;
+    }));
     await supabase.from('work_items').update({ [field]: value }).eq('id', id);
   };
 
