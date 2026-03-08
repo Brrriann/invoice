@@ -926,38 +926,68 @@ function App() {
                     const day = i + 1;
                     const dateStr = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                     
-                    const dayWorkItems = workItems.filter(w => {
-                      if (!w.start_date) return false;
-                      if (!w.end_date) return w.start_date === dateStr;
-                      return dateStr >= w.start_date && dateStr <= w.end_date;
-                    });
-                    
-                    const daySubcontracts = subcontracts.filter(s => {
-                      if (!s.start_date) return false;
-                      if (!s.end_date) return s.start_date === dateStr;
-                      return dateStr >= s.start_date && dateStr <= s.end_date;
+                    // 해당 월의 모든 이벤트를 가져와서 슬롯(행) 할당 (성능을 위해 렌더링 루프 밖에서 계산하는 것이 좋으나 구조상 여기서 처리)
+                    const monthEvents = [...workItems, ...subcontracts]
+                      .filter(e => e.start_date)
+                      .sort((a, b) => a.start_date.localeCompare(b.start_date) || (b.end_date || b.start_date).localeCompare(a.end_date || a.start_date));
+
+                    // 간단한 슬롯 할당 알고리즘
+                    const eventSlots: any[][] = [];
+                    monthEvents.forEach(event => {
+                      let slotIndex = eventSlots.findIndex(slot => {
+                        return !slot.some(se => {
+                          const eStart = event.start_date;
+                          const eEnd = event.end_date || event.start_date;
+                          const seStart = se.start_date;
+                          const seEnd = se.end_date || se.start_date;
+                          return (eStart <= seEnd && eEnd >= seStart);
+                        });
+                      });
+                      if (slotIndex === -1) eventSlots.push([event]);
+                      else eventSlots[slotIndex].push(event);
                     });
 
                     return (
                       <div key={day} className="calendar-day">
                         <span className="day-number">{day}</span>
-                        <div className="day-events">
-                          {dayWorkItems.map(w => {
-                            const proj = projects.find(p => p.id === w.project_id);
+                        <div className="day-events-container">
+                          {eventSlots.map((slot, sIdx) => {
+                            const event = slot.find(e => {
+                              const eStart = e.start_date;
+                              const eEnd = e.end_date || e.start_date;
+                              return dateStr >= eStart && dateStr <= eEnd;
+                            });
+
+                            if (!event) return <div key={sIdx} className="event-spacer" />;
+
+                            const isWorkItem = 'status' in event;
+                            const proj = projects.find(p => p.id === event.project_id);
                             const customerName = proj?.customer_name || proj?.site_name || '';
-                            const color = getProjectColor(w.project_id);
+                            const color = getProjectColor(event.project_id);
+                            
+                            const isStart = event.start_date === dateStr;
+                            const isEnd = (event.end_date || event.start_date) === dateStr;
+                            const isSunday = new Date(dateStr).getDay() === 0;
+                            // 텍스트는 시작일이거나, 일요일(주가 바뀔 때)에만 표시 (사용자 요청에 따라 시작일에만 표시할 수도 있음)
+                            const showText = isStart || (isSunday && dateStr <= (event.end_date || event.start_date));
+
                             return (
-                              <div key={w.id} className="event" style={{ background: color.bg, color: color.text, borderColor: color.border, borderWidth: '1px', borderStyle: 'solid' }}>
-                                {customerName}:{w.label}:{w.status}
-                              </div>
-                            );
-                          })}
-                          {daySubcontracts.map(s => {
-                            const proj = projects.find(p => p.id === s.project_id);
-                            const customerName = proj?.customer_name || proj?.site_name || '';
-                            return (
-                              <div key={s.id} className="event subcontract-event">
-                                🔧 {customerName}:{s.label}:외주
+                              <div 
+                                key={event.id} 
+                                className={`event-bar ${isStart ? 'is-start' : ''} ${isEnd ? 'is-end' : ''} ${!isWorkItem ? 'subcontract' : ''}`}
+                                style={{ 
+                                  background: color.bg, 
+                                  color: color.text, 
+                                  borderColor: color.border,
+                                  borderLeft: isStart ? `1px solid ${color.border}` : 'none',
+                                  borderRight: isEnd ? `1px solid ${color.border}` : 'none'
+                                }}
+                              >
+                                {showText && (
+                                  <span className="event-label">
+                                    {!isWorkItem && '🔧 '}{customerName}:{event.label}
+                                  </span>
+                                )}
                               </div>
                             );
                           })}

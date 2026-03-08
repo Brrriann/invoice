@@ -1036,36 +1036,62 @@
 
 .calendar-day {
   background: white;
-  min-height: 90px;
-  padding: 6px;
+  min-height: 100px;
+  padding: 6px 0;
   display: flex;
   flex-direction: column;
   gap: 3px;
+  border-right: 1px solid var(--color-border);
 }
 
-.calendar-day.empty { background: #fafafa; }
-.day-number { font-size: 11px; font-weight: 700; color: var(--color-text-muted); }
+.day-number { font-size: 11px; font-weight: 700; color: var(--color-text-muted); padding-left: 6px; }
 
-.day-events {
+.day-events-container {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  width: 100%;
 }
 
-.event {
+.event-bar {
   font-size: 9px;
-  padding: 2px 4px;
-  border-radius: 3px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  margin: 0 -1px; /* 갭을 채우기 위해 약간 확장 */
+  padding: 0 4px;
+  box-sizing: border-box;
   font-weight: 700;
+  overflow: visible;
+  white-space: nowrap;
+  border-top: 1px solid;
+  border-bottom: 1px solid;
+  position: relative;
+  z-index: 1;
 }
 
-.subcontract-event {
-  background: #f1f5f9 !important;
-  color: #334155 !important;
-  font-size: 0.6rem;
+.event-bar.is-start {
+  margin-left: 4px;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.event-bar.is-end {
+  margin-right: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.event-label {
+  position: sticky;
+  left: 6px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.event-spacer {
+  height: 18px;
+  margin-bottom: 2px;
 }
 
 /* --- Invoice Table View --- */
