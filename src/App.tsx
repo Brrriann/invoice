@@ -168,10 +168,68 @@ function App() {
 
   // --- 메인 앱 상태 ---
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [view, setView] = useState<'quotation' | 'measurement' | 'dashboard'>('dashboard');
+  const [view, setView] = useState<'quotation' | 'measurement' | 'dashboard' | 'blog'>('dashboard');
   const [dashboardMode, setDashboardMode] = useState<'list' | 'calendar' | 'invoice'>('list');
   const [invoiceFilter, setInvoiceFilter] = useState<'전체' | '미발급' | '발급완료'>('전체');
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [searchProject, setSearchProject] = useState('');
+
+  // AI 블로그 상태
+  const [blogData, setBlogData] = useState({
+    siteName: '',
+    style: '모던 화이트',
+    features: '',
+    materials: '',
+    tone: '전문적이고 신뢰감 있는',
+    isGenerating: false,
+    result: ''
+  });
+
+  const generateBlogPost = async () => {
+    if (!blogData.siteName || !blogData.features) {
+      alert('현장명과 핵심 시공 내용을 입력해주세요.');
+      return;
+    }
+
+    setBlogData(prev => ({ ...prev, isGenerating: true }));
+    const apiKey = 'AIzaSyD5ifntUwsPN40_3J5EdkWTWlnScOx1WQc';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+    const prompt = `
+      너는 10년 차 베테랑 인테리어 실장님이야. 고객들에게 깊은 신뢰를 주고, 실제 시공 문의(전환)가 폭증하도록 네이버 블로그 포스팅을 작성해줘.
+
+      [시공 정보]
+      - 현장명: ${blogData.siteName}
+      - 스타일: ${blogData.style}
+      - 핵심 시공 내용: ${blogData.features}
+      - 사용 자재: ${blogData.materials}
+      - 원하는 문체: ${blogData.tone}
+
+      [작성 가이드라인]
+      1. 제목: 클릭을 유발하는 매력적인 제목 3가지를 먼저 제안해줘.
+      2. 도입부: 해당 현장이 가진 문제점이나 고객의 고민을 공감하며 시작해줘. (예: 좁고 답답했던 주방, 어두웠던 거실 등)
+      3. 본문: 단순 나열이 아닌, "왜 이 자재를 썼는지", "이 공간에서 실장님의 어떤 노하우가 들어갔는지" 전문적인 지식을 곁들여 감성적으로 설명해줘.
+      4. 감성 터치: 시공 후 고객이 누릴 변화된 삶의 가치(행복, 편안함)를 묘사해줘.
+      5. 마무리: 문의를 유도하는 강력한 클로징 멘트를 넣어줘.
+      6. 형식: 적절한 이모지를 섞어 가독성을 높여줘. 전문 용어와 감성적인 표현의 균형을 맞춰줘.
+    `;
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }]
+        })
+      });
+      const data = await response.json();
+      const generatedText = data.candidates[0].content.parts[0].text;
+      setBlogData(prev => ({ ...prev, result: generatedText, isGenerating: false }));
+    } catch (error) {
+      console.error('AI 글 생성 실패:', error);
+      alert('글 생성 중 오류가 발생했습니다.');
+      setBlogData(prev => ({ ...prev, isGenerating: false }));
+    }
+  };
   const [items, setItems] = useState<Item[]>([
     { id: '1', type: 'door', name: '', unit: 'SET', width: 0, height: 0, quantity: 1, unitPrice: 0, specialNote: '', remarks: '' }
   ]);
@@ -716,6 +774,13 @@ function App() {
             </span>
             실측 템플릿
           </button>
+          <button className={view === 'blog' ? 'active' : ''} onClick={() => { setView('blog'); setSidebarOpen(false); }}>
+            <span className="nav-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </span>
+            AI 블로그 작성기
+            <span className="nav-badge">HOT</span>
+          </button>
         </nav>
         <div className="sidebar-footer">
           <div className="sidebar-user">
@@ -1247,6 +1312,113 @@ function App() {
             </div>
             <div className="summary-section"><div className="row total">합계금액: ₩{Math.floor(items.reduce((s, i) => s + Math.floor(i.quantity * i.unitPrice), 0) * 1.1).toLocaleString()}</div></div>
             <div className="btn-group-main"><button onClick={saveCurrentQuotation} className="btn-save">클라우드 저장</button><button onClick={handlePrint} className="btn-print">인쇄 / PDF</button></div>
+          </div>
+        ) : view === 'blog' ? (
+          <div className="quotation-card blog-view">
+            <div className="blog-header-box">
+              <h1>✨ AI 블로그 포스팅 생성기</h1>
+              <p>현장 정보만 입력하면 베테랑 실장님이 글을 써드립니다.</p>
+            </div>
+
+            <div className="blog-main-layout">
+              <div className="blog-input-side">
+                <div className="form-section">
+                  <h3>🏠 현장 기본 정보</h3>
+                  <div className="grid">
+                    <div className="input-group">
+                      <label>현장명 (지역 및 아파트명)</label>
+                      <input placeholder="예: 서초동 래미안 34평형" value={blogData.siteName} onChange={e => setBlogData({...blogData, siteName: e.target.value})} />
+                    </div>
+                    <div className="input-group">
+                      <label>인테리어 스타일</label>
+                      <select value={blogData.style} onChange={e => setBlogData({...blogData, style: e.target.value})}>
+                        <option value="모던 화이트">모던 화이트</option>
+                        <option value="내추럴 우드">내추럴 우드</option>
+                        <option value="미니멀리즘">미니멀리즘</option>
+                        <option value="프렌치 클래식">프렌치 클래식</option>
+                        <option value="산업형 빈티지">산업형 빈티지</option>
+                        <option value="따뜻한 베이지">따뜻한 베이지</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-section">
+                  <h3>🔨 핵심 시공 및 자재</h3>
+                  <div className="input-group">
+                    <label>핵심 시공 내용 (강조하고 싶은 포인트)</label>
+                    <textarea 
+                      placeholder="예: 주방 대면형 구조 변경, 거실 실물 라인 조명 설치, 무몰딩 도배 등" 
+                      value={blogData.features} 
+                      onChange={e => setBlogData({...blogData, features: e.target.value})}
+                      rows={4}
+                    />
+                  </div>
+                  <div className="input-group" style={{marginTop:'15px'}}>
+                    <label>주요 사용 자재</label>
+                    <input 
+                      placeholder="예: LX 지인 바닥재, 융 스위치, 600각 포세린 타일" 
+                      value={blogData.materials} 
+                      onChange={e => setBlogData({...blogData, materials: e.target.value})} 
+                    />
+                  </div>
+                </div>
+
+                <div className="form-section">
+                  <h3>✍️ 글의 분위기</h3>
+                  <div className="tone-grid">
+                    {['전문적이고 신뢰감 있는', '따뜻하고 감성적인', '친근하고 유머러스한', '간결하고 명확한'].map(t => (
+                      <button 
+                        key={t} 
+                        className={`btn-tone ${blogData.tone === t ? 'active' : ''}`}
+                        onClick={() => setBlogData({...blogData, tone: t})}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button 
+                  className={`btn-generate-blog ${blogData.isGenerating ? 'loading' : ''}`} 
+                  onClick={generateBlogPost}
+                  disabled={blogData.isGenerating}
+                >
+                  {blogData.isGenerating ? (
+                    <>
+                      <span className="spinner"></span>
+                      베테랑 실장님이 글을 쓰는 중...
+                    </>
+                  ) : '🪄 고효율 블로그 글 생성하기'}
+                </button>
+              </div>
+
+              <div className="blog-result-side">
+                <div className="result-header">
+                  <h3>📝 생성된 포스팅 결과</h3>
+                  {blogData.result && (
+                    <button className="btn-copy-result" onClick={() => {
+                      navigator.clipboard.writeText(blogData.result);
+                      alert('클립보드에 복사되었습니다!');
+                    }}>📋 복사하기</button>
+                  )}
+                </div>
+                <div className="result-content-area">
+                  {blogData.result ? (
+                    <div className="generated-text-wrapper">
+                      {blogData.result.split('\n').map((line, i) => (
+                        <p key={i}>{line || '\u00A0'}</p>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="result-empty">
+                      <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                      <p>왼쪽 정보를 입력하고 버튼을 누르면<br/>전문가급 블로그 글이 여기 나타납니다.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         ) : (
           /* 인테리어 실측 템플릿 */
