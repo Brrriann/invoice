@@ -431,14 +431,20 @@ function App() {
 
   // --- DB 로직 (견적서) ---
   const fetchQuotations = async () => {
-    const { data, error } = await supabase.from('quotations').select('*').order('created_at', { ascending: false });
+    if (!currentUser) return;
+    const { data, error } = await supabase.from('quotations').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
     if (!error) setSavedQuotations(data || []);
+    else console.error('견적서 조회 실패:', error);
   };
 
   const saveCurrentQuotation = async () => {
     if (!currentUser) return;
+    if (!customer.name.trim()) {
+      alert('고객명을 입력하세요');
+      return;
+    }
     const { error } = await supabase.from('quotations').insert([{
-      user_id: currentUser.id, items, provider, customer, quoteNumber, greeting, remarks, total_amount: items.reduce((sum, i) => sum + (i.quantity * i.unitPrice), 0) * 1.1
+      user_id: currentUser.id, items, provider, customer: customer.name, quoteNumber, greeting, remarks, total_amount: items.reduce((sum, i) => sum + (i.quantity * i.unitPrice), 0) * 1.1
     }]);
     if (error) alert('저장 실패: ' + error.message);
     else { alert('견적서가 저장되었습니다.'); fetchQuotations(); }
@@ -452,8 +458,10 @@ function App() {
 
   // --- DB 로직 (실측) ---
   const fetchMeasurements = async () => {
-    const { data, error } = await supabase.from('measurements_v2').select('*').order('created_at', { ascending: false });
+    if (!currentUser) return;
+    const { data, error } = await supabase.from('measurements_v2').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
     if (!error) setSavedMeasurements(data || []);
+    else console.error('실측리포트 조회 실패:', error);
   };
 
   const saveCurrentMeasurement = async () => {
@@ -538,8 +546,14 @@ function App() {
   // --- 기타 핸들러 ---
   const loadQuotation = (q: SavedQuotation) => {
     if (!window.confirm('작성 중인 내용이 사라집니다. 불러오시겠습니까?')) return;
-    setItems(q.items); setProvider(q.provider); setCustomer(q.customer);
-    setQuoteNumber(q.quoteNumber); setGreeting(q.greeting); setRemarks(q.remarks);
+    setItems(q.items);
+    setProvider(q.provider);
+    // customer가 문자열이면 객체로 변환
+    const customerObj = typeof q.customer === 'string' ? { name: q.customer, contact: '', date: new Date().toISOString().split('T')[0] } : q.customer;
+    setCustomer(customerObj);
+    setQuoteNumber(q.quoteNumber);
+    setGreeting(q.greeting);
+    setRemarks(q.remarks);
   };
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
@@ -1277,17 +1291,21 @@ function App() {
                   {savedQuotations.filter(q => {
                     if (!searchQuotation) return true;
                     const s = searchQuotation.toLowerCase();
-                    return (q.customer?.name || '').toLowerCase().includes(s) || (q.quoteNumber || '').toLowerCase().includes(s);
+                    const customerName = typeof q.customer === 'string' ? q.customer : (q.customer?.name || '');
+                    return customerName.toLowerCase().includes(s) || (q.quoteNumber || '').toLowerCase().includes(s);
                   }).map(q => (
                     <div key={q.id} className="saved-item">
                       <div className="item-info" onClick={() => loadQuotation(q)}>
-                        <div className="item-name">{q.customer.name || '(무명)'}</div>
+                        <div className="item-name">{(typeof q.customer === 'string' ? q.customer : q.customer?.name) || '(무명)'}</div>
                         <div className="item-date">{new Date(q.created_at).toLocaleDateString()}</div>
                       </div>
                       <button onClick={() => deleteQuotation(q.id)} className="btn-item-delete">&times;</button>
                     </div>
                   ))}
-                  {savedQuotations.length > 0 && searchQuotation && savedQuotations.filter(q => (q.customer?.name || '').toLowerCase().includes(searchQuotation.toLowerCase()) || (q.quoteNumber || '').toLowerCase().includes(searchQuotation.toLowerCase())).length === 0 && (
+                  {savedQuotations.length > 0 && searchQuotation && savedQuotations.filter(q => {
+                    const customerName = typeof q.customer === 'string' ? q.customer : (q.customer?.name || '');
+                    return customerName.toLowerCase().includes(searchQuotation.toLowerCase()) || (q.quoteNumber || '').toLowerCase().includes(searchQuotation.toLowerCase());
+                  }).length === 0 && (
                     <div className="search-no-result">검색 결과가 없습니다</div>
                   )}
                 </div>
