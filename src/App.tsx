@@ -44,7 +44,8 @@ interface WorkItem {
   user_id: string;
   label: string;
   type: '실측' | '시공';
-  date: string;
+  start_date: string;
+  end_date: string;
   status: '실측예정' | '실측 후 대기' | '시공확정' | '시공중' | '완료';
 }
 
@@ -56,7 +57,8 @@ interface Subcontract {
   amount: number;
   invoice_issued: boolean;
   payment_done: boolean;
-  date: string;
+  start_date: string;
+  end_date: string;
 }
 
 interface SavedQuotation {
@@ -280,7 +282,8 @@ function App() {
     if (!currentUser) return;
     const { error } = await supabase.from('subcontracts').insert([{
       project_id: projectId, user_id: currentUser.id,
-      label: '', amount: 0, invoice_issued: false, payment_done: false, date: ''
+      label: '', amount: 0, invoice_issued: false, payment_done: false, 
+      start_date: '', end_date: ''
     }]);
     if (!error) fetchSubcontracts();
   };
@@ -324,7 +327,8 @@ function App() {
       user_id: currentUser.id,
       label: `공정${count + 1}`,
       type: '시공',
-      date: '',
+      start_date: '',
+      end_date: '',
       status: '실측예정'
     }]);
     if (!error) fetchWorkItems();
@@ -793,7 +797,11 @@ function App() {
                                 <option value="시공중">시공중</option>
                                 <option value="완료">완료</option>
                               </select>
-                              <input type="date" value={w.date || ''} onChange={e => updateWorkItem(w.id, 'date', e.target.value)} />
+                              <div className="date-range-inputs">
+                                <input type="date" value={w.start_date || ''} onChange={e => updateWorkItem(w.id, 'start_date', e.target.value)} title="시작일" />
+                                <span className="date-separator">~</span>
+                                <input type="date" value={w.end_date || ''} onChange={e => updateWorkItem(w.id, 'end_date', e.target.value)} title="종료일" />
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -819,7 +827,11 @@ function App() {
                               </div>
                               <input className="work-label-input" placeholder="공정명" value={s.label} onChange={e => updateSubcontract(s.id, 'label', e.target.value)} />
                               <input className="sub-amount-input" placeholder="금액" type="text" value={s.amount ? formatNumber(s.amount) : ''} onChange={e => updateSubcontract(s.id, 'amount', parseNumber(e.target.value))} />
-                              <input type="date" value={s.date || ''} onChange={e => updateSubcontract(s.id, 'date', e.target.value)} />
+                              <div className="date-range-inputs">
+                                <input type="date" value={s.start_date || ''} onChange={e => updateSubcontract(s.id, 'start_date', e.target.value)} title="시작일" />
+                                <span className="date-separator">~</span>
+                                <input type="date" value={s.end_date || ''} onChange={e => updateSubcontract(s.id, 'end_date', e.target.value)} title="종료일" />
+                              </div>
                               <div className="sub-checks">
                                 <label className={`sub-check ${s.invoice_issued ? 'on' : ''}`}>
                                   <input type="checkbox" checked={s.invoice_issued} onChange={e => updateSubcontract(s.id, 'invoice_issued', e.target.checked)} style={{display:'none'}} />
@@ -913,8 +925,18 @@ function App() {
                   {Array.from({ length: new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate() }).map((_, i) => {
                     const day = i + 1;
                     const dateStr = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                    const dayWorkItems = workItems.filter(w => w.date === dateStr);
-                    const daySubcontracts = subcontracts.filter(s => s.date === dateStr);
+                    
+                    const dayWorkItems = workItems.filter(w => {
+                      if (!w.start_date) return false;
+                      if (!w.end_date) return w.start_date === dateStr;
+                      return dateStr >= w.start_date && dateStr <= w.end_date;
+                    });
+                    
+                    const daySubcontracts = subcontracts.filter(s => {
+                      if (!s.start_date) return false;
+                      if (!s.end_date) return s.start_date === dateStr;
+                      return dateStr >= s.start_date && dateStr <= s.end_date;
+                    });
 
                     return (
                       <div key={day} className="calendar-day">
