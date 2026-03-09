@@ -1335,14 +1335,26 @@ function App() {
                     </div>
                     <div className="input-group">
                       <label>인테리어 스타일</label>
-                      <select value={blogData.style} onChange={e => setBlogData({...blogData, style: e.target.value})}>
-                        <option value="모던 화이트">모던 화이트</option>
-                        <option value="내추럴 우드">내추럴 우드</option>
-                        <option value="미니멀리즘">미니멀리즘</option>
-                        <option value="프렌치 클래식">프렌치 클래식</option>
-                        <option value="산업형 빈티지">산업형 빈티지</option>
-                        <option value="따뜻한 베이지">따뜻한 베이지</option>
-                      </select>
+                      <input
+                        list="style-options"
+                        placeholder="예: 모던 화이트, 미니멀리즘 등 (직접입력 가능)"
+                        value={blogData.style}
+                        onChange={e => setBlogData({...blogData, style: e.target.value})}
+                      />
+                      <datalist id="style-options">
+                        <option value="모던 화이트" />
+                        <option value="내추럴 우드" />
+                        <option value="미니멀리즘" />
+                        <option value="프렌치 클래식" />
+                        <option value="산업형 빈티지" />
+                        <option value="따뜻한 베이지" />
+                        <option value="스칸디나비안" />
+                        <option value="보호드" />
+                        <option value="인더스트리얼" />
+                        <option value="북유럽" />
+                        <option value="지중해 스타일" />
+                        <option value="클래식 모던" />
+                      </datalist>
                     </div>
                   </div>
                 </div>
