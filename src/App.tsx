@@ -1356,7 +1356,7 @@ function App() {
                         <option value="클래식 모던">클래식 모던</option>
                         <option value="기타">기타 (직접입력)</option>
                       </select>
-                      {!['모던 화이트', '내추럴 우드', '미니멀리즘', '프렌치 클래식', '산업형 빈티지', '따뜻한 베이지', '스칸디나비안', '보호드', '인더스트리얼', '북유럽', '지중해 스타일', '클래식 모던'].includes(blogData.style) && blogData.style !== '' && (
+                      {!['모던 화이트', '내추럴 우드', '미니멀리즘', '프렌치 클래식', '산업형 빈티지', '따뜻한 베이지', '스칸디나비안', '보호드', '인더스트리얼', '북유럽', '지중해 스타일', '클래식 모던'].includes(blogData.style) && (
                         <input
                           placeholder="스타일명 입력"
                           value={blogData.style}
