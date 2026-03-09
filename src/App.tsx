@@ -181,6 +181,7 @@ function App() {
     features: '',
     materials: '',
     tone: '전문적이고 신뢰감 있는',
+    role: '10년 차 베테랑 인테리어 실장',
     isGenerating: false,
     result: ''
   });
@@ -205,12 +206,15 @@ function App() {
         model: "gemini-2.5-flash-lite"
       });
       const prompt = `
-        너는 10년 차 베테랑 인테리어 실장님이야. 아래 정보를 바탕으로 네이버 블로그 포스팅을 작성해줘.
+        너는 ${blogData.role}이야. 아래 정보를 바탕으로 네이버 블로그 포스팅을 작성해줘.
+
         현장명: ${blogData.siteName}
         스타일: ${blogData.style}
         내용: ${blogData.features}
         자재: ${blogData.materials}
         문체: ${blogData.tone}
+
+        중요: 절대로 ** 기호를 사용해서 단어를 강조하지 마. 마크다운 형식을 사용하지 말고 자연스러운 글로 작성해줘.
       `;
 
       // 콘텐츠 생성 요청
@@ -1360,6 +1364,17 @@ function App() {
                       placeholder="예: LX 지인 바닥재, 융 스위치, 600각 포세린 타일" 
                       value={blogData.materials} 
                       onChange={e => setBlogData({...blogData, materials: e.target.value})} 
+                    />
+                  </div>
+                </div>
+
+                <div className="form-section">
+                  <h3>👤 글쓴이 역할 지정</h3>
+                  <div className="input-group">
+                    <input
+                      placeholder="예: 10년 차 베테랑 인테리어 실장, 디자이너, 건축가 등"
+                      value={blogData.role}
+                      onChange={e => setBlogData({...blogData, role: e.target.value})}
                     />
                   </div>
                 </div>
