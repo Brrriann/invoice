@@ -3,6 +3,7 @@ import { supabase } from './lib/supabase';
 import './App.css';
 import React from 'react';
 import * as XLSX from 'xlsx';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // --- 인터페이스 정의 ---
 interface Item {
@@ -191,46 +192,45 @@ function App() {
     }
 
     setBlogData(prev => ({ ...prev, isGenerating: true }));
-    const apiKey = 'AIzaSyD5ifntUwsPN40_3J5EdkWTWlnScOx1WQc';
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
-    const prompt = `
-      너는 10년 차 베테랑 인테리어 실장님이야. 고객들에게 깊은 신뢰를 주고, 실제 시공 문의(전환)가 폭증하도록 네이버 블로그 포스팅을 작성해줘.
-
-      [시공 정보]
-      - 현장명: ${blogData.siteName}
-      - 스타일: ${blogData.style}
-      - 핵심 시공 내용: ${blogData.features}
-      - 사용 자재: ${blogData.materials}
-      - 원하는 문체: ${blogData.tone}
-
-      [작성 가이드라인]
-      1. 제목: 클릭을 유발하는 매력적인 제목 3가지를 먼저 제안해줘.
-      2. 도입부: 해당 현장이 가진 문제점이나 고객의 고민을 공감하며 시작해줘. (예: 좁고 답답했던 주방, 어두웠던 거실 등)
-      3. 본문: 단순 나열이 아닌, "왜 이 자재를 썼는지", "이 공간에서 실장님의 어떤 노하우가 들어갔는지" 전문적인 지식을 곁들여 감성적으로 설명해줘.
-      4. 감성 터치: 시공 후 고객이 누릴 변화된 삶의 가치(행복, 편안함)를 묘사해줘.
-      5. 마무리: 문의를 유도하는 강력한 클로징 멘트를 넣어줘.
-      6. 형식: 적절한 이모지를 섞어 가독성을 높여줘. 전문 용어와 감성적인 표현의 균형을 맞춰줘.
-    `;
+    // 제공해주신 키를 직접 변수에 할당합니다.
+    const apiKey = 'AIzaSyBbuFog77NQ_2wdBItT-nAB2XyL9gRwT_A';
 
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }]
-        })
+      // 최신 SDK 라이브러리 초기화
+      const genAI = new GoogleGenerativeAI(apiKey);
+      
+      // 429 에러(존재 확인)를 뱉었던 유일한 모델인 gemini-2.0-flash로 복구합니다.
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.5-flash-lite"
       });
-      const data = await response.json();
-      const generatedText = data.candidates[0].content.parts[0].text;
-      setBlogData(prev => ({ ...prev, result: generatedText, isGenerating: false }));
-    } catch (error) {
-      console.error('AI 글 생성 실패:', error);
-      alert('글 생성 중 오류가 발생했습니다.');
+      const prompt = `
+        너는 10년 차 베테랑 인테리어 실장님이야. 아래 정보를 바탕으로 네이버 블로그 포스팅을 작성해줘.
+        현장명: ${blogData.siteName}
+        스타일: ${blogData.style}
+        내용: ${blogData.features}
+        자재: ${blogData.materials}
+        문체: ${blogData.tone}
+      `;
+
+      // 콘텐츠 생성 요청
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+
+      setBlogData(prev => ({ ...prev, result: text, isGenerating: false }));
+    } catch (error: any) {
+      console.error('AI 상세 에러 로그:', error);
+
+      // 404 에러가 계속될 경우, 키 권한 문제임을 알리는 메시지 추가
+      if (error.message.includes('404')) {
+        alert("모델을 찾을 수 없습니다(404). \n1. Google AI Studio에서 'Generative Language API'가 Enabled 상태인지 확인하세요. \n2. 키가 생성된 프로젝트의 지역 제한을 확인하세요.");
+      } else {
+        alert(`글 생성 중 오류가 발생했습니다: ${error.message}`);
+      }
       setBlogData(prev => ({ ...prev, isGenerating: false }));
     }
-  };
-  const [items, setItems] = useState<Item[]>([
+  };  const [items, setItems] = useState<Item[]>([
     { id: '1', type: 'door', name: '', unit: 'SET', width: 0, height: 0, quantity: 1, unitPrice: 0, specialNote: '', remarks: '' }
   ]);
   const [provider, setProvider] = useState(initialProvider);
@@ -248,7 +248,7 @@ function App() {
   const [companyIntro, setCompanyIntro] = useState('');
   const [showIntroInPrint, setShowIntroInPrint] = useState(false);
   const [expandedBizInfo, setExpandedBizInfo] = useState<Set<string>>(new Set());
-  const [searchProject, setSearchProject] = useState('');
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   const [searchQuotation, setSearchQuotation] = useState('');
   const [searchMeasurement, setSearchMeasurement] = useState('');
 
