@@ -1524,7 +1524,7 @@ function App() {
           </div>
         )}
 
-        {view !== 'dashboard' && (
+        {view !== 'dashboard' && view !== 'blog' && (
           <div className="saved-list-panel">
             {view === 'quotation' ? (
               <>

@@ -1474,6 +1474,8 @@
 
 .generated-text-wrapper {
   animation: fadeIn 0.5s ease;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 .generated-text-wrapper p {
@@ -1483,6 +1485,8 @@
   font-size: 1.05rem;
   font-weight: 400;
   letter-spacing: 0.2px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 .generated-text-wrapper p:last-child {
@@ -1623,6 +1627,11 @@ h3::before {
 
 @media (min-width: 640px) { .form-section .grid { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 1024px) { .form-section .grid { grid-template-columns: repeat(3, 1fr); } }
+
+/* 블로그 입력 영역은 항상 1컬럼 */
+.blog-input-side .form-section .grid {
+  grid-template-columns: 1fr !important;
+}
 
 /* --- Inputs --- */
 input, textarea, select {
