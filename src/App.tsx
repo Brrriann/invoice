@@ -194,8 +194,14 @@ function App() {
 
     setBlogData(prev => ({ ...prev, isGenerating: true }));
 
-    // 제공해주신 키를 직접 변수에 할당합니다.
-    const apiKey = 'AIzaSyBbuFog77NQ_2wdBItT-nAB2XyL9gRwT_A';
+    // 환경 변수에서 API 키를 가져옵니다
+    const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+
+    if (!apiKey) {
+      alert('API 키가 설정되지 않았습니다. .env 파일을 확인하세요.');
+      setBlogData(prev => ({ ...prev, isGenerating: false }));
+      return;
+    }
 
     try {
       // 최신 SDK 라이브러리 초기화
