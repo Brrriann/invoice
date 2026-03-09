@@ -1335,29 +1335,35 @@ function App() {
                     </div>
                     <div className="input-group">
                       <label>인테리어 스타일</label>
-                      <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', alignItems: 'flex-start'}}>
-                        <select value={blogData.style} onChange={e => setBlogData({...blogData, style: e.target.value})} style={{gridColumn: '1 / -1'}}>
-                          <option value="모던 화이트">모던 화이트</option>
-                          <option value="내추럴 우드">내추럴 우드</option>
-                          <option value="미니멀리즘">미니멀리즘</option>
-                          <option value="프렌치 클래식">프렌치 클래식</option>
-                          <option value="산업형 빈티지">산업형 빈티지</option>
-                          <option value="따뜻한 베이지">따뜻한 베이지</option>
-                          <option value="스칸디나비안">스칸디나비안</option>
-                          <option value="보호드">보호드</option>
-                          <option value="인더스트리얼">인더스트리얼</option>
-                          <option value="북유럽">북유럽</option>
-                          <option value="지중해 스타일">지중해 스타일</option>
-                          <option value="클래식 모던">클래식 모던</option>
-                        </select>
-                        <div style={{gridColumn: '1 / -1', textAlign: 'center', fontSize: '0.85rem', color: '#94a3b8', margin: '8px 0'}}>또는 직접 입력</div>
+                      <select value={['모던 화이트', '내추럴 우드', '미니멀리즘', '프렌치 클래식', '산업형 빈티지', '따뜻한 베이지', '스칸디나비안', '보호드', '인더스트리얼', '북유럽', '지중해 스타일', '클래식 모던'].includes(blogData.style) ? blogData.style : '기타'} onChange={e => {
+                        if (e.target.value === '기타') {
+                          setBlogData({...blogData, style: ''});
+                        } else {
+                          setBlogData({...blogData, style: e.target.value});
+                        }
+                      }}>
+                        <option value="모던 화이트">모던 화이트</option>
+                        <option value="내추럴 우드">내추럴 우드</option>
+                        <option value="미니멀리즘">미니멀리즘</option>
+                        <option value="프렌치 클래식">프렌치 클래식</option>
+                        <option value="산업형 빈티지">산업형 빈티지</option>
+                        <option value="따뜻한 베이지">따뜻한 베이지</option>
+                        <option value="스칸디나비안">스칸디나비안</option>
+                        <option value="보호드">보호드</option>
+                        <option value="인더스트리얼">인더스트리얼</option>
+                        <option value="북유럽">북유럽</option>
+                        <option value="지중해 스타일">지중해 스타일</option>
+                        <option value="클래식 모던">클래식 모던</option>
+                        <option value="기타">기타 (직접입력)</option>
+                      </select>
+                      {!['모던 화이트', '내추럴 우드', '미니멀리즘', '프렌치 클래식', '산업형 빈티지', '따뜻한 베이지', '스칸디나비안', '보호드', '인더스트리얼', '북유럽', '지중해 스타일', '클래식 모던'].includes(blogData.style) && blogData.style !== '' && (
                         <input
-                          placeholder="직접 입력"
+                          placeholder="스타일명 입력"
                           value={blogData.style}
                           onChange={e => setBlogData({...blogData, style: e.target.value})}
-                          style={{gridColumn: '1 / -1'}}
+                          style={{marginTop: '10px'}}
                         />
-                      </div>
+                      )}
                     </div>
                   </div>
                 </div>
