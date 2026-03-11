@@ -382,7 +382,7 @@ function App() {
     }
   };
 
-  const updateSubcontract = async (id: string, field: keyof Subcontract, value: string | number | boolean) => {
+  const updateSubcontract = useCallback(async (id: string, field: keyof Subcontract, value: string | number | boolean) => {
     setSubcontracts(prev => prev.map(s => {
       if (s.id === id) {
         const updated = { ...s, [field]: value };
@@ -390,7 +390,8 @@ function App() {
         if (field === 'start_date' && value && !s.end_date) {
           updated.end_date = value as string;
           // DB에도 함께 업데이트하기 위해 루프 밖에서 처리하거나 여기서 별도 호출
-          supabase.from('subcontracts').update({ end_date: value as string }).eq('id', id);        }
+          supabase.from('subcontracts').update({ end_date: value as string }).eq('id', id);
+        }
         return updated;
       }
       return s;
@@ -399,7 +400,7 @@ function App() {
     if (field !== 'label') {
       await supabase.from('subcontracts').update({ [field]: value }).eq('id', id);
     }
-  };
+  }, [setSubcontracts]);
 
   const saveSubcontractLabel = async (id: string, value: string) => {
     if (!value.trim()) return; // 비어있으면 저장하지 않음
@@ -577,6 +578,7 @@ function App() {
     else console.error('실측리포트 조회 실패:', error);
   }, [currentUser, setSavedMeasurements]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
   useEffect(() => {
     if (currentUser) {
       fetchQuotations();
@@ -1010,15 +1012,16 @@ function App() {
                               </select>
                               <div className="date-range-inputs">
                                 <div className="date-input-container">
+                                  <svg className="calendar-mini-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                   <input type="text" placeholder="MM-DD" value={formatDateToMMDD(w.start_date || '')} readOnly />
                                   <input type="date" value={w.start_date || ''} onChange={e => updateWorkItem(w.id, 'start_date', e.target.value)} className="date-picker-overlay" title="시작일" />
                                 </div>
                                 <span className="date-separator">~</span>
                                 <div className="date-input-container">
+                                  <svg className="calendar-mini-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                   <input type="text" placeholder="MM-DD" value={formatDateToMMDD(w.end_date || '')} readOnly />
                                   <input type="date" value={w.end_date || ''} onChange={e => updateWorkItem(w.id, 'end_date', e.target.value)} className="date-picker-overlay" title="종료일" />
-                                </div>
-                              </div>
+                                </div>                              </div>
                             </div>
                           ))}
                         </div>
@@ -1055,11 +1058,13 @@ function App() {
                               <input className="sub-amount-input" placeholder="금액" type="text" value={s.amount ? formatNumber(s.amount) : ''} onChange={e => updateSubcontract(s.id, 'amount', parseNumber(e.target.value))} />
                               <div className="date-range-inputs">
                                 <div className="date-input-container">
+                                  <svg className="calendar-mini-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                   <input type="text" placeholder="MM-DD" value={formatDateToMMDD(s.start_date || '')} readOnly />
                                   <input type="date" value={s.start_date || ''} onChange={e => updateSubcontract(s.id, 'start_date', e.target.value)} className="date-picker-overlay" title="시작일" />
                                 </div>
                                 <span className="date-separator">~</span>
                                 <div className="date-input-container">
+                                  <svg className="calendar-mini-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                   <input type="text" placeholder="MM-DD" value={formatDateToMMDD(s.end_date || '')} readOnly />
                                   <input type="date" value={s.end_date || ''} onChange={e => updateSubcontract(s.id, 'end_date', e.target.value)} className="date-picker-overlay" title="종료일" />
                                 </div>

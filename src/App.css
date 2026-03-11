@@ -2502,3 +2502,8 @@ input::placeholder, textarea::placeholder {
   cursor: pointer;
 }
 .red-border { border: 2px solid #ef4444 !important; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important; }
+
+.date-input-container { display: flex; align-items: center; gap: 4px; position: relative; }
+.calendar-mini-icon { color: var(--color-text-muted); flex-shrink: 0; pointer-events: none; }
+.date-input-container input[type='text'] { padding-left: 24px !important; }
+.date-input-container .calendar-mini-icon { position: absolute; left: 8px; z-index: 1; }
