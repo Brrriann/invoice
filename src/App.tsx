@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { supabase } from './lib/supabase';
 import './App.css';
 import React from 'react';
@@ -167,7 +168,7 @@ const formatDateToMMDD = (dateStr: string): string => {
 
 function App() {
   // --- 인증 관련 상태 ---
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authView, setAuthView] = useState<'login' | 'signup' | 'forgot' | 'reset'>('login');
   const [authInputs, setAuthViewInputs] = useState({ email: '', password: '', confirmPassword: '', phone: '' });
   const [newPassword, setNewPassword] = useState({ password: '', confirmPassword: '' });
@@ -240,14 +241,21 @@ function App() {
       const text = response.text();
 
       setBlogData(prev => ({ ...prev, result: text, isGenerating: false }));
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('AI 상세 에러 로그:', error);
 
+      let errorMessage = '알 수 없는 오류가 발생했습니다.';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
       // 404 에러가 계속될 경우, 키 권한 문제임을 알리는 메시지 추가
-      if (error.message.includes('404')) {
+      if (errorMessage.includes('404')) {
         alert("모델을 찾을 수 없습니다(404). \n1. Google AI Studio에서 'Generative Language API'가 Enabled 상태인지 확인하세요. \n2. 키가 생성된 프로젝트의 지역 제한을 확인하세요.");
       } else {
-        alert(`글 생성 중 오류가 발생했습니다: ${error.message}`);
+        alert(`글 생성 중 오류가 발생했습니다: ${errorMessage}`);
       }
       setBlogData(prev => ({ ...prev, isGenerating: false }));
     }
@@ -307,25 +315,16 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (currentUser) {
-      fetchQuotations();
-      fetchMeasurements();
-      fetchProjects();
-      fetchWorkItems();
-      fetchSubcontracts();
-      fetchCompanyProfile();
-    }
-  }, [currentUser]);
+
 
   // --- 회사 프로필 ---
-  const fetchCompanyProfile = async () => {
+  const fetchCompanyProfile = useCallback(async () => {
     if (!currentUser) return;
     const { data } = await supabase.from('company_profiles').select('*').eq('user_id', currentUser.id).single();
     if (data) {
-      setProvider({ name: data.name || '', brandTagline: data.brand_tagline || '', representative: data.representative || '', businessNo: data.business_no || '', address: data.address || '', contact: data.contact || '' });
+      setProvider({ name: data.name || '', brandTagline: data.brandTagline || '', representative: data.representative || '', businessNo: data.businessNo || '', address: data.address || '', contact: data.contact || '' });
     }
-  };
+  }, [currentUser, setProvider]);
 
   const saveCompanyProfile = async () => {
     if (!currentUser) return;
@@ -344,20 +343,20 @@ function App() {
   };
 
   // --- DB 로직 (대시보드/프로젝트) ---
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
     if (!error) setProjects(data || []);
-  };
+  }, [setProjects]);
 
-  const fetchWorkItems = async () => {
+  const fetchWorkItems = useCallback(async () => {
     const { data, error } = await supabase.from('work_items').select('*').order('created_at', { ascending: true });
     if (!error) setWorkItems(data || []);
-  };
+  }, [setWorkItems]);
 
-  const fetchSubcontracts = async () => {
+  const fetchSubcontracts = useCallback(async () => {
     const { data, error } = await supabase.from('subcontracts').select('*').order('created_at', { ascending: true });
     if (!error) setSubcontracts(data || []);
-  };
+  }, [setSubcontracts]);
 
   const createSubcontractFromWorkItem = async (projectId: string, workItem: WorkItem) => {
     if (!currentUser) return;
@@ -383,16 +382,15 @@ function App() {
     }
   };
 
-  const updateSubcontract = async (id: string, field: string, value: any) => {
+  const updateSubcontract = async (id: string, field: keyof Subcontract, value: string | number | boolean) => {
     setSubcontracts(prev => prev.map(s => {
       if (s.id === id) {
         const updated = { ...s, [field]: value };
         // 시작일을 변경했는데 종료일이 없으면 시작일과 동일하게 설정
         if (field === 'start_date' && value && !s.end_date) {
-          updated.end_date = value;
+          updated.end_date = value as string;
           // DB에도 함께 업데이트하기 위해 루프 밖에서 처리하거나 여기서 별도 호출
-          supabase.from('subcontracts').update({ end_date: value }).eq('id', id);
-        }
+          supabase.from('subcontracts').update({ end_date: value as string }).eq('id', id);        }
         return updated;
       }
       return s;
@@ -404,7 +402,16 @@ function App() {
   };
 
   const saveSubcontractLabel = async (id: string, value: string) => {
-    await supabase.from('subcontracts').update({ label: value }).eq('id', id);
+    try {
+      const { error } = await supabase.from('subcontracts').update({ label: value }).eq('id', id);
+      if (error) {
+        console.error('Failed to save subcontract label:', error.message);
+        alert('외주 공정명 저장 실패: ' + error.message);
+      }
+    } catch (unexpectedError) {
+      console.error('An unexpected error occurred while saving subcontract label:', unexpectedError);
+      alert('외주 공정명 저장 중 알 수 없는 오류가 발생했습니다.');
+    }
   };
 
   const deleteSubcontract = async (id: string) => {
@@ -448,7 +455,7 @@ function App() {
     if (!error) fetchWorkItems();
   };
 
-  const updateWorkItem = async (id: string, field: string, value: string) => {
+  const updateWorkItem = useCallback(async (id: string, field: string, value: string) => {
     setWorkItems(prev => prev.map(w => {
       if (w.id === id) {
         const updated = { ...w, [field]: value };
@@ -465,10 +472,19 @@ function App() {
     if (field !== 'label') {
       await supabase.from('work_items').update({ [field]: value }).eq('id', id);
     }
-  };
+  }, [setWorkItems]);
 
   const saveWorkItemLabel = async (id: string, value: string) => {
-    await supabase.from('work_items').update({ label: value }).eq('id', id);
+    try {
+      const { error } = await supabase.from('work_items').update({ label: value }).eq('id', id);
+      if (error) {
+        console.error('Failed to save work item label:', error.message);
+        alert('공정명 저장 실패: ' + error.message);
+      }
+    } catch (unexpectedError) {
+      console.error('An unexpected error occurred while saving work item label:', unexpectedError);
+      alert('공정명 저장 중 알 수 없는 오류가 발생했습니다.');
+    }
   };
 
   const deleteWorkItem = async (id: string) => {
@@ -504,16 +520,16 @@ function App() {
     XLSX.writeFile(workbook, `계산서발행현황_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
-  const updateProjectLocal = (id: string, field: string, value: any) => {
+  const updateProjectLocal = (id: string, field: keyof Project, value: string | number | '미발급' | '발급완료' | '미수금' | '일부수금' | '완료') => {
     setProjects(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
   };
 
-  const syncProjectToDB = async (id: string, field: string, value: any) => {
+  const syncProjectToDB = async (id: string, field: keyof Project, value: string | number | '미발급' | '발급완료' | '미수금' | '일부수금' | '완료') => {
     const { error } = await supabase.from('projects').update({ [field]: value }).eq('id', id);
     if (error) console.error('DB Sync Error:', error.message);
   };
 
-  const handleProjectUpdateImmediate = (id: string, field: string, value: any) => {
+  const handleProjectUpdateImmediate = (id: string, field: keyof Project, value: string | number | '미발급' | '발급완료' | '미수금' | '일부수금' | '완료') => {
     updateProjectLocal(id, field, value);
     syncProjectToDB(id, field, value);
   };
@@ -525,12 +541,12 @@ function App() {
   };
 
   // --- DB 로직 (견적서) ---
-  const fetchQuotations = async () => {
+  const fetchQuotations = useCallback(async () => {
     if (!currentUser) return;
     const { data, error } = await supabase.from('quotations').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
     if (!error) setSavedQuotations(data || []);
     else console.error('견적서 조회 실패:', error);
-  };
+  }, [currentUser, setSavedQuotations]);
 
   const saveCurrentQuotation = async () => {
     if (!currentUser) return;
@@ -552,12 +568,23 @@ function App() {
   };
 
   // --- DB 로직 (실측) ---
-  const fetchMeasurements = async () => {
+  const fetchMeasurements = useCallback(async () => {
     if (!currentUser) return;
     const { data, error } = await supabase.from('measurements_v2').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
     if (!error) setSavedMeasurements(data || []);
     else console.error('실측리포트 조회 실패:', error);
-  };
+  }, [currentUser, setSavedMeasurements]);
+
+  useEffect(() => {
+    if (currentUser) {
+      fetchQuotations();
+      fetchMeasurements();
+      fetchProjects();
+      fetchWorkItems();
+      fetchSubcontracts();
+      fetchCompanyProfile();
+    }
+  }, [currentUser, fetchQuotations, fetchMeasurements, fetchProjects, fetchWorkItems, fetchSubcontracts, fetchCompanyProfile]);
 
   const saveCurrentMeasurement = async () => {
     if (!currentUser) return;
@@ -583,7 +610,7 @@ function App() {
     if (!error) fetchMeasurements();
   };
 
-  const loadMeasurement = (m: any) => {
+  const loadMeasurement = (m: SavedMeasurement) => {
     if (!window.confirm('작성 중인 내용이 사라집니다. 불러오시겠습니까?')) return;
     setMeasureData({
       siteName: m.site_name,
@@ -614,7 +641,7 @@ function App() {
     setMeasureData({ ...measureData, spaces: measureData.spaces.filter(s => s.id !== id) });
   };
 
-  const updateSpace = (id: string, field: keyof InteriorSpace, value: any) => {
+  const updateSpace = (id: string, field: keyof InteriorSpace, value: string | string[]) => {
     setMeasureData({ ...measureData, spaces: measureData.spaces.map(s => s.id === id ? { ...s, [field]: value } : s) });
   };
 
@@ -634,7 +661,7 @@ function App() {
     }
   };
 
-  const toggleChecklist = (field: keyof WorkChecklist, value: any) => {
+  const toggleChecklist = (field: keyof WorkChecklist, value: boolean | string) => {
     setMeasureData({ ...measureData, checklist: { ...measureData.checklist, [field]: value } });
   };
 
@@ -721,6 +748,34 @@ function App() {
   const parseNumber = (str: string) => {
     return parseInt(str.replace(/,/g, "")) || 0;
   };
+
+  // --- 공정명 입력 필터링 핸들러 ---
+  const handleWorkLabelChange = useCallback((
+    e: React.ChangeEvent<HTMLInputElement>,
+    id: string,
+  ) => {
+    const inputValue = e.target.value;
+    const filteredValue = inputValue.replace(/[^가-힣a-zA-Z ]/g, ''); // 한글, 영어 대소문자, 공백만 허용
+
+    if (inputValue !== filteredValue) {
+      alert('공정명은 숫자나 특수문자를 포함할 수 없습니다.');
+    }
+    updateWorkItem(id, 'label', filteredValue);
+  }, [updateWorkItem]);
+
+  // --- 외주 공정명 입력 필터링 핸들러 ---
+  const handleSubcontractLabelChange = useCallback((
+    e: React.ChangeEvent<HTMLInputElement>,
+    id: string,
+  ) => {
+    const inputValue = e.target.value;
+    const filteredValue = inputValue.replace(/[^가-힣a-zA-Z ]/g, ''); // 한글, 영어 대소문자, 공백만 허용
+
+    if (inputValue !== filteredValue) {
+      alert('외주 공정명은 숫자나 특수문자를 포함할 수 없습니다.');
+    }
+    updateSubcontract(id, 'label', filteredValue);
+  }, [updateSubcontract]);
 
   if (isLoading) return <div className="loading">로딩 중...</div>;
 
@@ -945,7 +1000,7 @@ function App() {
                                   </button>
                                 </div>
                               </div>
-                              <input className="work-label-input" value={w.label} onChange={e => updateWorkItem(w.id, 'label', e.target.value)} onCompositionEnd={e => saveWorkItemLabel(w.id, e.currentTarget.value)} onBlur={e => saveWorkItemLabel(w.id, e.currentTarget.value)} placeholder="공정명" />
+                              <input className="work-label-input" value={w.label} onChange={e => handleWorkLabelChange(e, w.id)} onCompositionEnd={e => saveWorkItemLabel(w.id, e.currentTarget.value)} onBlur={e => saveWorkItemLabel(w.id, e.currentTarget.value)} placeholder="공정명" />
                               <select value={w.status} onChange={e => updateWorkItem(w.id, 'status', e.target.value)} className={`status-select ${w.status.replace(/ /g, '-')}`}>
                                 <option value="실측예정">실측예정</option>
                                 <option value="실측 후 대기">실측 후 대기</option>
@@ -986,7 +1041,7 @@ function App() {
                                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                                 </button>
                               </div>
-                              <input className="work-label-input" placeholder="공정명" value={s.label} onChange={e => updateSubcontract(s.id, 'label', e.target.value)} onCompositionEnd={e => saveSubcontractLabel(s.id, e.currentTarget.value)} onBlur={e => saveSubcontractLabel(s.id, e.currentTarget.value)} />
+                              <input className="work-label-input" placeholder="공정명" value={s.label} onChange={e => handleSubcontractLabelChange(e, s.id)} onCompositionEnd={e => saveSubcontractLabel(s.id, e.currentTarget.value)} onBlur={e => saveSubcontractLabel(s.id, e.currentTarget.value)} />
                               <input className="sub-amount-input" placeholder="금액" type="text" value={s.amount ? formatNumber(s.amount) : ''} onChange={e => updateSubcontract(s.id, 'amount', parseNumber(e.target.value))} />
                               <div className="date-range-inputs">
                                 <div className="date-input-container">
@@ -1055,7 +1110,17 @@ function App() {
 
                       {/* ── 계산서 발행 정보 (접기/펼치기) ── */}
                       <div className="biz-info-section">
-                        <button className="biz-info-toggle" onClick={() => setExpandedBizInfo(prev => { const next = new Set(prev); next.has(project.id) ? next.delete(project.id) : next.add(project.id); return next; })}>
+                        <button className="biz-info-toggle" onClick={() => {
+                          setExpandedBizInfo(prev => {
+                            const next = new Set(prev);
+                            if (next.has(project.id)) {
+                              next.delete(project.id);
+                            } else {
+                              next.add(project.id);
+                            }
+                            return next;
+                          });
+                        }}>
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{transform: expandedBizInfo.has(project.id) ? 'rotate(90deg)' : 'rotate(0deg)', transition:'transform 200ms'}}>
                             <polyline points="9 18 15 12 9 6"/>
                           </svg>
@@ -1101,9 +1166,9 @@ function App() {
                       ))
                       .sort((a, b) => a.start_date.localeCompare(b.start_date) || (b.end_date || b.start_date).localeCompare(a.end_date || a.start_date));
 
-                    const eventSlots: any[][] = [];
+                    const eventSlots: (WorkItem | Subcontract)[][] = [];
                     monthEvents.forEach(event => {
-                      let slotIndex = eventSlots.findIndex(slot => {
+                    const slotIndex = eventSlots.findIndex(slot => {
                         return !slot.some(se => {
                           const eStart = event.start_date;
                           const eEnd = event.end_date || event.start_date;
