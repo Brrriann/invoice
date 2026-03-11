@@ -372,6 +372,8 @@ function App() {
       end_date: workItem.end_date
     }]);
     if (!error) {
+      // 원본 공정 삭제
+      await deleteWorkItem(workItem.id);
       await fetchSubcontracts();
       // 외주 섹션으로 스크롤
       const subSection = document.querySelector('.sub-cards-grid');
