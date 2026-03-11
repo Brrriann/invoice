@@ -977,7 +977,7 @@ function App() {
                               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                               공정 ({projWorkItems.length})
                             </span>
-                            <div style={{color: '#ef4444', fontSize: '0.75rem', fontWeight: 'bold'}}>*입력창이 빨간색일 때에는 내용이 저장되지 않습니다</div>
+                            <div style={{color: '#ef4444', fontSize: '0.75rem', fontWeight: 'bold'}}>*입력창이 빨간색일때 페이지를 벗어나면 내용이 저장되지 않습니다. 페이지를 벗어나기전 다른곳을 클릭하여 입력창값을 확정해주세요.</div>
                           </div>
                           <button className="btn-add-work" onClick={() => addWorkItem(project.id, projWorkItems.length)}>+ 추가</button>
                         </div>
@@ -1032,7 +1032,7 @@ function App() {
                               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                               외주 ({projSubs.length})
                             </span>
-                            <div style={{color: '#ef4444', fontSize: '0.75rem', fontWeight: 'bold'}}>*입력창이 빨간색일 때에는 내용이 저장되지 않습니다</div>
+                            <div style={{color: '#ef4444', fontSize: '0.75rem', fontWeight: 'bold'}}>*입력창이 빨간색일때 페이지를 벗어나면 내용이 저장되지 않습니다. 페이지를 벗어나기전 다른곳을 클릭하여 입력창값을 확정해주세요.</div>
                           </div>
                         </div>
                         <div className="sub-cards-grid">
