@@ -994,7 +994,7 @@ function App() {
                                 </div>
                               </div>
                               <input 
-                                className={`work-label-input ${!w.label.trim() ? 'red-border' : ''}`}
+                                className="work-label-input"
                                 value={w.label} 
                                 onChange={e => handleWorkLabelChange(e, w.id)} 
                                 onCompositionEnd={e => saveWorkItemLabel(w.id, e.currentTarget.value)} 
@@ -1045,7 +1045,7 @@ function App() {
                                 </button>
                               </div>
                               <input 
-                                className={`work-label-input ${!s.label.trim() ? 'red-border' : ''}`}
+                                className="work-label-input"
                                 placeholder="공정명" 
                                 value={s.label} 
                                 onChange={e => handleSubcontractLabelChange(e, s.id)} 
