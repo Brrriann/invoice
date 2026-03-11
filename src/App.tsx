@@ -402,6 +402,7 @@ function App() {
   };
 
   const saveSubcontractLabel = async (id: string, value: string) => {
+    if (!value.trim()) return; // 비어있으면 저장하지 않음
     try {
       const { error } = await supabase.from('subcontracts').update({ label: value }).eq('id', id);
       if (error) {
@@ -475,6 +476,7 @@ function App() {
   }, [setWorkItems]);
 
   const saveWorkItemLabel = async (id: string, value: string) => {
+    if (!value.trim()) return; // 비어있으면 저장하지 않음
     try {
       const { error } = await supabase.from('work_items').update({ label: value }).eq('id', id);
       if (error) {
@@ -749,32 +751,20 @@ function App() {
     return parseInt(str.replace(/,/g, "")) || 0;
   };
 
-  // --- 공정명 입력 필터링 핸들러 ---
+  // --- 공정명 입력 핸들러 (숫자/기호 허용으로 복구) ---
   const handleWorkLabelChange = useCallback((
     e: React.ChangeEvent<HTMLInputElement>,
     id: string,
   ) => {
-    const inputValue = e.target.value;
-    const filteredValue = inputValue.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z ]/g, ''); // 한글(자음, 모음 포함), 영어 대소문자, 공백만 허용
-
-    if (inputValue !== filteredValue) {
-      alert('공정명은 숫자나 특수문자를 포함할 수 없습니다.');
-    }
-    updateWorkItem(id, 'label', filteredValue);
+    updateWorkItem(id, 'label', e.target.value);
   }, [updateWorkItem]);
 
-  // --- 외주 공정명 입력 필터링 핸들러 ---
+  // --- 외주 공정명 입력 핸들러 (숫자/기호 허용으로 복구) ---
   const handleSubcontractLabelChange = useCallback((
     e: React.ChangeEvent<HTMLInputElement>,
     id: string,
   ) => {
-    const inputValue = e.target.value;
-    const filteredValue = inputValue.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z ]/g, ''); // 한글(자음, 모음 포함), 영어 대소문자, 공백만 허용
-
-    if (inputValue !== filteredValue) {
-      alert('외주 공정명은 숫자나 특수문자를 포함할 수 없습니다.');
-    }
-    updateSubcontract(id, 'label', filteredValue);
+    updateSubcontract(id, 'label', e.target.value);
   }, [updateSubcontract]);
 
   if (isLoading) return <div className="loading">로딩 중...</div>;
@@ -984,7 +974,7 @@ function App() {
                         <div className="card-section-header">
                           <span className="card-section-title">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                            공정 ({projWorkItems.length})
+                            공정 ({projWorkItems.length}) <small style={{color: '#ef4444', marginLeft: '8px', fontSize: '0.8em'}}>*입력창이 빨간색일 때에는 내용이 저장되지 않습니다</small>
                           </span>
                           <button className="btn-add-work" onClick={() => addWorkItem(project.id, projWorkItems.length)}>+ 추가</button>
                         </div>
@@ -1000,7 +990,14 @@ function App() {
                                   </button>
                                 </div>
                               </div>
-                              <input className="work-label-input" value={w.label} onChange={e => handleWorkLabelChange(e, w.id)} onCompositionEnd={e => saveWorkItemLabel(w.id, e.currentTarget.value)} onBlur={e => saveWorkItemLabel(w.id, e.currentTarget.value)} placeholder="공정명" />
+                              <input 
+                                className={`work-label-input ${!w.label.trim() ? 'red-border' : ''}`}
+                                value={w.label} 
+                                onChange={e => handleWorkLabelChange(e, w.id)} 
+                                onCompositionEnd={e => saveWorkItemLabel(w.id, e.currentTarget.value)} 
+                                onBlur={e => saveWorkItemLabel(w.id, e.currentTarget.value)} 
+                                placeholder="공정명"
+                              />
                               <select value={w.status} onChange={e => updateWorkItem(w.id, 'status', e.target.value)} className={`status-select ${w.status.replace(/ /g, '-')}`}>
                                 <option value="실측예정">실측예정</option>
                                 <option value="실측 후 대기">실측 후 대기</option>
@@ -1029,7 +1026,7 @@ function App() {
                         <div className="card-section-header">
                           <span className="card-section-title">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                            외주 ({projSubs.length})
+                            외주 ({projSubs.length}) <small style={{color: '#ef4444', marginLeft: '8px', fontSize: '0.8em'}}>*입력창이 빨간색일 때에는 내용이 저장되지 않습니다</small>
                           </span>
                         </div>
                         <div className="sub-cards-grid">
@@ -1041,7 +1038,14 @@ function App() {
                                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                                 </button>
                               </div>
-                              <input className="work-label-input" placeholder="공정명" value={s.label} onChange={e => handleSubcontractLabelChange(e, s.id)} onCompositionEnd={e => saveSubcontractLabel(s.id, e.currentTarget.value)} onBlur={e => saveSubcontractLabel(s.id, e.currentTarget.value)} />
+                              <input 
+                                className={`work-label-input ${!s.label.trim() ? 'red-border' : ''}`}
+                                placeholder="공정명" 
+                                value={s.label} 
+                                onChange={e => handleSubcontractLabelChange(e, s.id)} 
+                                onCompositionEnd={e => saveSubcontractLabel(s.id, e.currentTarget.value)} 
+                                onBlur={e => saveSubcontractLabel(s.id, e.currentTarget.value)} 
+                              />
                               <input className="sub-amount-input" placeholder="금액" type="text" value={s.amount ? formatNumber(s.amount) : ''} onChange={e => updateSubcontract(s.id, 'amount', parseNumber(e.target.value))} />
                               <div className="date-range-inputs">
                                 <div className="date-input-container">

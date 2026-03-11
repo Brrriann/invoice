@@ -2501,3 +2501,6 @@ input::placeholder, textarea::placeholder {
   opacity: 0;
   cursor: pointer;
 }
+\
+.red-border { border: 2px solid #ef4444 !important; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important; }
+\
