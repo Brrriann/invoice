@@ -2455,3 +2455,24 @@ input::placeholder, textarea::placeholder {
 
   .print-logo { max-height: 60px; max-width: 200px; object-fit: contain; }
 }
+
+/* Date input container with overlay picker */
+.date-input-container {
+  position: relative;
+  width: 100%;
+}
+
+.date-input-container input[type="text"] {
+  width: 100%;
+  cursor: pointer;
+}
+
+.date-input-container .date-picker-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}

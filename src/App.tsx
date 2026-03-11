@@ -165,12 +165,6 @@ const formatDateToMMDD = (dateStr: string): string => {
   return dateStr.slice(5); // YYYY-MM-DD → MM-DD
 };
 
-const formatMMDDToFullDate = (mmdd: string): string => {
-  if (!mmdd) return '';
-  const currentYear = new Date().getFullYear();
-  return `${currentYear}-${mmdd}`;
-};
-
 function App() {
   // --- 인증 관련 상태 ---
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -943,9 +937,15 @@ function App() {
                                 <option value="완료">완료</option>
                               </select>
                               <div className="date-range-inputs">
-                                <input type="text" placeholder="MM-DD" value={formatDateToMMDD(w.start_date || '')} onChange={e => updateWorkItem(w.id, 'start_date', formatMMDDToFullDate(e.target.value))} title="시작일" />
+                                <div className="date-input-container">
+                                  <input type="text" placeholder="MM-DD" value={formatDateToMMDD(w.start_date || '')} readOnly />
+                                  <input type="date" value={w.start_date || ''} onChange={e => updateWorkItem(w.id, 'start_date', e.target.value)} className="date-picker-overlay" title="시작일" />
+                                </div>
                                 <span className="date-separator">~</span>
-                                <input type="text" placeholder="MM-DD" value={formatDateToMMDD(w.end_date || '')} onChange={e => updateWorkItem(w.id, 'end_date', formatMMDDToFullDate(e.target.value))} title="종료일" />
+                                <div className="date-input-container">
+                                  <input type="text" placeholder="MM-DD" value={formatDateToMMDD(w.end_date || '')} readOnly />
+                                  <input type="date" value={w.end_date || ''} onChange={e => updateWorkItem(w.id, 'end_date', e.target.value)} className="date-picker-overlay" title="종료일" />
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -973,9 +973,15 @@ function App() {
                               <input className="work-label-input" placeholder="공정명" value={s.label} onChange={e => updateSubcontract(s.id, 'label', e.target.value)} onCompositionEnd={e => saveSubcontractLabel(s.id, e.currentTarget.value)} />
                               <input className="sub-amount-input" placeholder="금액" type="text" value={s.amount ? formatNumber(s.amount) : ''} onChange={e => updateSubcontract(s.id, 'amount', parseNumber(e.target.value))} />
                               <div className="date-range-inputs">
-                                <input type="text" placeholder="MM-DD" value={formatDateToMMDD(s.start_date || '')} onChange={e => updateSubcontract(s.id, 'start_date', formatMMDDToFullDate(e.target.value))} title="시작일" />
+                                <div className="date-input-container">
+                                  <input type="text" placeholder="MM-DD" value={formatDateToMMDD(s.start_date || '')} readOnly />
+                                  <input type="date" value={s.start_date || ''} onChange={e => updateSubcontract(s.id, 'start_date', e.target.value)} className="date-picker-overlay" title="시작일" />
+                                </div>
                                 <span className="date-separator">~</span>
-                                <input type="text" placeholder="MM-DD" value={formatDateToMMDD(s.end_date || '')} onChange={e => updateSubcontract(s.id, 'end_date', formatMMDDToFullDate(e.target.value))} title="종료일" />
+                                <div className="date-input-container">
+                                  <input type="text" placeholder="MM-DD" value={formatDateToMMDD(s.end_date || '')} readOnly />
+                                  <input type="date" value={s.end_date || ''} onChange={e => updateSubcontract(s.id, 'end_date', e.target.value)} className="date-picker-overlay" title="종료일" />
+                                </div>
                               </div>
                               <div className="sub-checks">
                                 <label className={`sub-check ${s.invoice_issued ? 'on' : ''}`}>
