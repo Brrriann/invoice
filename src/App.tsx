@@ -363,10 +363,32 @@ function App() {
     if (!currentUser) return;
     const { error } = await supabase.from('subcontracts').insert([{
       project_id: projectId, user_id: currentUser.id,
-      label: '', amount: 0, invoice_issued: false, payment_done: false, 
+      label: '', amount: 0, invoice_issued: false, payment_done: false,
       start_date: '', end_date: ''
     }]);
     if (!error) fetchSubcontracts();
+  };
+
+  const createSubcontractFromWorkItem = async (projectId: string, workItem: WorkItem) => {
+    if (!currentUser) return;
+    const { error } = await supabase.from('subcontracts').insert([{
+      project_id: projectId,
+      user_id: currentUser.id,
+      label: workItem.label,
+      amount: 0,
+      invoice_issued: false,
+      payment_done: false,
+      start_date: workItem.start_date,
+      end_date: workItem.end_date
+    }]);
+    if (!error) {
+      await fetchSubcontracts();
+      // 외주 섹션으로 스크롤
+      const subSection = document.querySelector('.sub-cards-grid');
+      if (subSection) {
+        setTimeout(() => subSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      }
+    }
   };
 
   const updateSubcontract = async (id: string, field: string, value: any) => {
@@ -924,9 +946,12 @@ function App() {
                             <div key={w.id} className={`work-item-chip ${w.status === '완료' ? 'done' : ''}`}>
                               <div className="chip-top">
                                 <span className="chip-index">{idx + 1}</span>
-                                <button className="btn-remove-work" onClick={() => deleteWorkItem(w.id)} aria-label="공정 삭제">
-                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                </button>
+                                <div className="chip-actions">
+                                  <button className="btn-create-subcontract" onClick={() => createSubcontractFromWorkItem(project.id, w)} title="외주로 생성">외주</button>
+                                  <button className="btn-remove-work" onClick={() => deleteWorkItem(w.id)} aria-label="공정 삭제">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                  </button>
+                                </div>
                               </div>
                               <input className="work-label-input" value={w.label} onChange={e => updateWorkItem(w.id, 'label', e.target.value)} onCompositionEnd={e => saveWorkItemLabel(w.id, e.currentTarget.value)} placeholder="공정명" />
                               <select value={w.status} onChange={e => updateWorkItem(w.id, 'status', e.target.value)} className={`status-select ${w.status.replace(/ /g, '-')}`}>
