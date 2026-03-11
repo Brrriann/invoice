@@ -755,7 +755,7 @@ function App() {
     id: string,
   ) => {
     const inputValue = e.target.value;
-    const filteredValue = inputValue.replace(/[^가-힣a-zA-Z ]/g, ''); // 한글, 영어 대소문자, 공백만 허용
+    const filteredValue = inputValue.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z ]/g, ''); // 한글(자음, 모음 포함), 영어 대소문자, 공백만 허용
 
     if (inputValue !== filteredValue) {
       alert('공정명은 숫자나 특수문자를 포함할 수 없습니다.');
@@ -769,7 +769,7 @@ function App() {
     id: string,
   ) => {
     const inputValue = e.target.value;
-    const filteredValue = inputValue.replace(/[^가-힣a-zA-Z ]/g, ''); // 한글, 영어 대소문자, 공백만 허용
+    const filteredValue = inputValue.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z ]/g, ''); // 한글(자음, 모음 포함), 영어 대소문자, 공백만 허용
 
     if (inputValue !== filteredValue) {
       alert('외주 공정명은 숫자나 특수문자를 포함할 수 없습니다.');
