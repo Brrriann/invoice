@@ -74,11 +74,11 @@
         인테리어 업체 맞춤 업무 솔루션
       </div>
       <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-primary leading-tight tracking-tight mb-6">
-        현장 공정부터 견적·실측까지<br />
-        <span class="text-cta">하나로 끝내세요</span>
+        현장 공정부터 견적·실측,<br />
+        <span class="text-cta">AI 마케팅까지 하나로</span>
       </h1>
       <p class="text-lg sm:text-xl text-secondary leading-relaxed mb-10 max-w-2xl mx-auto">
-        공정 대시보드, 견적서 작성, 실측 템플릿 — 인테리어 현장 업무의 처음부터 끝까지를 하나의 시스템으로 관리합니다.
+        공정 대시보드, 견적서, 실측 리포트, 그리고 AI 블로그 글 작성기까지 — 인테리어 현장 업무와 마케팅을 통합 관리합니다.
       </p>
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
         <a href="https://invoice-2cd.pages.dev/" class="inline-flex items-center justify-center gap-2 bg-cta hover:bg-cta-hover text-white font-semibold px-8 py-4 rounded-xl transition-colors duration-200 cursor-pointer text-base shadow-lg shadow-blue-200">
@@ -99,13 +99,14 @@
           <div class="w-3 h-3 rounded-full bg-red-400"></div>
           <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
           <div class="w-3 h-3 rounded-full bg-green-400"></div>
-          <span class="ml-4 text-slate-400 text-xs">공정관리시스템 — 공정 대시보드</span>
+          <span class="ml-4 text-slate-400 text-xs">공정관리시스템 — 통합 대시보드</span>
         </div>
         <!-- Nav mock -->
-        <div class="flex gap-3 px-6 py-3 border-b border-slate-700 bg-slate-850">
-          <span class="text-xs px-3 py-1.5 rounded-lg bg-cta text-white font-medium">공정 대시보드</span>
-          <span class="text-xs px-3 py-1.5 rounded-lg bg-slate-700 text-slate-300">견적서 작성</span>
-          <span class="text-xs px-3 py-1.5 rounded-lg bg-slate-700 text-slate-300">실측 템플릿</span>
+        <div class="flex gap-3 px-6 py-3 border-b border-slate-700 bg-slate-850 overflow-x-auto">
+          <span class="text-xs px-3 py-1.5 rounded-lg bg-cta text-white font-medium whitespace-nowrap">공정 대시보드</span>
+          <span class="text-xs px-3 py-1.5 rounded-lg bg-slate-700 text-slate-300 whitespace-nowrap">견적서 작성</span>
+          <span class="text-xs px-3 py-1.5 rounded-lg bg-slate-700 text-slate-300 whitespace-nowrap">실측 템플릿</span>
+          <span class="text-xs px-3 py-1.5 rounded-lg bg-purple-600 text-white font-medium whitespace-nowrap">AI 블로그</span>
         </div>
         <!-- Dashboard mock content -->
         <div class="p-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -126,65 +127,22 @@
                 <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">공정2 목공</span>
                 <span class="text-xs text-yellow-400">시공중</span>
               </div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">공정3 도배</span>
-                <span class="text-xs text-slate-400">시공확정</span>
-              </div>
             </div>
             <div class="flex gap-2 text-xs">
               <span class="px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-300">계산서 미발급</span>
               <span class="px-2 py-0.5 rounded bg-red-500/20 text-red-300">미수금</span>
             </div>
           </div>
-          <!-- Project card 2 -->
-          <div class="bg-slate-800 rounded-xl p-4 border-l-4 border-green-400">
-            <div class="flex justify-between items-start mb-3">
-              <div>
-                <div class="text-white font-semibold text-sm">서초 오피스텔 인테리어</div>
-                <div class="text-slate-400 text-xs mt-0.5">이민수 고객</div>
-              </div>
+          <!-- AI Blog Suggestion Mock -->
+          <div class="bg-purple-900/30 rounded-xl p-4 border-l-4 border-purple-500 border border-purple-500/30 sm:col-span-2">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center text-[10px] text-white font-bold">AI</div>
+              <div class="text-purple-200 font-semibold text-sm">시공 후기 자동 생성 완료</div>
             </div>
-            <div class="space-y-1.5 mb-3">
-              <div class="flex items-center gap-2">
-                <span class="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-300">공정1 타일</span>
-                <span class="text-xs text-green-400">완료</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-300">공정2 도장</span>
-                <span class="text-xs text-green-400">완료</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-300">외주1 조명</span>
-                <span class="text-xs text-green-400">대금지급완료</span>
-              </div>
+            <div class="bg-black/20 rounded-lg p-3 text-[11px] text-purple-100 leading-relaxed italic mb-3">
+              "강남구 현장의 화이트 우드 리모델링 시공이 완료되었습니다! 꼼꼼한 철거부터 세련된 목공 디테일까지, 변화된 모습을 블로그에서 확인하세요..."
             </div>
-            <div class="flex gap-2 text-xs">
-              <span class="px-2 py-0.5 rounded bg-green-500/20 text-green-300">계산서 완료</span>
-              <span class="px-2 py-0.5 rounded bg-green-500/20 text-green-300">수금완료</span>
-            </div>
-          </div>
-          <!-- Project card 3 -->
-          <div class="bg-slate-800 rounded-xl p-4 border-l-4 border-purple-400">
-            <div class="flex justify-between items-start mb-3">
-              <div>
-                <div class="text-white font-semibold text-sm">마포 카페 인테리어</div>
-                <div class="text-slate-400 text-xs mt-0.5">박지영 고객</div>
-              </div>
-            </div>
-            <div class="space-y-1.5 mb-3">
-              <div class="flex items-center gap-2">
-                <span class="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300">공정1 바닥재</span>
-                <span class="text-xs text-slate-400">실측예정</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-300">외주1 전기</span>
-                <span class="text-xs text-slate-400">계산서 대기</span>
-              </div>
-            </div>
-            <div class="flex gap-2 text-xs">
-              <span class="px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-300">계산서 미발급</span>
-              <span class="px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-300">일부수금</span>
-            </div>
+            <button class="w-full py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-lg transition-colors">블로그 글로 복사하기</button>
           </div>
         </div>
       </div>
@@ -192,11 +150,11 @@
     </div>
   </section>
 
-  <!-- 3 Core Features -->
+  <!-- 4 Core Features -->
   <section id="features" class="py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
     <div class="text-center max-w-2xl mx-auto mb-16 fade-up">
-      <h2 class="text-3xl sm:text-4xl font-extrabold text-primary mb-4">3가지 핵심 기능</h2>
-      <p class="text-secondary text-lg">인테리어 현장 업무에 꼭 필요한 것만 담았습니다</p>
+      <h2 class="text-3xl sm:text-4xl font-extrabold text-primary mb-4">4가지 핵심 기능</h2>
+      <p class="text-secondary text-lg">인테리어 현장 업무와 마케팅까지 한 번에 해결하세요</p>
     </div>
 
     <!-- Feature 1: 공정 대시보드 -->
@@ -213,36 +171,15 @@
             <li class="flex items-start gap-3">
               <svg class="w-5 h-5 text-cta flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
               <div>
-                <span class="font-semibold text-primary">5단계 공정 상태 관리</span>
-                <p class="text-sm text-secondary mt-0.5">실측예정 → 실측 후 대기 → 시공확정 → 시공중 → 완료</p>
+                <span class="font-semibold text-primary">공정 상태 및 일정 관리</span>
+                <p class="text-sm text-secondary mt-0.5">실측예정부터 완료까지 5단계 상태와 시작/종료일 관리</p>
               </div>
             </li>
             <li class="flex items-start gap-3">
               <svg class="w-5 h-5 text-cta flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
               <div>
-                <span class="font-semibold text-primary">외주 관리</span>
-                <p class="text-sm text-secondary mt-0.5">외주 금액·날짜, 계산서 발행·대금 지급 여부를 현장 단위로 추적</p>
-              </div>
-            </li>
-            <li class="flex items-start gap-3">
-              <svg class="w-5 h-5 text-cta flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-              <div>
-                <span class="font-semibold text-primary">계산서·수금 현황</span>
-                <p class="text-sm text-secondary mt-0.5">미발급 합계 즉시 확인, 수금 상태(미수금/일부수금/완료) 관리</p>
-              </div>
-            </li>
-            <li class="flex items-start gap-3">
-              <svg class="w-5 h-5 text-cta flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-              <div>
-                <span class="font-semibold text-primary">캘린더 보기</span>
-                <p class="text-sm text-secondary mt-0.5">월별 캘린더로 공정·외주 일정을 현장별 색상으로 시각화</p>
-              </div>
-            </li>
-            <li class="flex items-start gap-3">
-              <svg class="w-5 h-5 text-cta flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-              <div>
-                <span class="font-semibold text-primary">엑셀 다운로드</span>
-                <p class="text-sm text-secondary mt-0.5">계산서 현황 리스트를 엑셀 파일로 즉시 내보내기</p>
+                <span class="font-semibold text-primary">외주 및 수금 현황 추적</span>
+                <p class="text-sm text-secondary mt-0.5">현장별 외주 대금 지급과 계약금 수금 상태를 실시간 기록</p>
               </div>
             </li>
           </ul>
@@ -254,16 +191,6 @@
             <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-border">
               <div class="w-2 h-2 rounded-full bg-slate-300"></div>
               <span class="text-sm font-medium text-secondary">실측예정</span>
-            </div>
-            <div class="flex justify-center"><svg class="w-4 h-4 text-border" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></div>
-            <div class="flex items-center gap-3 p-3 rounded-xl bg-blue-50 border border-blue-100">
-              <div class="w-2 h-2 rounded-full bg-blue-400"></div>
-              <span class="text-sm font-medium text-cta">실측 후 대기</span>
-            </div>
-            <div class="flex justify-center"><svg class="w-4 h-4 text-border" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></div>
-            <div class="flex items-center gap-3 p-3 rounded-xl bg-yellow-50 border border-yellow-100">
-              <div class="w-2 h-2 rounded-full bg-yellow-400"></div>
-              <span class="text-sm font-medium text-yellow-700">시공확정</span>
             </div>
             <div class="flex justify-center"><svg class="w-4 h-4 text-border" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg></div>
             <div class="flex items-center gap-3 p-3 rounded-xl bg-orange-50 border border-orange-100">
@@ -285,41 +212,23 @@
     <!-- Feature 2: 견적서 -->
     <div class="mb-16 fade-up">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <!-- Quotation preview -->
         <div class="order-2 lg:order-1 bg-white border border-border rounded-2xl p-6 shadow-sm">
           <div class="flex items-center justify-between mb-4">
-            <div>
-              <div class="font-bold text-primary">홍길동 인테리어</div>
-              <div class="text-xs text-muted">사업자등록번호 123-45-67890</div>
-            </div>
-            <div class="text-right">
-              <div class="text-lg font-extrabold text-cta">견 적 서</div>
-              <div class="text-xs text-muted">No. 2026-001</div>
-            </div>
+            <div class="font-bold text-primary text-sm">견적서 (인쇄 양식)</div>
+            <div class="text-lg font-extrabold text-cta">견 적 서</div>
           </div>
-          <div class="bg-cta/5 border border-cta/20 rounded-xl p-3 mb-4">
-            <div class="text-xs text-muted mb-1">견적 총 합계액 (VAT포함)</div>
-            <div class="text-xl font-extrabold text-primary">KRW 5,500,000</div>
+          <div class="bg-cta/5 border border-cta/20 rounded-xl p-3 mb-4 text-center">
+            <div class="text-[10px] text-muted mb-1">견적 총 합계액 (VAT포함)</div>
+            <div class="text-lg font-extrabold text-primary">KRW 5,500,000</div>
           </div>
-          <table class="w-full text-xs border-collapse mb-4">
-            <thead>
-              <tr class="bg-slate-50">
-                <th class="border border-border p-2 text-left text-muted font-medium">품명</th>
-                <th class="border border-border p-2 text-center text-muted font-medium">수량</th>
-                <th class="border border-border p-2 text-right text-muted font-medium">단가</th>
-                <th class="border border-border p-2 text-right text-muted font-medium">금액</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td class="border border-border p-2">바닥재 시공</td><td class="border border-border p-2 text-center">1식</td><td class="border border-border p-2 text-right">1,500,000</td><td class="border border-border p-2 text-right">1,500,000</td></tr>
-              <tr><td class="border border-border p-2">도배 시공</td><td class="border border-border p-2 text-center">1식</td><td class="border border-border p-2 text-right">800,000</td><td class="border border-border p-2 text-right">800,000</td></tr>
-              <tr><td class="border border-border p-2">조명 설치</td><td class="border border-border p-2 text-center">10EA</td><td class="border border-border p-2 text-right">70,000</td><td class="border border-border p-2 text-right">700,000</td></tr>
-              <tr><td class="border border-border p-2 text-muted" colspan="3">옵션: 커튼 설치</td><td class="border border-border p-2 text-right">500,000</td></tr>
-            </tbody>
-          </table>
-          <div class="flex gap-2">
-            <div class="flex-1 bg-cta text-white text-center text-xs font-semibold py-2 rounded-lg cursor-pointer hover:bg-cta-hover transition-colors duration-200">클라우드 저장</div>
-            <div class="flex-1 bg-primary text-white text-center text-xs font-semibold py-2 rounded-lg cursor-pointer hover:bg-slate-800 transition-colors duration-200">인쇄 / PDF</div>
+          <div class="space-y-2 opacity-60">
+            <div class="h-4 bg-slate-100 rounded w-full"></div>
+            <div class="h-4 bg-slate-100 rounded w-5/6"></div>
+            <div class="h-4 bg-slate-100 rounded w-full"></div>
+          </div>
+          <div class="mt-6 flex gap-2">
+            <div class="flex-1 bg-cta text-white text-center text-[10px] font-bold py-2 rounded-lg">클라우드 저장</div>
+            <div class="flex-1 bg-primary text-white text-center text-[10px] font-bold py-2 rounded-lg">PDF 출력</div>
           </div>
         </div>
         <div class="order-1 lg:order-2">
@@ -328,34 +237,20 @@
             기능 02
           </div>
           <h3 class="text-2xl sm:text-3xl font-extrabold text-primary mb-4">견적서 작성</h3>
-          <p class="text-secondary leading-relaxed mb-6">공급자 정보는 한 번만 입력하면 자동 저장됩니다. 고객 정보와 품목만 입력하면 전문 견적서가 완성됩니다.</p>
+          <p class="text-secondary leading-relaxed mb-6">고객 정보와 품목만 입력하면 전문적인 견적서가 완성됩니다. 공급자 정보는 한 번만 입력하면 평생 자동 저장됩니다.</p>
           <ul class="space-y-3">
             <li class="flex items-start gap-3">
               <svg class="w-5 h-5 text-cta flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
               <div>
-                <span class="font-semibold text-primary">공급자 정보 자동 저장</span>
-                <p class="text-sm text-secondary mt-0.5">상호, 대표자, 사업자번호 등 로그인할 때마다 자동으로 불러옴</p>
+                <span class="font-semibold text-primary">자동 수식 계산</span>
+                <p class="text-sm text-secondary mt-0.5">단가와 수량 입력 시 공급가액, 부가세, 합계금액 자동 계산</p>
               </div>
             </li>
             <li class="flex items-start gap-3">
               <svg class="w-5 h-5 text-cta flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
               <div>
-                <span class="font-semibold text-primary">일반 품목 + 옵션 품목 분리</span>
-                <p class="text-sm text-secondary mt-0.5">품명·단위·수량·단가·비고 입력, VAT 10% 합계 자동 계산</p>
-              </div>
-            </li>
-            <li class="flex items-start gap-3">
-              <svg class="w-5 h-5 text-cta flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-              <div>
-                <span class="font-semibold text-primary">로고 + 자사 소개 출력</span>
-                <p class="text-sm text-secondary mt-0.5">로고 업로드, 회사 소개 문구를 견적서 하단에 포함 여부 선택 가능</p>
-              </div>
-            </li>
-            <li class="flex items-start gap-3">
-              <svg class="w-5 h-5 text-cta flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-              <div>
-                <span class="font-semibold text-primary">클라우드 저장 + PDF 출력</span>
-                <p class="text-sm text-secondary mt-0.5">저장 내역에서 언제든 불러오기, 전문 양식으로 인쇄 또는 PDF 저장</p>
+                <span class="font-semibold text-primary">자사 소개 자동 포함</span>
+                <p class="text-sm text-secondary mt-0.5">로고와 강점 문구를 포함해 브랜드 신뢰도를 높이는 출력 양식</p>
               </div>
             </li>
           </ul>
@@ -366,7 +261,7 @@
     <div class="border-t border-border my-16"></div>
 
     <!-- Feature 3: 실측 템플릿 -->
-    <div class="fade-up">
+    <div class="mb-16 fade-up">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <div>
           <div class="inline-flex items-center gap-2 bg-blue-50 text-cta text-sm font-semibold px-3 py-1.5 rounded-lg mb-4">
@@ -374,100 +269,108 @@
             기능 03
           </div>
           <h3 class="text-2xl sm:text-3xl font-extrabold text-primary mb-4">실측 템플릿</h3>
-          <p class="text-secondary leading-relaxed mb-6">현장에서 바로 입력하는 디지털 실측 리포트입니다. 공간별 규격, 마감재 상태, 사진까지 체계적으로 기록하고 PDF로 출력하세요.</p>
+          <p class="text-secondary leading-relaxed mb-6">현장에서 바로 입력하는 디지털 실측 리포트입니다. 공간별 규격, 마감재 상태, 사진까지 체계적으로 기록하세요.</p>
           <ul class="space-y-3">
             <li class="flex items-start gap-3">
               <svg class="w-5 h-5 text-cta flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
               <div>
-                <span class="font-semibold text-primary">공간별 규격 기록 (mm)</span>
-                <p class="text-sm text-secondary mt-0.5">가로(W)·세로(D)·천장고(H), 창문·출입문 위치/크기</p>
+                <span class="font-semibold text-primary">공간별 상세 기록</span>
+                <p class="text-sm text-secondary mt-0.5">가로·세로·고(H) 규격과 창문·도어 위치를 모바일로 즉시 기록</p>
               </div>
             </li>
             <li class="flex items-start gap-3">
               <svg class="w-5 h-5 text-cta flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
               <div>
-                <span class="font-semibold text-primary">마감재 현황 + 교체 제안</span>
-                <p class="text-sm text-secondary mt-0.5">바닥재·벽면·천장의 현재 상태와 제안 자재를 나란히 기록</p>
-              </div>
-            </li>
-            <li class="flex items-start gap-3">
-              <svg class="w-5 h-5 text-cta flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-              <div>
-                <span class="font-semibold text-primary">공사 항목 체크리스트</span>
-                <p class="text-sm text-secondary mt-0.5">철거·바닥재·도배·목공·전기·배관·타일·조명·가구 등 10개 항목</p>
-              </div>
-            </li>
-            <li class="flex items-start gap-3">
-              <svg class="w-5 h-5 text-cta flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-              <div>
-                <span class="font-semibold text-primary">공간별 사진 첨부</span>
-                <p class="text-sm text-secondary mt-0.5">현장 사진을 공간마다 업로드, 실측 리포트 출력 시 함께 포함</p>
+                <span class="font-semibold text-primary">현장 사진 관리</span>
+                <p class="text-sm text-secondary mt-0.5">공간마다 실측 사진을 바로 첨부하여 리포트에 포함</p>
               </div>
             </li>
           </ul>
         </div>
         <!-- Checklist visual -->
         <div class="bg-white border border-border rounded-2xl p-6 shadow-sm">
-          <div class="text-sm font-semibold text-secondary mb-4">공사 항목 체크리스트</div>
-          <div class="grid grid-cols-2 gap-2 mb-5">
-            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-cta/5 border border-cta/20">
-              <svg class="w-4 h-4 text-cta" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-              <span class="text-sm font-medium text-primary">철거</span>
+          <div class="text-[10px] font-bold text-muted mb-3 uppercase tracking-wider">현장 체크리스트 예시</div>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="flex items-center gap-2 p-2 rounded-lg bg-cta/5 border border-cta/10">
+              <div class="w-3 h-3 bg-cta rounded-sm flex items-center justify-center"><svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg></div>
+              <span class="text-xs text-primary font-medium">철거</span>
             </div>
-            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-cta/5 border border-cta/20">
-              <svg class="w-4 h-4 text-cta" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-              <span class="text-sm font-medium text-primary">바닥재</span>
+            <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-50 border border-border">
+              <div class="w-3 h-3 border border-border rounded-sm"></div>
+              <span class="text-xs text-muted">목공</span>
             </div>
-            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-cta/5 border border-cta/20">
-              <svg class="w-4 h-4 text-cta" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-              <span class="text-sm font-medium text-primary">도배·도장</span>
+            <div class="flex items-center gap-2 p-2 rounded-lg bg-cta/5 border border-cta/10">
+              <div class="w-3 h-3 bg-cta rounded-sm flex items-center justify-center"><svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg></div>
+              <span class="text-xs text-primary font-medium">전기</span>
             </div>
-            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-border">
-              <div class="w-4 h-4 rounded border-2 border-border"></div>
-              <span class="text-sm text-secondary">목공</span>
-            </div>
-            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-cta/5 border border-cta/20">
-              <svg class="w-4 h-4 text-cta" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-              <span class="text-sm font-medium text-primary">전기</span>
-            </div>
-            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-border">
-              <div class="w-4 h-4 rounded border-2 border-border"></div>
-              <span class="text-sm text-secondary">배관·위생</span>
-            </div>
-            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-border">
-              <div class="w-4 h-4 rounded border-2 border-border"></div>
-              <span class="text-sm text-secondary">타일</span>
-            </div>
-            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-cta/5 border border-cta/20">
-              <svg class="w-4 h-4 text-cta" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-              <span class="text-sm font-medium text-primary">조명</span>
-            </div>
-            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-border">
-              <div class="w-4 h-4 rounded border-2 border-border"></div>
-              <span class="text-sm text-secondary">가구·붙박이</span>
-            </div>
-            <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-border">
-              <div class="w-4 h-4 rounded border-2 border-border"></div>
-              <span class="text-sm text-secondary">기타</span>
+            <div class="flex items-center gap-2 p-2 rounded-lg bg-cta/5 border border-cta/10">
+              <div class="w-3 h-3 bg-cta rounded-sm flex items-center justify-center"><svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg></div>
+              <span class="text-xs text-primary font-medium">조명</span>
             </div>
           </div>
-          <div class="border-t border-border pt-4">
-            <div class="text-xs text-muted mb-2">거실 규격 (mm)</div>
-            <div class="grid grid-cols-3 gap-2">
-              <div class="bg-slate-50 border border-border rounded-lg p-2 text-center">
-                <div class="text-xs text-muted">가로(W)</div>
-                <div class="font-semibold text-sm text-primary">4,200</div>
-              </div>
-              <div class="bg-slate-50 border border-border rounded-lg p-2 text-center">
-                <div class="text-xs text-muted">세로(D)</div>
-                <div class="font-semibold text-sm text-primary">5,800</div>
-              </div>
-              <div class="bg-slate-50 border border-border rounded-lg p-2 text-center">
-                <div class="text-xs text-muted">천장고(H)</div>
-                <div class="font-semibold text-sm text-primary">2,400</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="border-t border-border my-16"></div>
+
+    <!-- Feature 4: AI 블로그 글 작성기 -->
+    <div class="fade-up">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div class="order-2 lg:order-1 bg-white border border-border rounded-2xl p-6 shadow-sm relative overflow-hidden">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+            </div>
+            <div class="font-bold text-primary">AI 블로그 포스팅 생성</div>
+          </div>
+          <div class="space-y-4">
+            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+              <div class="text-[10px] text-muted mb-1">입력된 현장 정보</div>
+              <div class="text-xs font-medium text-secondary">강남구 역삼동 아파트, 화이트 우드 스타일, 무문선 시공...</div>
+            </div>
+            <div class="flex justify-center">
+              <svg class="w-5 h-5 text-purple-400 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+            </div>
+            <div class="p-4 bg-purple-50 rounded-xl border border-purple-100">
+              <div class="text-[10px] text-purple-600 font-bold mb-2">생성된 블로그 글 (Gemini AI)</div>
+              <div class="text-[11px] leading-relaxed text-secondary italic">
+                "안녕하세요! 오늘은 강남구 역삼동 현장의 화이트 우드 인테리어 시공 사례를 소개해 드립니다. 이번 현장의 핵심은 깔끔한 무문선 디테일과..."
               </div>
             </div>
           </div>
+          <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-purple-600/5 rounded-full blur-2xl"></div>
+        </div>
+        <div class="order-1 lg:order-2">
+          <div class="inline-flex items-center gap-2 bg-purple-50 text-purple-600 text-sm font-semibold px-3 py-1.5 rounded-lg mb-4">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 2 0 00-3.86.517l-.318.158a6 2 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+            기능 04
+          </div>
+          <h3 class="text-2xl sm:text-3xl font-extrabold text-primary mb-4">AI 블로그 글 작성기</h3>
+          <p class="text-secondary leading-relaxed mb-6">시공하느라 바쁜 사장님들을 위한 마케팅 도구입니다. 현장 정보만 입력하면 구글 Gemini AI가 네이버 블로그 맞춤형 홍보글을 즉시 작성합니다.</p>
+          <ul class="space-y-3">
+            <li class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              <div>
+                <span class="font-semibold text-primary">전문적인 시공 후기 생성</span>
+                <p class="text-sm text-secondary mt-0.5">현장 위치, 스타일, 시공 포인트에 맞춰 자연스러운 글 자동 생성</p>
+              </div>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              <div>
+                <span class="font-semibold text-primary">맞춤형 톤앤매너 선택</span>
+                <p class="text-sm text-secondary mt-0.5">신뢰감 있는 전문적인 톤, 친근한 이웃 같은 톤 등 선택 가능</p>
+              </div>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              <div>
+                <span class="font-semibold text-primary">마케팅 시간 90% 절약</span>
+                <p class="text-sm text-secondary mt-0.5">글쓰기 고민 없이 시공 사례를 꾸준히 업로드하여 홍보 효과 극대화</p>
+              </div>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -478,15 +381,15 @@
     <div class="max-w-6xl mx-auto">
       <div class="text-center max-w-2xl mx-auto mb-16 fade-up">
         <h2 class="text-3xl sm:text-4xl font-extrabold text-primary mb-4">실제 사용 흐름</h2>
-        <p class="text-secondary text-lg">현장 첫 방문부터 수금 완료까지</p>
+        <p class="text-secondary text-lg">현장 첫 방문부터 온라인 홍보까지</p>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 fade-up">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 fade-up">
         <div class="relative">
           <div class="hidden md:block absolute top-8 left-full w-full h-px bg-border -translate-x-1/2 z-0"></div>
           <div class="relative z-10 text-center">
             <div class="w-16 h-16 bg-cta rounded-2xl flex items-center justify-center mx-auto mb-5 text-white text-xl font-extrabold shadow-lg shadow-blue-200">1</div>
             <h3 class="text-lg font-bold text-primary mb-2">실측 기록</h3>
-            <p class="text-secondary text-sm leading-relaxed">현장 방문 시 실측 템플릿으로 공간별 규격, 마감재, 사진을 현장에서 바로 입력합니다.</p>
+            <p class="text-secondary text-sm leading-relaxed px-4">현장 방문 시 실측 템플릿으로 규격, 마감재, 사진을 바로 입력합니다.</p>
           </div>
         </div>
         <div class="relative">
@@ -494,52 +397,22 @@
           <div class="relative z-10 text-center">
             <div class="w-16 h-16 bg-cta rounded-2xl flex items-center justify-center mx-auto mb-5 text-white text-xl font-extrabold shadow-lg shadow-blue-200">2</div>
             <h3 class="text-lg font-bold text-primary mb-2">견적서 발송</h3>
-            <p class="text-secondary text-sm leading-relaxed">실측 후 견적서를 작성해 PDF로 출력, 고객에게 바로 전달합니다. VAT 포함 합계가 자동 계산됩니다.</p>
+            <p class="text-secondary text-sm leading-relaxed px-4">실측 후 견적서를 작성해 PDF로 출력, 고객에게 즉시 전달합니다.</p>
+          </div>
+        </div>
+        <div class="relative">
+          <div class="hidden md:block absolute top-8 left-full w-full h-px bg-border -translate-x-1/2 z-0"></div>
+          <div class="relative z-10 text-center">
+            <div class="w-16 h-16 bg-cta rounded-2xl flex items-center justify-center mx-auto mb-5 text-white text-xl font-extrabold shadow-lg shadow-blue-200">3</div>
+            <h3 class="text-lg font-bold text-primary mb-2">공정 관리</h3>
+            <p class="text-secondary text-sm leading-relaxed px-4">계약 후 대시보드에서 공정 진행 상태와 수금 현황을 추적합니다.</p>
           </div>
         </div>
         <div class="relative z-10 text-center">
-          <div class="w-16 h-16 bg-cta rounded-2xl flex items-center justify-center mx-auto mb-5 text-white text-xl font-extrabold shadow-lg shadow-blue-200">3</div>
-          <h3 class="text-lg font-bold text-primary mb-2">공정·수금 관리</h3>
-          <p class="text-secondary text-sm leading-relaxed">계약 후 공정 대시보드에서 공정 진행 상태, 외주 대금, 계산서·수금 현황을 한눈에 추적합니다.</p>
+          <div class="w-16 h-16 bg-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-5 text-white text-xl font-extrabold shadow-lg shadow-purple-200">4</div>
+          <h3 class="text-lg font-bold text-primary mb-2">AI 홍보</h3>
+          <p class="text-secondary text-sm leading-relaxed px-4">시공 정보를 활용해 AI로 마케팅 글을 생성, 블로그에 업로드합니다.</p>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 공통 기능 -->
-  <section class="py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
-    <div class="text-center max-w-2xl mx-auto mb-12 fade-up">
-      <h2 class="text-3xl sm:text-4xl font-extrabold text-primary mb-4">공통 기능</h2>
-      <p class="text-secondary text-lg">어디서든 안전하게</p>
-    </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 fade-up">
-      <div class="bg-white border border-border rounded-2xl p-6 hover:border-cta/30 hover:shadow-md transition-all duration-200 cursor-default">
-        <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center mb-4">
-          <svg class="w-5 h-5 text-cta" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg>
-        </div>
-        <h4 class="font-bold text-primary mb-1">클라우드 저장</h4>
-        <p class="text-sm text-secondary leading-relaxed">모든 데이터가 실시간으로 저장됩니다. PC·모바일 어디서든 동일하게 접속 가능합니다.</p>
-      </div>
-      <div class="bg-white border border-border rounded-2xl p-6 hover:border-cta/30 hover:shadow-md transition-all duration-200 cursor-default">
-        <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center mb-4">
-          <svg class="w-5 h-5 text-cta" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-        </div>
-        <h4 class="font-bold text-primary mb-1">엑셀 출력</h4>
-        <p class="text-sm text-secondary leading-relaxed">계산서 현황을 엑셀로 다운로드합니다. 미발급 합계를 즉시 확인하고 외부 보고에 활용하세요.</p>
-      </div>
-      <div class="bg-white border border-border rounded-2xl p-6 hover:border-cta/30 hover:shadow-md transition-all duration-200 cursor-default">
-        <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center mb-4">
-          <svg class="w-5 h-5 text-cta" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-        </div>
-        <h4 class="font-bold text-primary mb-1">PDF 인쇄</h4>
-        <p class="text-sm text-secondary leading-relaxed">견적서·실측 리포트를 전문 양식으로 인쇄하거나 PDF로 저장해 고객에게 바로 전달하세요.</p>
-      </div>
-      <div class="bg-white border border-border rounded-2xl p-6 hover:border-cta/30 hover:shadow-md transition-all duration-200 cursor-default">
-        <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center mb-4">
-          <svg class="w-5 h-5 text-cta" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-        </div>
-        <h4 class="font-bold text-primary mb-1">계정 보안</h4>
-        <p class="text-sm text-secondary leading-relaxed">이메일 기반 인증으로 내 데이터만 접근 가능합니다. 다른 사용자의 현장 정보는 볼 수 없습니다.</p>
       </div>
     </div>
   </section>
@@ -562,11 +435,11 @@
         </details>
         <details class="group bg-surface border border-border rounded-2xl">
           <summary class="flex items-center justify-between p-6 cursor-pointer list-none font-semibold text-primary hover:text-cta transition-colors duration-200">
-            견적서는 몇 개까지 저장할 수 있나요?
+            AI 블로그 글은 어떤 원리로 생성되나요?
             <svg class="w-5 h-5 text-muted group-open:rotate-180 transition-transform duration-200 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
           </summary>
           <div class="px-6 pb-6 text-secondary leading-relaxed">
-            견적서와 실측 리포트 모두 제한 없이 클라우드에 저장됩니다. 저장 내역 목록에서 고객명과 날짜로 빠르게 찾아 불러올 수 있습니다.
+            구글의 최신 인공지능 모델인 Gemini API를 사용합니다. 사장님이 입력하신 현장 위치, 인테리어 스타일, 주요 시공 포인트 데이터를 바탕으로 AI가 실제 사람이 쓴 것 같은 자연스러운 홍보 문구를 만들어냅니다.
           </div>
         </details>
         <details class="group bg-surface border border-border rounded-2xl">
@@ -576,24 +449,6 @@
           </summary>
           <div class="px-6 pb-6 text-secondary leading-relaxed">
             네. 별도 앱 설치 없이 스마트폰 브라우저에서 바로 사용할 수 있습니다. 현장에서 스마트폰으로 실측을 입력하고 사무실 PC에서 확인하세요.
-          </div>
-        </details>
-        <details class="group bg-surface border border-border rounded-2xl">
-          <summary class="flex items-center justify-between p-6 cursor-pointer list-none font-semibold text-primary hover:text-cta transition-colors duration-200">
-            공급자 정보를 매번 다시 입력해야 하나요?
-            <svg class="w-5 h-5 text-muted group-open:rotate-180 transition-transform duration-200 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
-          </summary>
-          <div class="px-6 pb-6 text-secondary leading-relaxed">
-            아닙니다. 견적서 작성 화면에서 공급자 정보를 한 번 저장하면, 다음 로그인부터 자동으로 불러옵니다.
-          </div>
-        </details>
-        <details class="group bg-surface border border-border rounded-2xl">
-          <summary class="flex items-center justify-between p-6 cursor-pointer list-none font-semibold text-primary hover:text-cta transition-colors duration-200">
-            외주 업체 대금도 관리할 수 있나요?
-            <svg class="w-5 h-5 text-muted group-open:rotate-180 transition-transform duration-200 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
-          </summary>
-          <div class="px-6 pb-6 text-secondary leading-relaxed">
-            네. 공정 대시보드에서 현장별로 외주 항목을 추가할 수 있습니다. 외주 금액, 날짜, 계산서 발행 여부, 대금 지급 여부를 체크박스로 간편하게 관리합니다.
           </div>
         </details>
       </div>
@@ -607,7 +462,7 @@
       <div class="relative z-10">
         <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">지금 바로 시작하세요</h2>
         <p class="text-slate-300 text-lg mb-10 max-w-xl mx-auto leading-relaxed">
-          공정 대시보드, 견적서, 실측 템플릿 — 인테리어 업무의 모든 것을 하나에서.
+          공정 대시보드, 견적서, 실측 템플릿, AI 홍보까지 — 인테리어 업무의 모든 것을 하나에서.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <a href="https://invoice-2cd.pages.dev/" class="inline-flex items-center justify-center gap-2 bg-cta hover:bg-cta-hover text-white font-semibold px-8 py-4 rounded-xl transition-colors duration-200 cursor-pointer text-base">
