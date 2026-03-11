@@ -1011,17 +1011,24 @@ function App() {
                                 <option value="완료">완료</option>
                               </select>
                               <div className="date-range-inputs">
-                                <div className="date-input-container">
+                                <div className="date-input-container" onClick={(e) => {
+                                  const input = e.currentTarget.querySelector('input[type="date"]');
+                                  if (input) (input as any).showPicker();
+                                }}>
                                   <svg className="calendar-mini-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                   <input type="text" placeholder="MM-DD" value={formatDateToMMDD(w.start_date || '')} readOnly />
                                   <input type="date" value={w.start_date || ''} onChange={e => updateWorkItem(w.id, 'start_date', e.target.value)} className="date-picker-overlay" title="시작일" />
                                 </div>
                                 <span className="date-separator">~</span>
-                                <div className="date-input-container">
+                                <div className="date-input-container" onClick={(e) => {
+                                  const input = e.currentTarget.querySelector('input[type="date"]');
+                                  if (input) (input as any).showPicker();
+                                }}>
                                   <svg className="calendar-mini-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                   <input type="text" placeholder="MM-DD" value={formatDateToMMDD(w.end_date || '')} readOnly />
                                   <input type="date" value={w.end_date || ''} onChange={e => updateWorkItem(w.id, 'end_date', e.target.value)} className="date-picker-overlay" title="종료일" />
-                                </div>                              </div>
+                                </div>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -1057,13 +1064,19 @@ function App() {
                               />
                               <input className="sub-amount-input" placeholder="금액" type="text" value={s.amount ? formatNumber(s.amount) : ''} onChange={e => updateSubcontract(s.id, 'amount', parseNumber(e.target.value))} />
                               <div className="date-range-inputs">
-                                <div className="date-input-container">
+                                <div className="date-input-container" onClick={(e) => {
+                                  const input = e.currentTarget.querySelector('input[type="date"]');
+                                  if (input) (input as any).showPicker();
+                                }}>
                                   <svg className="calendar-mini-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                   <input type="text" placeholder="MM-DD" value={formatDateToMMDD(s.start_date || '')} readOnly />
                                   <input type="date" value={s.start_date || ''} onChange={e => updateSubcontract(s.id, 'start_date', e.target.value)} className="date-picker-overlay" title="시작일" />
                                 </div>
                                 <span className="date-separator">~</span>
-                                <div className="date-input-container">
+                                <div className="date-input-container" onClick={(e) => {
+                                  const input = e.currentTarget.querySelector('input[type="date"]');
+                                  if (input) (input as any).showPicker();
+                                }}>
                                   <svg className="calendar-mini-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                   <input type="text" placeholder="MM-DD" value={formatDateToMMDD(s.end_date || '')} readOnly />
                                   <input type="date" value={s.end_date || ''} onChange={e => updateSubcontract(s.id, 'end_date', e.target.value)} className="date-picker-overlay" title="종료일" />

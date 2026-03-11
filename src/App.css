@@ -2487,8 +2487,31 @@ input::placeholder, textarea::placeholder {
   width: 100%;
 }
 
-.date-input-container input[type="text"] {
+.red-border { border: 2px solid #ef4444 !important; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important; }
+
+/* 날짜 입력 컨테이너 통합 스타일 */
+.date-input-container { 
+  display: flex; 
+  align-items: center; 
+  gap: 4px; 
+  position: relative; 
+  cursor: pointer;
   width: 100%;
+}
+
+.calendar-mini-icon { 
+  color: var(--color-text-muted); 
+  flex-shrink: 0; 
+  pointer-events: none; 
+  position: absolute; 
+  left: 8px; 
+  z-index: 1; 
+}
+
+.date-input-container input[type='text'] { 
+  width: 100%;
+  padding-left: 26px !important; 
+  pointer-events: none; /* 클릭이 뒤의 date input으로 전달되도록 */
   cursor: pointer;
 }
 
@@ -2500,10 +2523,5 @@ input::placeholder, textarea::placeholder {
   height: 100%;
   opacity: 0;
   cursor: pointer;
+  z-index: 10; /* 가장 위로 올림 */
 }
-.red-border { border: 2px solid #ef4444 !important; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important; }
-
-.date-input-container { display: flex; align-items: center; gap: 4px; position: relative; }
-.calendar-mini-icon { color: var(--color-text-muted); flex-shrink: 0; pointer-events: none; }
-.date-input-container input[type='text'] { padding-left: 24px !important; }
-.date-input-container .calendar-mini-icon { position: absolute; left: 8px; z-index: 1; }
