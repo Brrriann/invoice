@@ -1495,26 +1495,33 @@ function App() {
                       <p style={{marginBottom: '15px'}}>AI 블로그 생성을 위해 Google의 Gemini API 키가 필요합니다.<br/>아래 단계를 따라 API 키를 발급받아주세요:</p>
                       <ol className="guide-steps">
                         <li>
-                          <strong>Step 1:</strong>
+                          <strong>1단계:</strong>
                           <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer"> Google AI Studio</a> 접속
                         </li>
                         <li>
-                          <strong>Step 2:</strong> 우상단의 <strong>[Get API key]</strong> 버튼 클릭
+                          <strong>2단계:</strong> 우상단의 <strong>「API 키 받기」</strong> 버튼 클릭
                         </li>
                         <li>
-                          <strong>Step 3:</strong> <strong>[Create API key in new project]</strong> 클릭
+                          <strong>3단계:</strong> <strong>「새 프로젝트에서 API 키 생성」</strong> 클릭
                         </li>
                         <li>
-                          <strong>Step 4:</strong> 생성된 API 키를 복사하여 아래에 붙여넣으세요.
+                          <strong>4단계:</strong> 생성된 API 키를 복사하여 아래에 붙여넣으세요.
                         </li>
                       </ol>
+                      <div style={{backgroundColor: '#fef3c7', border: '1px solid #fcd34d', borderRadius: '6px', padding: '12px', marginBottom: '15px', fontSize: '13px', lineHeight: '1.6', color: '#92400e'}}>
+                        <strong>💡 팁:</strong> 한 번 발급받은 키는 메모장에 저장해두시고 계속 사용이 가능합니다.<br/>
+                        <strong>⚠️ 주의:</strong> API 키를 타인과 공유하지 마세요. 노출 시 비용 청구가 될 수 있습니다.
+                      </div>
                       <button onClick={() => setShowApiKeyInput(true)} className="btn-primary">API 키 입력</button>
                     </div>
                   ) : (
                     <div className="api-key-input-form">
+                      <div style={{backgroundColor: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '6px', padding: '12px', marginBottom: '12px', fontSize: '13px', color: '#991b1b'}}>
+                        <strong>🔒 보안 주의:</strong> 이 페이지에서 입력한 키는 브라우저 메모리에만 유지되며 서버에 저장되지 않습니다. 새로고침하면 초기화됩니다.
+                      </div>
                       <input
                         type="password"
-                        placeholder="AIza..."
+                        placeholder="AIza... (예: AIzaSyDAerE1lUDYgYwRtoZxv1gK9GcdD3EZzCM)"
                         value={apiKeyInput}
                         onChange={e => setApiKeyInput(e.target.value)}
                         onKeyPress={e => e.key === 'Enter' && handleApiKeySubmit()}
