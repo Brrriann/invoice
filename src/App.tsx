@@ -4,6 +4,7 @@ import { supabase } from './lib/supabase';
 import './App.css';
 import React from 'react';
 import * as XLSX from 'xlsx';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // --- 인터페이스 정의 ---
 interface Item {
@@ -192,41 +193,53 @@ function App() {
     result: ''
   });
 
+  // Google API 키 관리
+  const [googleApiKey, setGoogleApiKey] = useState('');
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [apiKeyInput, setApiKeyInput] = useState('');
+
   const generateBlogPost = async () => {
     if (!blogData.siteName || !blogData.features) {
       alert('현장명과 핵심 시공 내용을 입력해주세요.');
       return;
     }
 
+    if (!googleApiKey) {
+      setShowApiKeyInput(true);
+      alert('먼저 Google API 키를 설정해주세요.');
+      return;
+    }
+
     setBlogData(prev => ({ ...prev, isGenerating: true }));
 
-    // 보안: API 키를 클라이언트에 노출하지 않음. 백엔드 API를 통해 요청합니다.
-    // 이 기능은 백엔드에서 구현되어야 합니다.
-    // TODO: 백엔드 엔드포인트로 변경 필요
-    // POST /api/generate-blog-post
-
     try {
-      alert('이 기능은 준비 중입니다. 시스템 관리자에게 문의하세요.');
-      setBlogData(prev => ({ ...prev, isGenerating: false }));
-      return;
+      const genAI = new GoogleGenerativeAI(googleApiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
-      // 향후 백엔드 API 호출로 대체될 예정
-      // const response = await fetch('/api/generate-blog-post', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     siteName: blogData.siteName,
-      //     style: blogData.style,
-      //     features: blogData.features,
-      //     materials: blogData.materials,
-      //     tone: blogData.tone,
-      //     role: blogData.role
-      //   })
-      // });
-      // const data = await response.json();
-      // setBlogData(prev => ({ ...prev, result: data.text, isGenerating: false }));
+      const prompt = `
+        너는 ${blogData.role}이야. 아래 정보를 바탕으로 네이버 블로그 포스팅을 작성해줘.
+
+        현장명: ${blogData.siteName}
+        스타일: ${blogData.style}
+        내용: ${blogData.features}
+        자재: ${blogData.materials}
+        문체: ${blogData.tone}
+
+        중요 지침:
+        1. 절대로 ** 기호를 사용해서 단어를 강조하지 마. 마크다운 형식을 사용하지 말고 자연스러운 글로 작성해줘.
+        2. 체류시간 3분 이상을 목표로 작성해줘 (충분히 길고 밀도있는 글).
+        3. 너무 짧은 글은 절대 금지. 각 항목에 대해 상세한 설명과 충분한 내용을 포함해야 해.
+        4. 시공 과정, 선택 이유, 자재의 특징, 시공 후 느낌 등 다양한 각도에서 설명해줘.
+        5. 독자가 충분히 읽을 수 있도록 여러 문단으로 구성하고 단락을 나눠서 작성해줘.
+      `;
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+
+      setBlogData(prev => ({ ...prev, result: text, isGenerating: false }));
     } catch (error: unknown) {
-      console.error('AI 상세 에러 로그:', error);
+      console.error('AI 블로그 생성 에러:', error);
 
       let errorMessage = '알 수 없는 오류가 발생했습니다.';
       if (error instanceof Error) {
@@ -235,9 +248,10 @@ function App() {
         errorMessage = error;
       }
 
-      // 404 에러가 계속될 경우, 키 권한 문제임을 알리는 메시지 추가
-      if (errorMessage.includes('404')) {
-        alert("모델을 찾을 수 없습니다(404). \n1. Google AI Studio에서 'Generative Language API'가 Enabled 상태인지 확인하세요. \n2. 키가 생성된 프로젝트의 지역 제한을 확인하세요.");
+      if (errorMessage.includes('401') || errorMessage.includes('permission')) {
+        alert("API 키가 유효하지 않습니다.\n\n1. API 키를 다시 확인해주세요.\n2. Google AI Studio에서 API가 활성화되어 있는지 확인하세요.\n3. 키를 다시 생성해보세요.");
+      } else if (errorMessage.includes('429')) {
+        alert("API 사용량 한계에 도달했습니다.\n나중에 다시 시도해주세요.");
       } else {
         alert(`글 생성 중 오류가 발생했습니다: ${errorMessage}`);
       }
@@ -307,6 +321,7 @@ function App() {
     const { data } = await supabase.from('company_profiles').select('*').eq('user_id', currentUser.id).single();
     if (data) {
       setProvider({ name: data.name || '', brandTagline: data.brandTagline || '', representative: data.representative || '', businessNo: data.businessNo || '', address: data.address || '', contact: data.contact || '' });
+      setGoogleApiKey(data.google_api_key || '');
     }
   }, [currentUser, setProvider]);
 
@@ -324,6 +339,56 @@ function App() {
     }, { onConflict: 'user_id' });
     if (error) alert('저장 실패: ' + error.message);
     else alert('공급자 정보가 저장되었습니다.');
+  };
+
+  const saveApiKey = async () => {
+    if (!currentUser) return;
+    if (!apiKeyInput.trim()) {
+      alert('API 키를 입력해주세요.');
+      return;
+    }
+    try {
+      const { error } = await supabase.from('company_profiles').upsert({
+        user_id: currentUser.id,
+        google_api_key: apiKeyInput.trim(),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+      if (error) {
+        alert('저장 실패: ' + error.message);
+      } else {
+        setGoogleApiKey(apiKeyInput.trim());
+        setShowApiKeyInput(false);
+        setApiKeyInput('');
+        alert('Google API 키가 저장되었습니다.');
+      }
+    } catch (error) {
+      alert('오류 발생: ' + (error instanceof Error ? error.message : '알 수 없는 오류'));
+    }
+  };
+
+  const deleteApiKey = async () => {
+    if (!currentUser) return;
+    if (!window.confirm('저장된 API 키를 삭제하시겠습니까?')) return;
+    try {
+      const { error } = await supabase.from('company_profiles').upsert({
+        user_id: currentUser.id,
+        google_api_key: null,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+      if (error) {
+        alert('삭제 실패: ' + error.message);
+      } else {
+        setGoogleApiKey('');
+        alert('API 키가 삭제되었습니다.');
+      }
+    } catch (error) {
+      alert('오류 발생: ' + (error instanceof Error ? error.message : '알 수 없는 오류'));
+    }
+  };
+
+  const maskApiKey = (key: string) => {
+    if (!key || key.length < 10) return key;
+    return key.substring(0, 6) + '...' + key.substring(key.length - 3);
   };
 
   // --- DB 로직 (대시보드/프로젝트) ---
@@ -1444,6 +1509,61 @@ function App() {
             <div className="blog-header-box">
               <h1>✨ AI 블로그 포스팅 생성기</h1>
               <p>현장 정보만 입력하면 베테랑 실장님이 글을 써드립니다.</p>
+            </div>
+
+            {/* API 키 설정 섹션 */}
+            <div className="api-key-section">
+              {googleApiKey ? (
+                <div className="api-key-display">
+                  <div>
+                    <h3>🔑 Google API 키 설정됨</h3>
+                    <p className="api-key-masked">{maskApiKey(googleApiKey)}</p>
+                  </div>
+                  <div style={{display: 'flex', gap: '10px'}}>
+                    <button onClick={() => setShowApiKeyInput(true)} className="btn-small">변경</button>
+                    <button onClick={deleteApiKey} className="btn-small btn-danger">삭제</button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <h3>🔑 Google API 키 설정 필요</h3>
+                  {!showApiKeyInput ? (
+                    <div className="api-key-guide">
+                      <p style={{marginBottom: '15px'}}>AI 블로그 생성을 위해 Google의 Gemini API 키가 필요합니다.<br/>아래 단계를 따라 API 키를 발급받아주세요:</p>
+                      <ol className="guide-steps">
+                        <li>
+                          <strong>Step 1:</strong>
+                          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer"> Google AI Studio</a> 접속
+                        </li>
+                        <li>
+                          <strong>Step 2:</strong> 우상단의 <strong>[Get API key]</strong> 버튼 클릭
+                        </li>
+                        <li>
+                          <strong>Step 3:</strong> <strong>[Create API key in new project]</strong> 클릭
+                        </li>
+                        <li>
+                          <strong>Step 4:</strong> 생성된 API 키를 복사하여 아래에 붙여넣으세요.
+                        </li>
+                      </ol>
+                      <button onClick={() => setShowApiKeyInput(true)} className="btn-primary">API 키 입력</button>
+                    </div>
+                  ) : (
+                    <div className="api-key-input-form">
+                      <input
+                        type="password"
+                        placeholder="AIza..."
+                        value={apiKeyInput}
+                        onChange={e => setApiKeyInput(e.target.value)}
+                        onKeyPress={e => e.key === 'Enter' && saveApiKey()}
+                      />
+                      <div style={{display: 'flex', gap: '10px', marginTop: '10px'}}>
+                        <button onClick={saveApiKey} className="btn-primary">저장</button>
+                        <button onClick={() => {setShowApiKeyInput(false); setApiKeyInput('');}} className="btn-secondary">취소</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="blog-main-layout">
