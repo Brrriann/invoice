@@ -4,7 +4,6 @@ import { supabase } from './lib/supabase';
 import './App.css';
 import React from 'react';
 import * as XLSX from 'xlsx';
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // --- 인터페이스 정의 ---
 interface Item {
@@ -201,46 +200,31 @@ function App() {
 
     setBlogData(prev => ({ ...prev, isGenerating: true }));
 
-    // 환경 변수에서 API 키를 가져옵니다
-    const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
-
-    if (!apiKey) {
-      alert('API 키가 설정되지 않았습니다. .env 파일을 확인하세요.');
-      setBlogData(prev => ({ ...prev, isGenerating: false }));
-      return;
-    }
+    // 보안: API 키를 클라이언트에 노출하지 않음. 백엔드 API를 통해 요청합니다.
+    // 이 기능은 백엔드에서 구현되어야 합니다.
+    // TODO: 백엔드 엔드포인트로 변경 필요
+    // POST /api/generate-blog-post
 
     try {
-      // 최신 SDK 라이브러리 초기화
-      const genAI = new GoogleGenerativeAI(apiKey);
-      
-      // 429 에러(존재 확인)를 뱉었던 유일한 모델인 gemini-2.0-flash로 복구합니다.
-      const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash-lite"
-      });
-      const prompt = `
-        너는 ${blogData.role}이야. 아래 정보를 바탕으로 네이버 블로그 포스팅을 작성해줘.
+      alert('이 기능은 준비 중입니다. 시스템 관리자에게 문의하세요.');
+      setBlogData(prev => ({ ...prev, isGenerating: false }));
+      return;
 
-        현장명: ${blogData.siteName}
-        스타일: ${blogData.style}
-        내용: ${blogData.features}
-        자재: ${blogData.materials}
-        문체: ${blogData.tone}
-
-        중요 지침:
-        1. 절대로 ** 기호를 사용해서 단어를 강조하지 마. 마크다운 형식을 사용하지 말고 자연스러운 글로 작성해줘.
-        2. 체류시간 3분 이상을 목표로 작성해줘 (충분히 길고 밀도있는 글).
-        3. 너무 짧은 글은 절대 금지. 각 항목에 대해 상세한 설명과 충분한 내용을 포함해야 해.
-        4. 시공 과정, 선택 이유, 자재의 특징, 시공 후 느낌 등 다양한 각도에서 설명해줘.
-        5. 독자가 충분히 읽을 수 있도록 여러 문단으로 구성하고 단락을 나눠서 작성해줘.
-      `;
-
-      // 콘텐츠 생성 요청
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-
-      setBlogData(prev => ({ ...prev, result: text, isGenerating: false }));
+      // 향후 백엔드 API 호출로 대체될 예정
+      // const response = await fetch('/api/generate-blog-post', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({
+      //     siteName: blogData.siteName,
+      //     style: blogData.style,
+      //     features: blogData.features,
+      //     materials: blogData.materials,
+      //     tone: blogData.tone,
+      //     role: blogData.role
+      //   })
+      // });
+      // const data = await response.json();
+      // setBlogData(prev => ({ ...prev, result: data.text, isGenerating: false }));
     } catch (error: unknown) {
       console.error('AI 상세 에러 로그:', error);
 
