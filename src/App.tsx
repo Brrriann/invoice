@@ -321,7 +321,6 @@ function App() {
     const { data } = await supabase.from('company_profiles').select('*').eq('user_id', currentUser.id).single();
     if (data) {
       setProvider({ name: data.name || '', brandTagline: data.brandTagline || '', representative: data.representative || '', businessNo: data.businessNo || '', address: data.address || '', contact: data.contact || '' });
-      setGoogleApiKey(data.google_api_key || '');
     }
   }, [currentUser, setProvider]);
 
@@ -341,49 +340,15 @@ function App() {
     else alert('공급자 정보가 저장되었습니다.');
   };
 
-  const saveApiKey = async () => {
-    if (!currentUser) return;
+  const handleApiKeySubmit = () => {
     if (!apiKeyInput.trim()) {
       alert('API 키를 입력해주세요.');
       return;
     }
-    try {
-      const { error } = await supabase.from('company_profiles').upsert({
-        user_id: currentUser.id,
-        google_api_key: apiKeyInput.trim(),
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' });
-      if (error) {
-        alert('저장 실패: ' + error.message);
-      } else {
-        setGoogleApiKey(apiKeyInput.trim());
-        setShowApiKeyInput(false);
-        setApiKeyInput('');
-        alert('Google API 키가 저장되었습니다.');
-      }
-    } catch (error) {
-      alert('오류 발생: ' + (error instanceof Error ? error.message : '알 수 없는 오류'));
-    }
-  };
-
-  const deleteApiKey = async () => {
-    if (!currentUser) return;
-    if (!window.confirm('저장된 API 키를 삭제하시겠습니까?')) return;
-    try {
-      const { error } = await supabase.from('company_profiles').upsert({
-        user_id: currentUser.id,
-        google_api_key: null,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' });
-      if (error) {
-        alert('삭제 실패: ' + error.message);
-      } else {
-        setGoogleApiKey('');
-        alert('API 키가 삭제되었습니다.');
-      }
-    } catch (error) {
-      alert('오류 발생: ' + (error instanceof Error ? error.message : '알 수 없는 오류'));
-    }
+    setGoogleApiKey(apiKeyInput.trim());
+    setShowApiKeyInput(false);
+    setApiKeyInput('');
+    alert('API 키가 설정되었습니다. (이 세션 동안만 유지됩니다)');
   };
 
   const maskApiKey = (key: string) => {
@@ -1516,13 +1481,11 @@ function App() {
               {googleApiKey ? (
                 <div className="api-key-display">
                   <div>
-                    <h3>🔑 Google API 키 설정됨</h3>
+                    <h3>🔑 Google API 키 설정됨 <span style={{fontSize: '12px', color: '#0369a1'}}>⏰ 세션 중</span></h3>
                     <p className="api-key-masked">{maskApiKey(googleApiKey)}</p>
+                    <small style={{color: '#64748b', marginTop: '5px', display: 'block'}}>새로고침 시 자동으로 초기화됩니다</small>
                   </div>
-                  <div style={{display: 'flex', gap: '10px'}}>
-                    <button onClick={() => setShowApiKeyInput(true)} className="btn-small">변경</button>
-                    <button onClick={deleteApiKey} className="btn-small btn-danger">삭제</button>
-                  </div>
+                  <button onClick={() => setShowApiKeyInput(true)} className="btn-small">다시 입력</button>
                 </div>
               ) : (
                 <div>
@@ -1554,10 +1517,10 @@ function App() {
                         placeholder="AIza..."
                         value={apiKeyInput}
                         onChange={e => setApiKeyInput(e.target.value)}
-                        onKeyPress={e => e.key === 'Enter' && saveApiKey()}
+                        onKeyPress={e => e.key === 'Enter' && handleApiKeySubmit()}
                       />
                       <div style={{display: 'flex', gap: '10px', marginTop: '10px'}}>
-                        <button onClick={saveApiKey} className="btn-primary">저장</button>
+                        <button onClick={handleApiKeySubmit} className="btn-primary">설정</button>
                         <button onClick={() => {setShowApiKeyInput(false); setApiKeyInput('');}} className="btn-secondary">취소</button>
                       </div>
                     </div>
