@@ -604,6 +604,55 @@ function App() {
     }
   }, [currentUser, fetchQuotations, fetchMeasurements, fetchProjects, fetchWorkItems, fetchSubcontracts, fetchCompanyProfile]);
 
+  // --- 이미지 압축 함수 ---
+  const compressImage = async (file: File, maxSizeKB = 500): Promise<Blob> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+
+          // 최대 해상도 제한 (long edge 1600px)
+          const maxDim = 1600;
+          let { width, height } = img;
+          if (width > maxDim || height > maxDim) {
+            const ratio = maxDim / Math.max(width, height);
+            width = Math.round(width * ratio);
+            height = Math.round(height * ratio);
+          }
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d')!;
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // 품질 조정 루프로 목표 크기 달성
+          let quality = 0.85;
+          const tryCompress = () => {
+            canvas.toBlob(
+              (blob) => {
+                if (!blob) return;
+                if (blob.size > maxSizeKB * 1024 && quality > 0.2) {
+                  quality -= 0.1;
+                  tryCompress();
+                } else {
+                  resolve(blob);
+                }
+              },
+              'image/jpeg',
+              quality
+            );
+          };
+          tryCompress();
+        };
+        img.src = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const saveCurrentMeasurement = async () => {
     if (!currentUser) return;
     const { error } = await supabase.from('measurements_v2').insert([{
@@ -663,19 +712,39 @@ function App() {
     setMeasureData({ ...measureData, spaces: measureData.spaces.map(s => s.id === id ? { ...s, [field]: value } : s) });
   };
 
-  const handleSpacePhotoUpload = (spaceId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSpacePhotoUpload = async (spaceId: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files) {
-      Array.from(files).forEach(file => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setMeasureData(prev => ({
-            ...prev,
-            spaces: prev.spaces.map(s => s.id === spaceId ? { ...s, photos: [...s.photos, reader.result as string] } : s)
-          }));
-        };
-        reader.readAsDataURL(file);
-      });
+    if (!files || !currentUser) return;
+
+    for (const file of Array.from(files)) {
+      try {
+        // 1. 이미지 압축
+        const compressed = await compressImage(file);
+
+        // 2. Supabase Storage 업로드
+        const fileName = `${currentUser.id}/${Date.now()}-${file.name}`;
+        const { data, error } = await supabase.storage
+          .from('measurement-photos')
+          .upload(fileName, compressed, { contentType: 'image/jpeg', upsert: false });
+
+        if (error) {
+          console.error('Storage upload error:', error);
+          continue;
+        }
+
+        // 3. Public URL 가져오기
+        const { data: urlData } = supabase.storage
+          .from('measurement-photos')
+          .getPublicUrl(data.path);
+
+        // 4. photos 배열에 URL만 저장
+        setMeasureData(prev => ({
+          ...prev,
+          spaces: prev.spaces.map(s => s.id === spaceId ? { ...s, photos: [...s.photos, urlData.publicUrl] } : s)
+        }));
+      } catch (error) {
+        console.error('Photo upload failed:', error);
+      }
     }
   };
 

@@ -8,7 +8,12 @@
       "Bash(cp /c/invoice/landing.html /tmp/gh-pages-deploy/index.html)",
       "Read(//tmp/**)",
       "Bash(__NEW_LINE_3ef1f37c009d697d__ curl:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "mcp__plugin_claude-mem_mcp-search__smart_search",
+      "mcp__plugin_claude-mem_mcp-search__smart_outline",
+      "Bash(rm /c/invoice/.env.production && ls -la /c/invoice/.env*)",
+      "Bash(grep -n \"view === 'blog'\" /c/invoice/src/App.tsx)",
+      "Bash(source:*)"
     ]
   }
 }
