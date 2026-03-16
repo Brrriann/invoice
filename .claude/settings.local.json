@@ -13,7 +13,10 @@
       "mcp__plugin_claude-mem_mcp-search__smart_outline",
       "Bash(rm /c/invoice/.env.production && ls -la /c/invoice/.env*)",
       "Bash(grep -n \"view === 'blog'\" /c/invoice/src/App.tsx)",
-      "Bash(source:*)"
+      "Bash(source:*)",
+      "mcp__plugin_claude-mem_mcp-search__search",
+      "mcp__plugin_claude-mem_mcp-search__get_observations",
+      "Bash(curl -s -H \"Authorization: Bearer $SUPABASE_PAT\" \"https://puofpkpwfqwyzdsrvupf.supabase.co/rest/v1/rpc/get_table_policies\" -X POST -H \"Content-Type: application/json\" -d '{\"\"\"\"table_name\"\"\"\":\"\"\"\"measurements_v2\"\"\"\"}')"
     ]
   }
 }

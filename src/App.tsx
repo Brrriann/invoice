@@ -699,20 +699,50 @@ function App() {
 
   const saveCurrentMeasurement = async () => {
     if (!currentUser) return;
-    const { error } = await supabase.from('measurements_v2').insert([{
-      user_id: currentUser.id,
-      site_name: measureData.siteName,
-      customer_name: measureData.customerName,
-      date: measureData.date,
-      measurer: measureData.measurer,
-      doors: measureData.spaces,
-      options: measureData.checklist,
-      contact: measureData.contact,
-      address: measureData.address,
-      special_notes: measureData.specialNotes
-    }]);
-    if (error) alert('저장 실패: ' + error.message);
-    else { alert('실측 리포트가 저장되었습니다.'); fetchMeasurements(); }
+
+    // 필수 정보 확인
+    if (!measureData.siteName.trim() || !measureData.customerName.trim()) {
+      alert('현장명과 고객명을 입력하세요.');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.from('measurements_v2').insert([{
+        user_id: currentUser.id,
+        site_name: measureData.siteName,
+        customer_name: measureData.customerName,
+        date: measureData.date,
+        measurer: measureData.measurer,
+        doors: measureData.spaces,
+        options: measureData.checklist,
+        contact: measureData.contact,
+        address: measureData.address,
+        special_notes: measureData.specialNotes
+      }]).select();
+
+      if (error) {
+        console.error('Save error details:', error);
+        alert(`저장 실패: ${error.message}\n(코드: ${error.code})`);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        alert('저장 완료되었으나 데이터 확인 실패');
+        return;
+      }
+
+      alert('실측 리포트가 저장되었습니다.');
+      fetchMeasurements();
+
+      // 폼 초기화
+      setMeasureData({
+        siteName: '', customerName: '', contact: '', address: '', date: new Date().toISOString().split('T')[0],
+        measurer: '', spaces: [], checklist: { ...defaultChecklist }, specialNotes: ''
+      });
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      alert(`예상치 못한 오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
+    }
   };
 
   const deleteMeasurement = async (id: string) => {
@@ -773,6 +803,13 @@ function App() {
 
         if (error) {
           console.error('Storage upload error:', error);
+          alert(`사진 업로드 실패: ${error.message}`);
+          continue;
+        }
+
+        if (!data || !data.path) {
+          console.error('No path returned from upload');
+          alert('사진 업로드 실패: 경로 정보 없음');
           continue;
         }
 
@@ -781,6 +818,12 @@ function App() {
           .from('measurement-photos')
           .getPublicUrl(data.path);
 
+        if (!urlData || !urlData.publicUrl) {
+          console.error('No public URL returned');
+          alert('사진 URL 생성 실패');
+          continue;
+        }
+
         // 4. photos 배열에 URL만 저장
         setMeasureData(prev => ({
           ...prev,
@@ -788,6 +831,7 @@ function App() {
         }));
       } catch (error) {
         console.error('Photo upload failed:', error);
+        alert(`사진 업로드 중 오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
       }
     }
   };
