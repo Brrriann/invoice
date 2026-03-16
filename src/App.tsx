@@ -885,9 +885,11 @@ function App() {
         </nav>
         <div className="sidebar-footer">
           <div className="sidebar-user">
-            <div className="user-avatar">{currentUser.email?.charAt(0).toUpperCase()}</div>
-            <div className="user-detail">
-              <div className="user-email">{currentUser.email}</div>
+            <div className="user-header">
+              <div className="user-avatar">{currentUser.email?.charAt(0).toUpperCase()}</div>
+              <div className="user-detail">
+                <div className="user-email">{currentUser.email}</div>
+              </div>
             </div>
             <div className="contact-info">
               <a href="mailto:official@magnatekorea.com" className="contact-link">
