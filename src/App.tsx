@@ -822,7 +822,9 @@ function App() {
         console.log(`Compressed: ${compressed.size} bytes`);
 
         // 2. Supabase Storage 업로드
-        const fileName = `${currentUser.id}/${Date.now()}-${file.name}`;
+        // 파일명을 영문/숫자로 변환 (한글 미지원)
+        const sanitizedFileName = `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`;
+        const fileName = `${currentUser.id}/${sanitizedFileName}`;
         console.log(`Uploading to Storage: ${fileName}`);
 
         const { data, error } = await supabase.storage
