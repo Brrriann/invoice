@@ -198,6 +198,9 @@ function App() {
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const [apiKeyInput, setApiKeyInput] = useState('');
 
+  // 인쇄용 사진 base64 변환 캐시
+  const [printPhotosBase64, setPrintPhotosBase64] = useState<Record<string, Record<number, string>>>({});
+
   const generateBlogPost = async () => {
     if (!blogData.siteName || !blogData.features) {
       alert('현장명과 핵심 시공 내용을 입력해주세요.');
@@ -603,6 +606,47 @@ function App() {
       fetchCompanyProfile();
     }
   }, [currentUser, fetchQuotations, fetchMeasurements, fetchProjects, fetchWorkItems, fetchSubcontracts, fetchCompanyProfile]);
+
+  // 인쇄 미리보기 표시 시 Storage URL을 base64로 변환
+  useEffect(() => {
+    if (view === 'measurement') {
+      const convertAllPhotos = async () => {
+        const converted: Record<string, Record<number, string>> = {};
+        for (const space of measureData.spaces) {
+          if (space.photos.length > 0) {
+            converted[space.id] = {};
+            for (let i = 0; i < space.photos.length; i++) {
+              const photo = space.photos[i];
+              if (photo.startsWith('https://')) {
+                // Storage URL만 변환 (이미 변환되지 않았으면)
+                if (!printPhotosBase64[space.id]?.[i]) {
+                  try {
+                    const response = await fetch(photo);
+                    const blob = await response.blob();
+                    const reader = new FileReader();
+                    converted[space.id][i] = await new Promise<string>((resolve) => {
+                      reader.onloadend = () => {
+                        resolve(reader.result as string);
+                      };
+                      reader.readAsDataURL(blob);
+                    });
+                  } catch (error) {
+                    console.error('Failed to convert photo:', error);
+                  }
+                } else {
+                  converted[space.id][i] = printPhotosBase64[space.id][i];
+                }
+              }
+            }
+          }
+        }
+        if (Object.keys(converted).length > 0) {
+          setPrintPhotosBase64(prev => ({ ...prev, ...converted }));
+        }
+      };
+      convertAllPhotos();
+    }
+  }, [view, measureData.spaces]);
 
   // --- 이미지 압축 함수 ---
   const compressImage = async (file: File, maxSizeKB = 500): Promise<Blob> => {
@@ -2051,7 +2095,11 @@ function App() {
               </table>
               {space.photos.length > 0 && (
                 <div className="m-photo-grid">
-                  {space.photos.map((p, i) => <div key={i} className="m-photo-item"><img src={p} alt="space" /></div>)}
+                  {space.photos.map((p, i) => {
+                    // 변환된 base64가 있으면 사용, 없으면 원본 사용
+                    const photoSrc = printPhotosBase64[space.id]?.[i] || p;
+                    return <div key={i} className="m-photo-item"><img src={photoSrc} alt="space" /></div>;
+                  })}
                 </div>
               )}
             </div>
