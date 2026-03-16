@@ -1916,7 +1916,7 @@ function App() {
                   </div>
                   <textarea className="remarks-input" placeholder="공간 특이사항 메모" value={space.notes} onChange={e => updateSpace(space.id, 'notes', e.target.value)} rows={2} />
                   <div className="door-photo-section">
-                    <label>사진 업로드</label>
+                    <label>사진 업로드 <span style={{ fontSize: '0.85em', color: '#999' }}>*사진 업로드 준비중입니다</span></label>
                     <input type="file" multiple accept="image/*" onChange={e => handleSpacePhotoUpload(space.id, e)} />
                     <div className="photo-preview-grid">
                       {space.photos.map((p, i) => (
