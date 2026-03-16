@@ -710,7 +710,12 @@ function App() {
         password: authInputs.password,
         options: { data: { phone: authInputs.phone } }
       });
-      if (error) alert(error.message); else alert('회원가입 완료! 로그인을 시도해 주세요.');
+      if (error) {
+        alert(error.message);
+      } else {
+        alert('회원가입 완료! 로그인을 시도해 주세요.');
+        setAuthView('login');
+      }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email: authInputs.email, password: authInputs.password });
       if (error) alert('로그인 실패: ' + error.message);
