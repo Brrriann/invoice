@@ -698,7 +698,10 @@ function App() {
   };
 
   const saveCurrentMeasurement = async () => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
 
     // 필수 정보 확인
     if (!measureData.siteName.trim() || !measureData.customerName.trim()) {
@@ -707,6 +710,14 @@ function App() {
     }
 
     try {
+      console.log('Saving measurement:', {
+        user_id: currentUser.id,
+        site_name: measureData.siteName,
+        customer_name: measureData.customerName,
+        spaces_count: measureData.spaces.length,
+        photos_count: measureData.spaces.reduce((sum, s) => sum + s.photos.length, 0)
+      });
+
       const { data, error } = await supabase.from('measurements_v2').insert([{
         user_id: currentUser.id,
         site_name: measureData.siteName,
@@ -721,15 +732,23 @@ function App() {
       }]).select();
 
       if (error) {
-        console.error('Save error details:', error);
-        alert(`저장 실패: ${error.message}\n(코드: ${error.code})`);
+        console.error('Save error details:', {
+          message: error.message,
+          code: error.code,
+          status: (error as any).status,
+          hint: (error as any).hint
+        });
+        alert(`저장 실패: ${error.message}\n(코드: ${error.code})\n힌트: ${(error as any).hint || 'N/A'}`);
         return;
       }
 
       if (!data || data.length === 0) {
+        console.error('No data returned from insert');
         alert('저장 완료되었으나 데이터 확인 실패');
         return;
       }
+
+      console.log('Save successful:', data);
 
       alert('실측 리포트가 저장되었습니다.');
       fetchMeasurements();
@@ -788,30 +807,41 @@ function App() {
 
   const handleSpacePhotoUpload = async (spaceId: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files || !currentUser) return;
+    if (!files || !currentUser) {
+      console.error('Photo upload failed: no files or currentUser', { files: !!files, currentUser: !!currentUser });
+      return;
+    }
+
+    console.log(`Starting photo upload: ${files.length} files for space ${spaceId}`);
 
     for (const file of Array.from(files)) {
       try {
+        console.log(`Compressing file: ${file.name} (${file.size} bytes)`);
         // 1. 이미지 압축
         const compressed = await compressImage(file);
+        console.log(`Compressed: ${compressed.size} bytes`);
 
         // 2. Supabase Storage 업로드
         const fileName = `${currentUser.id}/${Date.now()}-${file.name}`;
+        console.log(`Uploading to Storage: ${fileName}`);
+
         const { data, error } = await supabase.storage
           .from('measurement-photos')
           .upload(fileName, compressed, { contentType: 'image/jpeg', upsert: false });
 
         if (error) {
-          console.error('Storage upload error:', error);
-          alert(`사진 업로드 실패: ${error.message}`);
+          console.error('Storage upload error:', { message: error.message, status: (error as any).status, statusCode: (error as any).statusCode });
+          alert(`사진 업로드 실패: ${error.message}\n상태: ${(error as any).status || (error as any).statusCode}`);
           continue;
         }
 
         if (!data || !data.path) {
-          console.error('No path returned from upload');
+          console.error('No path returned from upload', { data });
           alert('사진 업로드 실패: 경로 정보 없음');
           continue;
         }
+
+        console.log(`Upload successful: ${data.path}`);
 
         // 3. Public URL 가져오기
         const { data: urlData } = supabase.storage
@@ -819,16 +849,20 @@ function App() {
           .getPublicUrl(data.path);
 
         if (!urlData || !urlData.publicUrl) {
-          console.error('No public URL returned');
+          console.error('No public URL returned', { urlData });
           alert('사진 URL 생성 실패');
           continue;
         }
 
+        console.log(`Public URL: ${urlData.publicUrl}`);
+
         // 4. photos 배열에 URL만 저장
+        console.log(`Adding photo to space ${spaceId}`);
         setMeasureData(prev => ({
           ...prev,
           spaces: prev.spaces.map(s => s.id === spaceId ? { ...s, photos: [...s.photos, urlData.publicUrl] } : s)
         }));
+        console.log(`Photo added successfully`);
       } catch (error) {
         console.error('Photo upload failed:', error);
         alert(`사진 업로드 중 오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
