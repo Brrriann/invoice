@@ -889,6 +889,14 @@ function App() {
             <div className="user-detail">
               <div className="user-email">{currentUser.email}</div>
             </div>
+            <div className="contact-info">
+              <a href="mailto:official@magnatekorea.com" className="contact-link">
+                Contact: official@magnatekorea.com
+              </a>
+              <a href="https://threads.net/kyuu_ceo" target="_blank" rel="noopener noreferrer" className="contact-link">
+                @kyuu_ceo
+              </a>
+            </div>
             <button className="btn-logout" onClick={handleLogout}>로그아웃</button>
           </div>
         </div>
