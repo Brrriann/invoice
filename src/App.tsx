@@ -1667,7 +1667,7 @@ function App() {
             <div className="items-section">
               <h3>품목 관리</h3>
               <table>
-                <thead><tr><th>품명</th><th>단위</th><th>수량</th><th>단가</th><th>소계</th><th>특이사항</th><th>비고</th><th>삭제</th></tr></thead>
+                <thead><tr><th>품명</th><th>단위</th><th>수량</th><th>단가</th><th>소계</th><th>특이사항<br/><small style={{fontSize: '0.75em', fontWeight: 'normal', color: '#999'}}>품목아래 표기됨</small></th><th>비고</th><th>삭제</th></tr></thead>
                 <tbody>{items.filter(i => i.type === 'door').map(i => <tr key={i.id}><td><input value={i.name} onChange={e => updateItem(i.id, 'name', e.target.value)} /></td><td><input value={i.unit} onChange={e => updateItem(i.id, 'unit', e.target.value)} /></td><td><input type="number" value={i.quantity} onChange={e => updateItem(i.id, 'quantity', parseInt(e.target.value))} /></td><td><input type="number" value={i.unitPrice} onChange={e => updateItem(i.id, 'unitPrice', parseInt(e.target.value))} /></td><td>{Math.floor(i.quantity * i.unitPrice).toLocaleString()}</td><td><input value={i.specialNote} onChange={e => updateItem(i.id, 'specialNote', e.target.value)} /></td><td><input value={i.remarks} onChange={e => updateItem(i.id, 'remarks', e.target.value)} /></td><td><button onClick={() => removeItem(i.id)}>×</button></td></tr>)}</tbody>
               </table>
               <button onClick={() => addItem('door')} className="btn-add">+ 추가</button>
@@ -1675,7 +1675,7 @@ function App() {
             <div className="items-section">
               <h3>품목 관리 - 옵션항목</h3>
               <table>
-                <thead><tr><th>품명</th><th>단위</th><th>수량</th><th>단가</th><th>소계</th><th>특이사항</th><th>비고</th><th>삭제</th></tr></thead>
+                <thead><tr><th>품명</th><th>단위</th><th>수량</th><th>단가</th><th>소계</th><th>특이사항<br/><small style={{fontSize: '0.75em', fontWeight: 'normal', color: '#999'}}>품목아래 표기됨</small></th><th>비고</th><th>삭제</th></tr></thead>
                 <tbody>{items.filter(i => i.type === 'option').map(i => <tr key={i.id}><td><input value={i.name} onChange={e => updateItem(i.id, 'name', e.target.value)} /></td><td><input value={i.unit} onChange={e => updateItem(i.id, 'unit', e.target.value)} /></td><td><input type="number" value={i.quantity} onChange={e => updateItem(i.id, 'quantity', parseInt(e.target.value))} /></td><td><input type="number" value={i.unitPrice} onChange={e => updateItem(i.id, 'unitPrice', parseInt(e.target.value))} /></td><td>{Math.floor(i.quantity * i.unitPrice).toLocaleString()}</td><td><input value={i.specialNote} onChange={e => updateItem(i.id, 'specialNote', e.target.value)} /></td><td><input value={i.remarks} onChange={e => updateItem(i.id, 'remarks', e.target.value)} /></td><td><button onClick={() => removeItem(i.id)}>×</button></td></tr>)}</tbody>
               </table>
               <button onClick={() => addItem('option')} className="btn-add">+ 추가</button>
