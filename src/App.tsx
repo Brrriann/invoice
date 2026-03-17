@@ -344,7 +344,7 @@ function App() {
       updated_at: new Date().toISOString()
     }, { onConflict: 'user_id' });
     if (error) alert('저장 실패: ' + error.message);
-    else alert('공급자 정보가 저장되었습니다.');
+    else alert('공급자정보가 저장되었습니다.\n견적서 저장은 아래의 클라우드저장 버튼을 눌러주세요!');
   };
 
   const handleApiKeySubmit = () => {
