@@ -201,6 +201,10 @@ function App() {
   // 인쇄용 사진 base64 변환 캐시
   const [printPhotosBase64, setPrintPhotosBase64] = useState<Record<string, Record<number, string>>>({});
 
+  // 사진 업로드 진행률 및 상태 관리
+  const [uploadProgress, setUploadProgress] = useState<{ [spaceId: string]: number }>({});
+  const [isUploading, setIsUploading] = useState<{ [spaceId: string]: boolean }>({});
+
   const generateBlogPost = async () => {
     if (!blogData.siteName || !blogData.features) {
       alert('현장명과 핵심 시공 내용을 입력해주세요.');
@@ -658,19 +662,22 @@ function App() {
         img.onload = () => {
           const canvas = document.createElement('canvas');
 
-          // 최대 해상도 제한 (long edge 1600px)
+          // 1:1 비율 강제 (정사각형 크롭 + 1600px)
           const maxDim = 1600;
-          let { width, height } = img;
-          if (width > maxDim || height > maxDim) {
-            const ratio = maxDim / Math.max(width, height);
-            width = Math.round(width * ratio);
-            height = Math.round(height * ratio);
-          }
-          canvas.width = width;
-          canvas.height = height;
+          const imgWidth = img.width;
+          const imgHeight = img.height;
+          const size = Math.min(imgWidth, imgHeight); // 정사각형 크기 (작은 쪽)
+
+          // 중앙 정렬로 크롭할 위치 계산
+          const cropX = (imgWidth - size) / 2;
+          const cropY = (imgHeight - size) / 2;
+
+          canvas.width = maxDim;
+          canvas.height = maxDim;
 
           const ctx = canvas.getContext('2d')!;
-          ctx.drawImage(img, 0, 0, width, height);
+          // 원본에서 정사각형 영역을 캔버스로 드로우 (중앙 크롭)
+          ctx.drawImage(img, cropX, cropY, size, size, 0, 0, maxDim, maxDim);
 
           // 품질 조정 루프로 목표 크기 달성
           let quality = 0.85;
@@ -814,7 +821,13 @@ function App() {
 
     console.log(`Starting photo upload: ${files.length} files for space ${spaceId}`);
 
-    for (const file of Array.from(files)) {
+    // 업로드 시작
+    setIsUploading(prev => ({ ...prev, [spaceId]: true }));
+    setUploadProgress(prev => ({ ...prev, [spaceId]: 0 }));
+
+    const fileArray = Array.from(files);
+    for (let index = 0; index < fileArray.length; index++) {
+      const file = fileArray[index];
       try {
         console.log(`Compressing file: ${file.name} (${file.size} bytes)`);
         // 1. 이미지 압축
@@ -865,11 +878,19 @@ function App() {
           spaces: prev.spaces.map(s => s.id === spaceId ? { ...s, photos: [...s.photos, urlData.publicUrl] } : s)
         }));
         console.log(`Photo added successfully`);
+
+        // 5. 진행률 업데이트
+        const progress = Math.round(((index + 1) / fileArray.length) * 100);
+        setUploadProgress(prev => ({ ...prev, [spaceId]: progress }));
       } catch (error) {
         console.error('Photo upload failed:', error);
         alert(`사진 업로드 중 오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
       }
     }
+
+    // 업로드 완료
+    setIsUploading(prev => ({ ...prev, [spaceId]: false }));
+    setUploadProgress(prev => ({ ...prev, [spaceId]: 0 }));
   };
 
   const toggleChecklist = (field: keyof WorkChecklist, value: boolean | string) => {
@@ -1919,7 +1940,18 @@ function App() {
                   <textarea className="remarks-input" placeholder="공간 특이사항 메모" value={space.notes} onChange={e => updateSpace(space.id, 'notes', e.target.value)} rows={2} />
                   <div className="door-photo-section">
                     <label>사진 업로드 <span style={{ fontSize: '0.85em', color: '#999' }}>사진은 1:1 비율로 업로드하시면 출력 시 더 잘보입니다</span></label>
-                    <input type="file" multiple accept="image/*" onChange={e => handleSpacePhotoUpload(space.id, e)} />
+                    <input type="file" multiple accept="image/*" onChange={e => handleSpacePhotoUpload(space.id, e)} disabled={isUploading[space.id]} />
+                    {isUploading[space.id] && (
+                      <div style={{ marginTop: '10px', marginBottom: '10px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '0.9em', color: '#666' }}>
+                          <span>업로드 중...</span>
+                          <span>{uploadProgress[space.id] || 0}%</span>
+                        </div>
+                        <div style={{ width: '100%', height: '8px', backgroundColor: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', backgroundColor: '#3b82f6', width: `${uploadProgress[space.id] || 0}%`, transition: 'width 0.2s ease' }} />
+                        </div>
+                      </div>
+                    )}
                     <div className="photo-preview-grid">
                       {space.photos.map((p, i) => (
                         <div key={i} className="photo-preview">
