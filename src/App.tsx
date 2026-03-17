@@ -328,6 +328,7 @@ function App() {
     const { data } = await supabase.from('company_profiles').select('*').eq('user_id', currentUser.id).single();
     if (data) {
       setProvider({ name: data.name || '', brandTagline: data.brandTagline || '', representative: data.representative || '', businessNo: data.businessNo || '', address: data.address || '', contact: data.contact || '' });
+      if (data.company_intro) setCompanyIntro(data.company_intro);
     }
   }, [currentUser, setProvider]);
 
@@ -345,6 +346,24 @@ function App() {
     }, { onConflict: 'user_id' });
     if (error) alert('저장 실패: ' + error.message);
     else alert('공급자정보가 저장되었습니다.\n견적서 저장은 아래의 클라우드저장 버튼을 눌러주세요!');
+  };
+
+  const saveCompanyIntro = async () => {
+    if (!currentUser) {
+      alert('로그인 후 저장할 수 있습니다.');
+      return;
+    }
+    if (!companyIntro.trim()) {
+      alert('자사 소개 내용을 입력해주세요.');
+      return;
+    }
+    const { error } = await supabase.from('company_profiles').upsert({
+      user_id: currentUser.id,
+      company_intro: companyIntro,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
+    if (error) alert('저장 실패: ' + error.message);
+    else alert('자사 소개가 저장되었습니다.');
   };
 
   const handleApiKeySubmit = () => {
@@ -1687,6 +1706,7 @@ function App() {
                   <input type="checkbox" checked={showIntroInPrint} onChange={e => setShowIntroInPrint(e.target.checked)} />
                   출력에 포함
                 </label>
+                <button className="btn-save-intro" onClick={saveCompanyIntro}>자사소개 저장</button>
               </h3>
               <div className="logo-upload-area">
                 {logoDataUrl && <img src={logoDataUrl} alt="logo-preview" className="logo-preview" />}
