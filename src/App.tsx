@@ -636,6 +636,9 @@ function App() {
                     });
                   } catch (error) {
                     console.error('Failed to convert photo:', error);
+                    // 변환 실패 시 placeholder 표시
+                    const placeholderBase64 = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23e2e8f0" width="100" height="100"/%3E%3Ctext x="50" y="50" text-anchor="middle" dy=".3em" font-size="10" fill="%23999"%3E사진 오류%3C/text%3E%3C/svg%3E';
+                    converted[space.id][i] = placeholderBase64;
                   }
                 } else {
                   converted[space.id][i] = printPhotosBase64[space.id][i];
