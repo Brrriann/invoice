@@ -2439,7 +2439,7 @@ input::placeholder, textarea::placeholder {
 
 @page {
   size: A4;
-  margin: 20mm;
+  margin: 8mm 20mm 20mm 20mm;
 }
 
 @media print {
@@ -2451,7 +2451,7 @@ input::placeholder, textarea::placeholder {
 
   .quotation-sheet, .measurement-sheet {
     width: 210mm;
-    padding: 15mm 12mm;
+    padding: 5mm 12mm 15mm 12mm;
     margin: 0 auto;
     color: #1e293b;
     position: relative;
