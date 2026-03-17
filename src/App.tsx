@@ -1680,7 +1680,7 @@ function App() {
               </table>
               <button onClick={() => addItem('option')} className="btn-add">+ 추가</button>
             </div>
-            <div className="form-section"><h3>특이사항</h3><textarea className="remarks-input" value={remarks} onChange={e => setRemarks(e.target.value)} rows={4} /></div>
+            <div className="form-section"><h3>특이사항</h3><textarea className="remarks-input" placeholder="※ 납기일: 발주 후 30일 이내&#10;※ 결제조건: 선금-50%,  잔금-공사 완료 후 즉시&#10;※ 부가세 포함 금액입니다." value={remarks} onChange={e => setRemarks(e.target.value)} rows={4} /></div>
             <div className="form-section">
               <h3>로고 및 자사 소개
                 <label className="intro-toggle-label">
