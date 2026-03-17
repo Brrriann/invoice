@@ -1642,7 +1642,7 @@ function App() {
             <h1>견적서 작성</h1>
             <div className="form-section">
               <h3>공급자 정보
-                <button className="btn-save-profile" onClick={saveCompanyProfile}>💾 저장</button>
+                <button className="btn-save-profile" onClick={saveCompanyProfile}>공급자정보 저장</button>
               </h3>
               <p className="profile-hint">저장하면 다음 로그인 시 자동으로 불러옵니다.</p>
               <div className="grid">

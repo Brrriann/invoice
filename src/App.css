@@ -2212,8 +2212,8 @@ input::placeholder, textarea::placeholder {
 
 .btn-save-profile {
   margin-left: auto;
-  font-size: 0.75rem;
-  padding: 4px 12px;
+  font-size: 0.9rem;
+  padding: 8px 16px;
   background: #10b981;
   color: white;
   border: none;
