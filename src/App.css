@@ -1188,6 +1188,12 @@
 
 @media (max-width: 768px) {
   .calendar-day-label {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .calendar-day-label {
     font-size: 12px;
     padding: 10px 6px;
   }
@@ -1223,17 +1229,42 @@
   padding-left: 6px;
   padding-top: 2px;
   line-height: 1.2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
 }
 
+/* 데스크탑: 요일 레이블 헤더 표시 */
+.day-label-mobile {
+  display: none;
+}
+
+/* 모바일: 요일 레이블 헤더 숨기고 날짜 옆에 요일 표시 */
 @media (max-width: 768px) {
   .day-number {
     font-size: 12px;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 4px;
+  }
+
+  .day-label-mobile {
+    display: inline;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-transform: capitalize;
   }
 }
 
 @media (max-width: 480px) {
   .day-number {
     font-size: 11px;
+  }
+
+  .day-label-mobile {
+    font-size: 9px;
   }
 }
 

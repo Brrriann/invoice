@@ -1540,13 +1540,16 @@ function App() {
                       else eventSlots[slotIndex].push(event);
                     });
 
+                    const dayLabels = ['일', '월', '화', '수', '목', '금', '토'];
                     return Array.from({ length: lastDay }).map((_, i) => {
                       const day = i + 1;
                       const dateStr = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                      
+                      const dayOfWeek = new Date(dateStr).getDay();
+                      const dayLabel = dayLabels[dayOfWeek];
+
                       return (
                         <div key={day} className="calendar-day">
-                          <span className="day-number">{day}</span>
+                          <span className="day-number">{day}<span className="day-label-mobile"> {dayLabel}</span></span>
                           <div className="day-events-container">
                             {eventSlots.map((slot, sIdx) => {
                               const event = slot.find(e => {
@@ -1570,15 +1573,13 @@ function App() {
                               const showText = isStart || (isSunday && dateStr <= (event.end_date || event.start_date)) || isMonthBoundary;
 
                               return (
-                                <div 
-                                  key={event.id} 
+                                <div
+                                  key={event.id}
                                   className={`event-bar ${isStart ? 'is-start' : ''} ${isEnd ? 'is-end' : ''} ${!isWorkItem ? 'subcontract' : ''}`}
-                                  style={{ 
-                                    background: color.bg, 
-                                    color: color.text, 
-                                    borderColor: color.border,
-                                    borderLeft: isStart ? `1px solid ${color.border}` : 'none',
-                                    borderRight: isEnd ? `1px solid ${color.border}` : 'none'
+                                  style={{
+                                    background: color.bg,
+                                    color: color.text,
+                                    borderColor: color.border
                                   }}
                                 >
                                   {showText && (
