@@ -1303,20 +1303,28 @@
 /* 멀티데이 이벤트: 시작일에만 왼쪽 radius */
 .event-bar.is-start {
   border-radius: 4px 0 0 4px;
-  border-left: 1px solid;
+  border-left: 2px solid;
+  border-right: none;
+}
+
+/* 멀티데이 이벤트: 중간 날짜 */
+.event-bar:not(.is-start):not(.is-end) {
+  border-left: none;
+  border-right: none;
 }
 
 /* 멀티데이 이벤트: 종료일에만 오른쪽 radius */
-.event-bar.is-end {
+.event-bar.is-end:not(.is-start) {
   border-radius: 0 4px 4px 0;
-  border-right: 1px solid;
+  border-left: none;
+  border-right: 2px solid;
 }
 
-/* 싱글데이 이벤트 또는 양쪽 끝: 모두 radius */
+/* 싱글데이 이벤트: 양쪽 모두 radius */
 .event-bar.is-start.is-end {
   border-radius: 4px;
-  border-left: 1px solid;
-  border-right: 1px solid;
+  border-left: 2px solid;
+  border-right: 2px solid;
 }
 
 @media (max-width: 768px) {
@@ -1327,14 +1335,23 @@
 
   .event-bar.is-start {
     border-radius: 3px 0 0 3px;
+    border-left: 2px solid;
   }
 
-  .event-bar.is-end {
+  .event-bar:not(.is-start):not(.is-end) {
+    border-left: none;
+    border-right: none;
+  }
+
+  .event-bar.is-end:not(.is-start) {
     border-radius: 0 3px 3px 0;
+    border-right: 2px solid;
   }
 
   .event-bar.is-start.is-end {
     border-radius: 3px;
+    border-left: 2px solid;
+    border-right: 2px solid;
   }
 }
 
@@ -1347,14 +1364,23 @@
 
   .event-bar.is-start {
     border-radius: 2px 0 0 2px;
+    border-left: 2px solid;
   }
 
-  .event-bar.is-end {
+  .event-bar:not(.is-start):not(.is-end) {
+    border-left: none;
+    border-right: none;
+  }
+
+  .event-bar.is-end:not(.is-start) {
     border-radius: 0 2px 2px 0;
+    border-right: 2px solid;
   }
 
   .event-bar.is-start.is-end {
     border-radius: 2px;
+    border-left: 2px solid;
+    border-right: 2px solid;
   }
 }
 
