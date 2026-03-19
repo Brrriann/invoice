@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from './lib/supabase';
+import { logSecureError, getUserFriendlyError } from './lib/secureLogger';
+import { selectSecure, insertSecure, updateSecure, deleteSecure, upsertSecure } from './lib/supabaseSecure';
 import './App.css';
 import React from 'react';
 import * as XLSX from 'xlsx';
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import LandingPage from './pages/LandingPage';
 
 // --- 인터페이스 정의 ---
 interface Item {
@@ -173,6 +176,7 @@ function App() {
   const [authInputs, setAuthViewInputs] = useState({ email: '', password: '', confirmPassword: '', phone: '' });
   const [newPassword, setNewPassword] = useState({ password: '', confirmPassword: '' });
   const [isLoading, setIsLoading] = useState(true);
+  const [showAuthForm, setShowAuthForm] = useState(false);
 
   // --- 메인 앱 상태 ---
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -246,22 +250,13 @@ function App() {
 
       setBlogData(prev => ({ ...prev, result: text, isGenerating: false }));
     } catch (error: unknown) {
-      console.error('AI 블로그 생성 에러:', error);
+      // 🔒 보안 로깅: 민감정보 제외
+      logSecureError('BLOG_GENERATION_ERROR', error, currentUser?.id, 'error');
 
-      let errorMessage = '알 수 없는 오류가 발생했습니다.';
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      }
+      // 사용자 친화적 메시지
+      const userMessage = getUserFriendlyError(error);
+      alert(userMessage);
 
-      if (errorMessage.includes('401') || errorMessage.includes('permission')) {
-        alert("API 키가 유효하지 않습니다.\n\n1. API 키를 다시 확인해주세요.\n2. Google AI Studio에서 API가 활성화되어 있는지 확인하세요.\n3. 키를 다시 생성해보세요.");
-      } else if (errorMessage.includes('429')) {
-        alert("API 사용량 한계에 도달했습니다.\n나중에 다시 시도해주세요.");
-      } else {
-        alert(`글 생성 중 오류가 발생했습니다: ${errorMessage}`);
-      }
       setBlogData(prev => ({ ...prev, isGenerating: false }));
     }
   };  const [items, setItems] = useState<Item[]>([
@@ -325,27 +320,34 @@ function App() {
   // --- 회사 프로필 ---
   const fetchCompanyProfile = useCallback(async () => {
     if (!currentUser) return;
-    const { data } = await supabase.from('company_profiles').select('*').eq('user_id', currentUser.id).single();
-    if (data) {
-      setProvider({ name: data.name || '', brandTagline: data.brandTagline || '', representative: data.representative || '', businessNo: data.businessNo || '', address: data.address || '', contact: data.contact || '' });
-      if (data.company_intro) setCompanyIntro(data.company_intro);
+    try {
+      const data = await selectSecure('company_profiles', currentUser.id, { single: true });
+      if (data) {
+        setProvider({ name: data.name || '', brandTagline: data.brandTagline || '', representative: data.representative || '', businessNo: data.businessNo || '', address: data.address || '', contact: data.contact || '' });
+        if (data.company_intro) setCompanyIntro(data.company_intro);
+      }
+    } catch (error) {
+      logSecureError('FETCH_COMPANY_PROFILE', error, currentUser?.id, 'warning');
     }
   }, [currentUser, setProvider]);
 
   const saveCompanyProfile = async () => {
     if (!currentUser) return;
-    const { error } = await supabase.from('company_profiles').upsert({
-      user_id: currentUser.id,
-      name: provider.name,
-      brand_tagline: provider.brandTagline,
-      representative: provider.representative,
-      business_no: provider.businessNo,
-      address: provider.address,
-      contact: provider.contact,
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'user_id' });
-    if (error) alert('저장 실패: ' + error.message);
-    else alert('공급자정보가 저장되었습니다.\n견적서 저장은 아래의 클라우드저장 버튼을 눌러주세요!');
+    try {
+      await upsertSecure('company_profiles', currentUser.id, {
+        name: provider.name,
+        brand_tagline: provider.brandTagline,
+        representative: provider.representative,
+        business_no: provider.businessNo,
+        address: provider.address,
+        contact: provider.contact,
+        updated_at: new Date().toISOString()
+      });
+      alert('공급자정보가 저장되었습니다.\n견적서 저장은 아래의 클라우드저장 버튼을 눌러주세요!');
+    } catch (error) {
+      logSecureError('PROFILE_SAVE', error, currentUser?.id, 'error');
+      alert(getUserFriendlyError(error));
+    }
   };
 
   const saveCompanyIntro = async () => {
@@ -357,13 +359,16 @@ function App() {
       alert('자사 소개 내용을 입력해주세요.');
       return;
     }
-    const { error } = await supabase.from('company_profiles').upsert({
-      user_id: currentUser.id,
-      company_intro: companyIntro,
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'user_id' });
-    if (error) alert('저장 실패: ' + error.message);
-    else alert('자사 소개가 저장되었습니다.');
+    try {
+      await upsertSecure('company_profiles', currentUser.id, {
+        company_intro: companyIntro,
+        updated_at: new Date().toISOString()
+      });
+      alert('자사 소개가 저장되었습니다.');
+    } catch (error) {
+      logSecureError('INTRO_SAVE', error, currentUser?.id, 'error');
+      alert(getUserFriendlyError(error));
+    }
   };
 
   const handleApiKeySubmit = () => {
@@ -384,36 +389,52 @@ function App() {
 
   // --- DB 로직 (대시보드/프로젝트) ---
   const fetchProjects = useCallback(async () => {
-    const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
-    if (!error) setProjects(data || []);
-  }, [setProjects]);
+    if (!currentUser) return;
+    try {
+      const data = await selectSecure('projects', currentUser.id);
+      if (data) setProjects(data);
+    } catch (error) {
+      logSecureError('FETCH_PROJECTS', error, currentUser?.id, 'warning');
+    }
+  }, [currentUser, setProjects]);
 
   const fetchWorkItems = useCallback(async () => {
-    const { data, error } = await supabase.from('work_items').select('*').order('created_at', { ascending: true });
-    if (!error) setWorkItems(data || []);
-  }, [setWorkItems]);
+    if (!currentUser) return;
+    try {
+      const data = await selectSecure('work_items', currentUser.id);
+      if (data) setWorkItems(data);
+    } catch (error) {
+      logSecureError('FETCH_WORKITEMS', error, currentUser?.id, 'warning');
+    }
+  }, [currentUser, setWorkItems]);
 
   const fetchSubcontracts = useCallback(async () => {
-    const { data, error } = await supabase.from('subcontracts').select('*').order('created_at', { ascending: true });
-    if (!error) setSubcontracts(data || []);
-  }, [setSubcontracts]);
+    if (!currentUser) return;
+    try {
+      const data = await selectSecure('subcontracts', currentUser.id);
+      if (data) setSubcontracts(data);
+    } catch (error) {
+      logSecureError('FETCH_SUBCONTRACTS', error, currentUser?.id, 'warning');
+    }
+  }, [currentUser, setSubcontracts]);
 
   const createSubcontractFromWorkItem = async (projectId: string, workItem: WorkItem) => {
     if (!currentUser) return;
-    const { error } = await supabase.from('subcontracts').insert([{
-      project_id: projectId,
-      user_id: currentUser.id,
-      label: workItem.label,
-      amount: 0,
-      invoice_issued: false,
-      payment_done: false,
-      start_date: workItem.start_date,
-      end_date: workItem.end_date
-    }]);
-    if (!error) {
+    try {
+      await insertSecure('subcontracts', currentUser.id, {
+        project_id: projectId,
+        label: workItem.label,
+        amount: 0,
+        invoice_issued: false,
+        payment_done: false,
+        start_date: workItem.start_date,
+        end_date: workItem.end_date
+      });
       // 원본 공정 삭제
       await deleteWorkItem(workItem.id);
       await fetchSubcontracts();
+    } catch (error) {
+      logSecureError('CREATE_SUBCONTRACT', error, currentUser?.id, 'error');
       // 외주 섹션으로 스크롤
       const subSection = document.querySelector('.sub-cards-grid');
       if (subSection) {
@@ -423,14 +444,17 @@ function App() {
   };
 
   const updateSubcontract = useCallback(async (id: string, field: keyof Subcontract, value: string | number | boolean) => {
+    if (!currentUser) return;
     setSubcontracts(prev => prev.map(s => {
       if (s.id === id) {
         const updated = { ...s, [field]: value };
         // 시작일을 변경했는데 종료일이 없으면 시작일과 동일하게 설정
         if (field === 'start_date' && value && !s.end_date) {
           updated.end_date = value as string;
-          // DB에도 함께 업데이트하기 위해 루프 밖에서 처리하거나 여기서 별도 호출
-          supabase.from('subcontracts').update({ end_date: value as string }).eq('id', id);
+          // DB에도 함께 업데이트
+          updateSecure('subcontracts', currentUser.id, id, { end_date: value as string }).catch(e =>
+            logSecureError('SUBCONTRACT_UPDATE', e, currentUser?.id, 'warning')
+          );
         }
         return updated;
       }
@@ -438,63 +462,74 @@ function App() {
     }));
     // label은 한글 입력 완료 후에만 DB 저장 (onCompositionEnd에서 호출)
     if (field !== 'label') {
-      await supabase.from('subcontracts').update({ [field]: value }).eq('id', id);
+      try {
+        await updateSecure('subcontracts', currentUser.id, id, { [field]: value });
+      } catch (error) {
+        logSecureError('SUBCONTRACT_UPDATE', error, currentUser?.id, 'warning');
+      }
     }
-  }, [setSubcontracts]);
+  }, [currentUser, setSubcontracts]);
 
   const saveSubcontractLabel = async (id: string, value: string) => {
-    if (!value.trim()) return; // 비어있으면 저장하지 않음
+    if (!value.trim() || !currentUser) return;
     try {
-      const { error } = await supabase.from('subcontracts').update({ label: value }).eq('id', id);
-      if (error) {
-        console.error('Failed to save subcontract label:', error.message);
-        alert('외주 공정명 저장 실패: ' + error.message);
-      }
-    } catch (unexpectedError) {
-      console.error('An unexpected error occurred while saving subcontract label:', unexpectedError);
-      alert('외주 공정명 저장 중 알 수 없는 오류가 발생했습니다.');
+      await updateSecure('subcontracts', currentUser.id, id, { label: value });
+    } catch (error) {
+      logSecureError('SUBCONTRACT_UPDATE', error, currentUser?.id, 'error');
+      alert('외주 공정명 저장 중 오류가 발생했습니다. 다시 시도해주세요.');
     }
   };
 
   const deleteSubcontract = async (id: string) => {
-    await supabase.from('subcontracts').delete().eq('id', id);
-    setSubcontracts(prev => prev.filter(s => s.id !== id));
+    if (!currentUser) return;
+    try {
+      await deleteSecure('subcontracts', currentUser.id, id);
+      setSubcontracts(prev => prev.filter(s => s.id !== id));
+    } catch (error) {
+      logSecureError('SUBCONTRACT_DELETE', error, currentUser?.id, 'error');
+    }
   };
 
   const addProject = async () => {
     if (!currentUser) return;
     const siteName = prompt('신규 현장명을 입력하세요:');
     if (!siteName) return;
-    const { error } = await supabase.from('projects').insert([{
-      user_id: currentUser.id,
-      site_name: siteName,
-      customer_name: '',
-      total_amount: 0,
-      invoice_status: '미발급',
-      payment_status: '미수금',
-      biz_name: '',
-      biz_owner: '',
-      biz_address: '',
-      biz_type: '',
-      biz_item: '',
-      biz_email: ''
-    }]);
-    if (error) alert('생성 실패: ' + error.message);
-    else fetchProjects();
+    try {
+      await insertSecure('projects', currentUser.id, {
+        site_name: siteName,
+        customer_name: '',
+        total_amount: 0,
+        invoice_status: '미발급',
+        payment_status: '미수금',
+        biz_name: '',
+        biz_owner: '',
+        biz_address: '',
+        biz_type: '',
+        biz_item: '',
+        biz_email: ''
+      });
+      fetchProjects();
+    } catch (error) {
+      logSecureError('PROJECT_INSERT', error, currentUser?.id, 'error');
+      alert('현장 생성 실패했습니다. 다시 시도해주세요.');
+    }
   };
 
   const addWorkItem = async (projectId: string, count: number) => {
     if (!currentUser) return;
-    const { error } = await supabase.from('work_items').insert([{
-      project_id: projectId,
-      user_id: currentUser.id,
-      label: `공정${count + 1}`,
-      type: '시공',
-      start_date: '',
-      end_date: '',
-      status: '실측예정'
-    }]);
-    if (!error) fetchWorkItems();
+    try {
+      await insertSecure('work_items', currentUser.id, {
+        project_id: projectId,
+        label: `공정${count + 1}`,
+        type: '시공',
+        start_date: '',
+        end_date: '',
+        status: '실측예정'
+      });
+      fetchWorkItems();
+    } catch (error) {
+      logSecureError('WORKITEM_INSERT', error, currentUser?.id, 'error');
+    }
   };
 
   const updateWorkItem = useCallback(async (id: string, field: string, value: string) => {
@@ -504,35 +539,43 @@ function App() {
         // 시작일을 변경했는데 종료일이 없으면 시작일과 동일하게 설정
         if (field === 'start_date' && value && !w.end_date) {
           updated.end_date = value;
-          supabase.from('work_items').update({ end_date: value }).eq('id', id);
+          if (currentUser) {
+            updateSecure('work_items', currentUser.id, id, { end_date: value }).catch(error => {
+              logSecureError('WORKITEM_UPDATE', error, currentUser?.id, 'warning');
+            });
+          }
         }
         return updated;
       }
       return w;
     }));
     // label은 한글 입력 완료 후에만 DB 저장 (onCompositionEnd에서 호출)
-    if (field !== 'label') {
-      await supabase.from('work_items').update({ [field]: value }).eq('id', id);
+    if (field !== 'label' && currentUser) {
+      updateSecure('work_items', currentUser.id, id, { [field]: value }).catch(error => {
+        logSecureError('WORKITEM_UPDATE', error, currentUser?.id, 'warning');
+      });
     }
-  }, [setWorkItems]);
+  }, [setWorkItems, currentUser]);
 
   const saveWorkItemLabel = async (id: string, value: string) => {
-    if (!value.trim()) return; // 비어있으면 저장하지 않음
+    if (!value.trim() || !currentUser) return; // 비어있으면 저장하지 않음
     try {
-      const { error } = await supabase.from('work_items').update({ label: value }).eq('id', id);
-      if (error) {
-        console.error('Failed to save work item label:', error.message);
-        alert('공정명 저장 실패: ' + error.message);
-      }
-    } catch (unexpectedError) {
-      console.error('An unexpected error occurred while saving work item label:', unexpectedError);
-      alert('공정명 저장 중 알 수 없는 오류가 발생했습니다.');
+      await updateSecure('work_items', currentUser.id, id, { label: value });
+    } catch (error) {
+      logSecureError('WORKITEM_UPDATE', error, currentUser?.id, 'warning');
+      alert('공정명 저장 실패했습니다. 다시 시도해주세요.');
     }
   };
 
   const deleteWorkItem = async (id: string) => {
-    await supabase.from('work_items').delete().eq('id', id);
-    setWorkItems(prev => prev.filter(w => w.id !== id));
+    if (!currentUser) return;
+    try {
+      await deleteSecure('work_items', currentUser.id, id);
+      setWorkItems(prev => prev.filter(w => w.id !== id));
+    } catch (error) {
+      logSecureError('WORKITEM_DELETE', error, currentUser?.id, 'error');
+      alert('공정 삭제에 실패했습니다. 다시 시도해주세요.');
+    }
   };
 
   const exportFilteredProjectsToExcel = (filteredProjects: Project[]) => {
@@ -568,8 +611,12 @@ function App() {
   };
 
   const syncProjectToDB = async (id: string, field: keyof Project, value: string | number | '미발급' | '발급완료' | '미수금' | '일부수금' | '완료') => {
-    const { error } = await supabase.from('projects').update({ [field]: value }).eq('id', id);
-    if (error) console.error('DB Sync Error:', error.message);
+    if (!currentUser) return;
+    try {
+      await updateSecure('projects', currentUser.id, id, { [field]: value });
+    } catch (error) {
+      logSecureError('PROJECT_SYNC', error, currentUser?.id, 'warning');
+    }
   };
 
   const handleProjectUpdateImmediate = (id: string, field: keyof Project, value: string | number | '미발급' | '발급완료' | '미수금' | '일부수금' | '완료') => {
@@ -579,16 +626,27 @@ function App() {
 
   const deleteProject = async (id: string) => {
     if (!window.confirm('현장 데이터를 삭제하시겠습니까?')) return;
-    const { error } = await supabase.from('projects').delete().eq('id', id);
-    if (!error) fetchProjects();
+    if (!currentUser) return;
+    try {
+      await deleteSecure('projects', currentUser.id, id);
+      fetchProjects();
+    } catch (error) {
+      logSecureError('PROJECT_DELETE', error, currentUser?.id, 'error');
+      alert('현장 삭제에 실패했습니다. 다시 시도해주세요.');
+    }
   };
 
   // --- DB 로직 (견적서) ---
   const fetchQuotations = useCallback(async () => {
     if (!currentUser) return;
-    const { data, error } = await supabase.from('quotations').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-    if (!error) setSavedQuotations(data || []);
-    else console.error('견적서 조회 실패:', error);
+    try {
+      const data = await selectSecure('quotations', currentUser.id);
+      setSavedQuotations((Array.isArray(data) ? data : []).sort((a: any, b: any) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      ));
+    } catch (error) {
+      logSecureError('FETCH_QUOTATIONS', error, currentUser?.id, 'warning');
+    }
   }, [currentUser, setSavedQuotations]);
 
   const saveCurrentQuotation = async () => {
@@ -597,25 +655,42 @@ function App() {
       alert('고객명을 입력하세요');
       return;
     }
-    const { error } = await supabase.from('quotations').insert([{
-      user_id: currentUser.id, items, provider, customer: customer.name, quoteNumber, greeting, remarks, total_amount: Math.floor(items.reduce((sum, i) => sum + Math.floor(i.quantity * i.unitPrice), 0) * 1.1)
-    }]);
-    if (error) alert('저장 실패: ' + error.message);
-    else { alert('견적서가 저장되었습니다.'); fetchQuotations(); }
+    try {
+      await insertSecure('quotations', currentUser.id, {
+        items, provider, customer: customer.name, quoteNumber, greeting, remarks,
+        total_amount: Math.floor(items.reduce((sum, i) => sum + Math.floor(i.quantity * i.unitPrice), 0) * 1.1)
+      });
+      alert('견적서가 저장되었습니다.');
+      fetchQuotations();
+    } catch (error) {
+      logSecureError('QUOTATION_SAVE', error, currentUser?.id, 'error');
+      alert(getUserFriendlyError(error));
+    }
   };
 
   const deleteQuotation = async (id: string) => {
     if (!window.confirm('정말 삭제하시겠습니까?')) return;
-    const { error } = await supabase.from('quotations').delete().eq('id', id);
-    if (!error) fetchQuotations();
+    if (!currentUser) return;
+    try {
+      await deleteSecure('quotations', currentUser.id, id);
+      fetchQuotations();
+    } catch (error) {
+      logSecureError('QUOTATION_DELETE', error, currentUser?.id, 'error');
+      alert('견적서 삭제에 실패했습니다. 다시 시도해주세요.');
+    }
   };
 
   // --- DB 로직 (실측) ---
   const fetchMeasurements = useCallback(async () => {
     if (!currentUser) return;
-    const { data, error } = await supabase.from('measurements_v2').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-    if (!error) setSavedMeasurements(data || []);
-    else console.error('실측리포트 조회 실패:', error);
+    try {
+      const data = await selectSecure('measurements_v2', currentUser.id);
+      setSavedMeasurements((Array.isArray(data) ? data : []).sort((a: any, b: any) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      ));
+    } catch (error) {
+      logSecureError('FETCH_MEASUREMENTS', error, currentUser?.id, 'warning');
+    }
   }, [currentUser, setSavedMeasurements]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
@@ -654,7 +729,7 @@ function App() {
                       reader.readAsDataURL(blob);
                     });
                   } catch (error) {
-                    console.error('Failed to convert photo:', error);
+                    logSecureError('PHOTO_CONVERSION', error, currentUser?.id, 'warning');
                     // 변환 실패 시 placeholder 표시
                     const placeholderBase64 = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23e2e8f0" width="100" height="100"/%3E%3Ctext x="50" y="50" text-anchor="middle" dy=".3em" font-size="10" fill="%23999"%3E사진 오류%3C/text%3E%3C/svg%3E';
                     converted[space.id][i] = placeholderBase64;
@@ -739,16 +814,7 @@ function App() {
     }
 
     try {
-      console.log('Saving measurement:', {
-        user_id: currentUser.id,
-        site_name: measureData.siteName,
-        customer_name: measureData.customerName,
-        spaces_count: measureData.spaces.length,
-        photos_count: measureData.spaces.reduce((sum, s) => sum + s.photos.length, 0)
-      });
-
-      const { data, error } = await supabase.from('measurements_v2').insert([{
-        user_id: currentUser.id,
+      const data = await insertSecure('measurements_v2', currentUser.id, {
         site_name: measureData.siteName,
         customer_name: measureData.customerName,
         date: measureData.date,
@@ -758,26 +824,13 @@ function App() {
         contact: measureData.contact,
         address: measureData.address,
         special_notes: measureData.specialNotes
-      }]).select();
-
-      if (error) {
-        console.error('Save error details:', {
-          message: error.message,
-          code: error.code,
-          status: (error as any).status,
-          hint: (error as any).hint
-        });
-        alert(`저장 실패: ${error.message}\n(코드: ${error.code})\n힌트: ${(error as any).hint || 'N/A'}`);
-        return;
-      }
+      });
 
       if (!data || data.length === 0) {
-        console.error('No data returned from insert');
+        logSecureError('MEASUREMENT_SAVE', new Error('No data returned'), currentUser?.id, 'warning');
         alert('저장 완료되었으나 데이터 확인 실패');
         return;
       }
-
-      console.log('Save successful:', data);
 
       alert('실측 리포트가 저장되었습니다.');
       fetchMeasurements();
@@ -788,15 +841,21 @@ function App() {
         measurer: '', spaces: [], checklist: { ...defaultChecklist }, specialNotes: ''
       });
     } catch (error) {
-      console.error('Unexpected error:', error);
-      alert(`예상치 못한 오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
+      logSecureError('MEASUREMENT_SAVE', error, currentUser?.id, 'error');
+      alert('실측 리포트 저장 중 오류가 발생했습니다. 다시 시도해주세요.');
     }
   };
 
   const deleteMeasurement = async (id: string) => {
     if (!window.confirm('정말 삭제하시겠습니까?')) return;
-    const { error } = await supabase.from('measurements_v2').delete().eq('id', id);
-    if (!error) fetchMeasurements();
+    if (!currentUser) return;
+    try {
+      await deleteSecure('measurements_v2', currentUser.id, id);
+      fetchMeasurements();
+    } catch (error) {
+      logSecureError('MEASUREMENT_DELETE', error, currentUser?.id, 'error');
+      alert('실측 리포트 삭제에 실패했습니다. 다시 시도해주세요.');
+    }
   };
 
   const loadMeasurement = (m: SavedMeasurement) => {
@@ -837,11 +896,9 @@ function App() {
   const handleSpacePhotoUpload = async (spaceId: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || !currentUser) {
-      console.error('Photo upload failed: no files or currentUser', { files: !!files, currentUser: !!currentUser });
+      if (!files) alert('파일을 선택해주세요.');
       return;
     }
-
-    console.log(`Starting photo upload: ${files.length} files for space ${spaceId}`);
 
     // 업로드 시작
     setIsUploading(prev => ({ ...prev, [spaceId]: true }));
@@ -851,34 +908,29 @@ function App() {
     for (let index = 0; index < fileArray.length; index++) {
       const file = fileArray[index];
       try {
-        console.log(`Compressing file: ${file.name} (${file.size} bytes)`);
         // 1. 이미지 압축
         const compressed = await compressImage(file);
-        console.log(`Compressed: ${compressed.size} bytes`);
 
         // 2. Supabase Storage 업로드
         // 파일명을 영문/숫자로 변환 (한글 미지원)
         const sanitizedFileName = `photo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`;
         const fileName = `${currentUser.id}/${sanitizedFileName}`;
-        console.log(`Uploading to Storage: ${fileName}`);
 
         const { data, error } = await supabase.storage
           .from('measurement-photos')
           .upload(fileName, compressed, { contentType: 'image/jpeg', upsert: false });
 
         if (error) {
-          console.error('Storage upload error:', { message: error.message, status: (error as any).status, statusCode: (error as any).statusCode });
-          alert(`사진 업로드 실패: ${error.message}\n상태: ${(error as any).status || (error as any).statusCode}`);
+          logSecureError('PHOTO_UPLOAD', error, currentUser?.id, 'warning');
+          alert('사진 업로드 실패했습니다. 다시 시도해주세요.');
           continue;
         }
 
         if (!data || !data.path) {
-          console.error('No path returned from upload', { data });
-          alert('사진 업로드 실패: 경로 정보 없음');
+          logSecureError('PHOTO_UPLOAD', new Error('No path returned'), currentUser?.id, 'warning');
+          alert('사진 업로드 실패했습니다. 다시 시도해주세요.');
           continue;
         }
-
-        console.log(`Upload successful: ${data.path}`);
 
         // 3. Public URL 가져오기
         const { data: urlData } = supabase.storage
@@ -886,27 +938,23 @@ function App() {
           .getPublicUrl(data.path);
 
         if (!urlData || !urlData.publicUrl) {
-          console.error('No public URL returned', { urlData });
-          alert('사진 URL 생성 실패');
+          logSecureError('PHOTO_URL_GENERATION', new Error('No public URL'), currentUser?.id, 'warning');
+          alert('사진 URL 생성 실패했습니다. 다시 시도해주세요.');
           continue;
         }
 
-        console.log(`Public URL: ${urlData.publicUrl}`);
-
         // 4. photos 배열에 URL만 저장
-        console.log(`Adding photo to space ${spaceId}`);
         setMeasureData(prev => ({
           ...prev,
           spaces: prev.spaces.map(s => s.id === spaceId ? { ...s, photos: [...s.photos, urlData.publicUrl] } : s)
         }));
-        console.log(`Photo added successfully`);
 
         // 5. 진행률 업데이트
         const progress = Math.round(((index + 1) / fileArray.length) * 100);
         setUploadProgress(prev => ({ ...prev, [spaceId]: progress }));
       } catch (error) {
-        console.error('Photo upload failed:', error);
-        alert(`사진 업로드 중 오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
+        logSecureError('PHOTO_UPLOAD', error, currentUser?.id, 'error');
+        alert('사진 업로드 중 오류가 발생했습니다. 다시 시도해주세요.');
       }
     }
 
@@ -1026,6 +1074,11 @@ function App() {
 
   if (isLoading) return <div className="loading">로딩 중...</div>;
 
+  // 로그인 안 됨 → 랜딩페이지 표시
+  if (!currentUser && isLoading === false && !showAuthForm) {
+    return <div style={{ background: '#fff', color: '#1F2937', minHeight: '100vh' }}><LandingPage onStartClick={() => { setAuthView('signup'); setShowAuthForm(true); }} /></div>;
+  }
+
   if (authView === 'reset') {
     return (
       <div className="auth-container">
@@ -1078,6 +1131,19 @@ function App() {
               </div>
             </>
           )}
+        </div>
+      </div>
+    );
+  }
+
+  // 로딩 중
+  if (isLoading) {
+    return (
+      <div className="app-shell">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '10px' }}>로딩 중...</div>
+          </div>
         </div>
       </div>
     );
