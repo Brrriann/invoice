@@ -1137,38 +1137,33 @@
   transform: scale(1.05);
 }
 
+/* 캘린더 외부 래퍼: border-radius + overflow:hidden 처리 */
+.calendar-grid-wrapper {
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 1px;
-  background: var(--color-border);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
+  gap: 0;
+  overflow: visible;
   min-width: 100%;
   /* Desktop: 7열, Tablet: 4열, Mobile: 3열 */
 }
 
 @media (max-width: 1024px) {
-  .calendar-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
+  .calendar-grid { grid-template-columns: repeat(4, 1fr); }
 }
 
 @media (max-width: 768px) {
-  .calendar-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  .calendar-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 480px) {
-  .calendar-card {
-    padding: 16px;
-  }
-
-  .calendar-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .calendar-card { padding: 16px; }
+  .calendar-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 .calendar-day-label {
@@ -1202,11 +1197,14 @@
 .calendar-day {
   background: white;
   min-height: 140px;
-  padding: 8px 4px;
+  padding: 8px 0;
   display: flex;
   flex-direction: column;
   gap: 3px;
   border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  position: relative;
+  overflow: visible;
 }
 
 @media (max-width: 768px) {
@@ -1283,105 +1281,68 @@
   height: 22px;
   display: flex;
   align-items: center;
-  margin: 0 -1px; /* 갭을 채우기 위해 약간 확장 */
   padding: 0 4px;
   box-sizing: border-box;
   font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
   white-space: nowrap;
-  border-top: 1px solid;
-  border-bottom: 1px solid;
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid transparent;
   position: relative;
-  z-index: 1;
+  z-index: 2;
   width: 100%;
   border-radius: 0;
   letter-spacing: 0.2px;
-  transition: all 150ms ease;
+  transition: opacity 150ms ease;
 }
 
-/* 멀티데이 이벤트: 시작일에만 왼쪽 radius */
-.event-bar.is-start {
+/* 시작일: 왼쪽 둥글게, 오른쪽으로 1px 확장해서 border 덮기 */
+.event-bar.is-start:not(.is-end) {
   border-radius: 4px 0 0 4px;
   border-left: 2px solid;
-  border-right: none;
+  border-top-color: inherit;
+  border-bottom-color: inherit;
+  width: calc(100% + 1px);
 }
 
-/* 멀티데이 이벤트: 중간 날짜 */
+/* 중간 날짜: 왼쪽으로 1px, 오른쪽으로 1px 확장해서 양쪽 border 덮기 */
 .event-bar:not(.is-start):not(.is-end) {
   border-left: none;
   border-right: none;
+  margin-left: -1px;
+  width: calc(100% + 2px);
 }
 
-/* 멀티데이 이벤트: 종료일에만 오른쪽 radius */
+/* 종료일: 왼쪽으로 1px 확장, 오른쪽 둥글게 */
 .event-bar.is-end:not(.is-start) {
   border-radius: 0 4px 4px 0;
-  border-left: none;
   border-right: 2px solid;
+  border-top-color: inherit;
+  border-bottom-color: inherit;
+  margin-left: -1px;
+  width: calc(100% + 1px);
 }
 
-/* 싱글데이 이벤트: 양쪽 모두 radius */
+/* 싱글데이: 양쪽 모두 둥글게, 확장 없음 */
 .event-bar.is-start.is-end {
   border-radius: 4px;
-  border-left: 2px solid;
-  border-right: 2px solid;
+  border: 2px solid;
+  width: 100%;
+  margin-left: 0;
 }
 
 @media (max-width: 768px) {
-  .event-bar {
-    font-size: 10px;
-    height: 20px;
-  }
-
-  .event-bar.is-start {
-    border-radius: 3px 0 0 3px;
-    border-left: 2px solid;
-  }
-
-  .event-bar:not(.is-start):not(.is-end) {
-    border-left: none;
-    border-right: none;
-  }
-
-  .event-bar.is-end:not(.is-start) {
-    border-radius: 0 3px 3px 0;
-    border-right: 2px solid;
-  }
-
-  .event-bar.is-start.is-end {
-    border-radius: 3px;
-    border-left: 2px solid;
-    border-right: 2px solid;
-  }
+  .event-bar { font-size: 10px; height: 20px; }
+  .event-bar.is-start:not(.is-end) { border-radius: 3px 0 0 3px; }
+  .event-bar.is-end:not(.is-start) { border-radius: 0 3px 3px 0; }
+  .event-bar.is-start.is-end { border-radius: 3px; }
 }
 
 @media (max-width: 480px) {
-  .event-bar {
-    font-size: 9px;
-    height: 18px;
-    padding: 0 3px;
-  }
-
-  .event-bar.is-start {
-    border-radius: 2px 0 0 2px;
-    border-left: 2px solid;
-  }
-
-  .event-bar:not(.is-start):not(.is-end) {
-    border-left: none;
-    border-right: none;
-  }
-
-  .event-bar.is-end:not(.is-start) {
-    border-radius: 0 2px 2px 0;
-    border-right: 2px solid;
-  }
-
-  .event-bar.is-start.is-end {
-    border-radius: 2px;
-    border-left: 2px solid;
-    border-right: 2px solid;
-  }
+  .event-bar { font-size: 9px; height: 18px; padding: 0 3px; }
+  .event-bar.is-start:not(.is-end) { border-radius: 2px 0 0 2px; }
+  .event-bar.is-end:not(.is-start) { border-radius: 0 2px 2px 0; }
+  .event-bar.is-start.is-end { border-radius: 2px; }
 }
 
 .event-bar.is-start {

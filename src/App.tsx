@@ -1510,6 +1510,7 @@ function App() {
                   <h2>{currentMonth.getFullYear()}년 {currentMonth.getMonth() + 1}월</h2>
                   <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}>&gt;</button>
                 </div>
+                <div className="calendar-grid-wrapper">
                 <div className="calendar-grid">
                   {['일', '월', '화', '수', '목', '금', '토'].map(day => <div key={day} className="calendar-day-label">{day}</div>)}
                   {Array.from({ length: new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay() }).map((_, i) => <div key={`empty-${i}`} className="calendar-day empty"></div>)}
@@ -1595,6 +1596,7 @@ function App() {
                       );
                     });
                   })()}
+                </div>
                 </div>
               </div>
             ) : (
