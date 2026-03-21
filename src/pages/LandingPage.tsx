@@ -31,48 +31,47 @@ export default function LandingPage({ onStartClick }: LandingPageProps) {
     <div style={{ background: '#F8FAFC', color: '#334155', fontFamily: "'Plus Jakarta Sans', 'Open Sans', sans-serif", minHeight: '100vh' }}>
       {/* Navbar */}
       <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, background: 'rgba(248, 250, 252, 0.95)', backdropFilter: 'blur(8px)', borderBottom: '1px solid rgba(100, 116, 139, 0.1)' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '1rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div className="landing-navbar" style={{ maxWidth: '1280px', margin: '0 auto', padding: '1rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ width: '44px', height: '44px', background: '#F97316', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '22px', fontWeight: '700' }}>📐</div>
-            <span style={{ fontSize: '16px', fontWeight: '700', color: '#334155' }}>공정관리시스템</span>
+            <div style={{ width: '36px', height: '36px', background: '#F97316', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '18px', fontWeight: '700' }}>📐</div>
+            <span style={{ fontSize: '15px', fontWeight: '700', color: '#334155' }}>공정관리시스템</span>
           </div>
-          <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-            <button onClick={() => scrollTo('features')} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', fontSize: '14px', fontWeight: '600', transition: 'color 200ms' }}>기능</button>
-            <button onClick={() => scrollTo('faq')} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', fontSize: '14px', fontWeight: '600', transition: 'color 200ms' }}>FAQ</button>
-            <button onClick={onStartClick} style={{ background: '#F97316', color: '#fff', border: 'none', padding: '0.625rem 1.25rem', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '14px', transition: 'all 200ms' }}>시작하기</button>
+          <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+            <button className="landing-navbar-links" onClick={() => scrollTo('features')} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', fontSize: '14px', fontWeight: '600', transition: 'color 200ms' }}>기능</button>
+            <button className="landing-navbar-links" onClick={() => scrollTo('faq')} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', fontSize: '14px', fontWeight: '600', transition: 'color 200ms' }}>FAQ</button>
+            <button onClick={onStartClick} style={{ background: '#F97316', color: '#fff', border: 'none', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '13px', transition: 'all 200ms', whiteSpace: 'nowrap' }}>시작하기</button>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section style={{ paddingTop: '140px', paddingBottom: '80px', background: '#F8FAFC' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 2rem' }}>
+      <section className="landing-hero-section" style={{ paddingTop: '140px', paddingBottom: '80px', background: '#F8FAFC' }}>
+        <div className="landing-content-pad" style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 2rem' }}>
           <div className="fade-up" style={{ textAlign: 'center', maxWidth: '900px', margin: '0 auto' }}>
-            <div style={{ display: 'inline-block', background: '#FEF3C7', color: '#F97316', fontSize: '12px', fontWeight: '700', padding: '0.5rem 1rem', borderRadius: '20px', marginBottom: '1.5rem', letterSpacing: '0.5px' }}>✨ 인테리어 현장의 완벽한 관리 솔루션</div>
-            <h1 style={{ fontSize: '3.5rem', fontWeight: '800', margin: '0 0 1.5rem', lineHeight: '1.2', color: '#334155' }}>
+            <div style={{ display: 'inline-block', background: '#FEF3C7', color: '#F97316', fontSize: '12px', fontWeight: '700', padding: '0.5rem 1rem', borderRadius: '20px', marginBottom: '1.5rem', letterSpacing: '0.5px' }}>인테리어 현장의 완벽한 관리 솔루션</div>
+            <h1 className="landing-hero-title" style={{ fontSize: '3.5rem', fontWeight: '800', margin: '0 0 1.5rem', lineHeight: '1.2', color: '#334155' }}>
               현장 공정부터<br />
               <span style={{ color: '#F97316' }}>세금계산서, AI 마케팅까지</span><br />
               모두 하나로 관리
             </h1>
-            <p style={{ fontSize: '1.125rem', color: '#64748B', margin: '0 auto 2.5rem', lineHeight: '1.8', maxWidth: '700px' }}>
-              공정 대시보드, 견적·세금계산서, 실측 템플릿, 엑셀 자동 생성, AI 마케팅까지.<br />
-              바쁜 사장님들의 업무 효율을 90% 높이는 통합 솔루션입니다.
+            <p className="landing-hero-subtitle" style={{ fontSize: '1.125rem', color: '#64748B', margin: '0 auto 2.5rem', lineHeight: '1.8', maxWidth: '700px' }}>
+              공정 대시보드, 견적·세금계산서, 실측 템플릿, 엑셀 자동 생성, AI 마케팅까지. 바쁜 사장님들의 업무 효율을 90% 높이는 통합 솔루션입니다.
             </p>
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button onClick={onStartClick} style={{ background: '#F97316', color: '#fff', border: 'none', padding: '1rem 2rem', borderRadius: '8px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', transition: 'all 200ms' }}>무료로 시작하기</button>
-              <button onClick={() => scrollTo('features')} style={{ background: '#fff', color: '#334155', border: '2px solid #E5E7EB', padding: '1rem 2rem', borderRadius: '8px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', transition: 'all 200ms' }}>둘러보기</button>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button className="landing-btn" onClick={onStartClick} style={{ background: '#F97316', color: '#fff', border: 'none', padding: '1rem 2rem', borderRadius: '8px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', transition: 'all 200ms' }}>무료로 시작하기</button>
+              <button className="landing-btn" onClick={() => scrollTo('features')} style={{ background: '#fff', color: '#334155', border: '2px solid #E5E7EB', padding: '1rem 2rem', borderRadius: '8px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', transition: 'all 200ms' }}>둘러보기</button>
             </div>
           </div>
 
           {/* Quick Stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem', marginTop: '4rem', maxWidth: '900px', margin: '4rem auto 0' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginTop: '3rem', maxWidth: '900px', margin: '3rem auto 0' }}>
             {[
               { num: '120+', label: '사용 중인 인테리어 업체' },
               { num: '90%', label: '업무 시간 단축' },
               { num: '99.9%', label: '데이터 보안' }
             ].map((stat, i) => (
               <div key={i} className="fade-up" style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '2rem', fontWeight: '800', color: '#F97316', marginBottom: '0.5rem' }}>{stat.num}</div>
+                <div className="landing-stat-num" style={{ fontSize: '2rem', fontWeight: '800', color: '#F97316', marginBottom: '0.5rem' }}>{stat.num}</div>
                 <div style={{ fontSize: '14px', color: '#64748B' }}>{stat.label}</div>
               </div>
             ))}
@@ -81,11 +80,11 @@ export default function LandingPage({ onStartClick }: LandingPageProps) {
       </section>
 
       {/* Core Features (2x2 Grid) */}
-      <section id="features" style={{ paddingTop: '80px', paddingBottom: '80px', background: '#fff' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 2rem' }}>
-          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <h2 className="fade-up" style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0 0 1rem', color: '#334155' }}>4가지 핵심 기능</h2>
-            <p className="fade-up" style={{ fontSize: '1.1rem', color: '#64748B', margin: 0 }}>인테리어 현장의 모든 업무를 효율적으로 관리하세요</p>
+      <section id="features" className="landing-content-section" style={{ paddingTop: '80px', paddingBottom: '80px', background: '#fff' }}>
+        <div className="landing-content-pad" style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 2rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <h2 className="fade-up landing-section-title" style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0 0 1rem', color: '#334155' }}>4가지 핵심 기능</h2>
+            <p className="fade-up landing-section-desc" style={{ fontSize: '1.1rem', color: '#64748B', margin: 0 }}>인테리어 현장의 모든 업무를 효율적으로 관리하세요</p>
           </div>
 
           <div className="features-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
@@ -95,10 +94,10 @@ export default function LandingPage({ onStartClick }: LandingPageProps) {
               { num: '03', title: '실측 템플릿', desc: '현장에서 규격, 마감재, 사진을 바로 입력하고, 체계적인 리포트로 저장합니다.', features: ['가로·세로·높이 입력', '마감재 상태 기록', '현장 사진 자동 임베드'] },
               { num: '04', title: 'AI 마케팅 글', desc: '시공 정보를 입력하면 AI가 블로그 맞춤형 마케팅 글을 즉시 생성합니다.', features: ['Gemini AI 기반 생성', '톤앤매너 선택 가능', '마케팅 시간 90% 절약'] }
             ].map((item, i) => (
-              <div key={i} className="fade-up" style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '2rem' }}>
-                <div style={{ width: '50px', height: '50px', background: '#F97316', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '20px', fontWeight: '700', marginBottom: '1.5rem' }}>{item.num}</div>
-                <h3 style={{ fontSize: '20px', fontWeight: '700', margin: '0 0 0.75rem', color: '#334155' }}>{item.title}</h3>
-                <p style={{ fontSize: '14px', color: '#64748B', margin: '0 0 1.5rem', lineHeight: '1.6' }}>{item.desc}</p>
+              <div key={i} className="fade-up landing-feature-card" style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '2rem' }}>
+                <div style={{ width: '44px', height: '44px', background: '#F97316', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '18px', fontWeight: '700', marginBottom: '1rem' }}>{item.num}</div>
+                <h3 className="landing-feature-title" style={{ fontSize: '20px', fontWeight: '700', margin: '0 0 0.75rem', color: '#334155' }}>{item.title}</h3>
+                <p className="landing-feature-desc" style={{ fontSize: '14px', color: '#64748B', margin: '0 0 1.5rem', lineHeight: '1.6' }}>{item.desc}</p>
                 <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
                   {item.features.map((feature, j) => (
                     <li key={j} style={{ fontSize: '13px', color: '#475569', margin: '0.75rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -113,14 +112,14 @@ export default function LandingPage({ onStartClick }: LandingPageProps) {
       </section>
 
       {/* Advanced Features Section */}
-      <section style={{ paddingTop: '80px', paddingBottom: '80px', background: 'linear-gradient(135deg, #F8FAFC 0%, #EEF2F5 100%)' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 2rem' }}>
-          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <h2 className="fade-up" style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0 0 1rem', color: '#334155' }}>더 많은 기능들</h2>
-            <p className="fade-up" style={{ fontSize: '1.1rem', color: '#64748B', margin: 0 }}>업무 효율을 극대화하는 추가 기능</p>
+      <section className="landing-content-section" style={{ paddingTop: '80px', paddingBottom: '80px', background: 'linear-gradient(135deg, #F8FAFC 0%, #EEF2F5 100%)' }}>
+        <div className="landing-content-pad" style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 2rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <h2 className="fade-up landing-section-title" style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0 0 1rem', color: '#334155' }}>더 많은 기능들</h2>
+            <p className="fade-up landing-section-desc" style={{ fontSize: '1.1rem', color: '#64748B', margin: 0 }}>업무 효율을 극대화하는 추가 기능</p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
+          <div className="landing-extra-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
             {[
               { icon: '📊', title: '데이터 분석', desc: '월별, 분기별 매출 현황과 수금률 분석', comingSoon: true },
               { icon: '👥', title: '팀 협업', desc: '작업자 초대 및 권한 관리로 팀 협업', comingSoon: true },
@@ -129,13 +128,13 @@ export default function LandingPage({ onStartClick }: LandingPageProps) {
               { icon: '☁️', title: '고급보안', desc: '모든 데이터는 안전하게 고급보안으로 암호화' },
               { icon: '🔐', title: '보안 인증', desc: '은행급 보안으로 데이터 보호' }
             ].map((item, i) => (
-              <div key={i} className="fade-up" style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '2rem', textAlign: 'center', position: 'relative', opacity: item.comingSoon ? 0.85 : 1 }}>
+              <div key={i} className="fade-up landing-extra-card" style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '1.5rem', textAlign: 'center', position: 'relative', opacity: item.comingSoon ? 0.85 : 1 }}>
                 {item.comingSoon && (
-                  <div style={{ position: 'absolute', top: '10px', right: '10px', background: '#F97316', color: '#fff', fontSize: '10px', fontWeight: '700', padding: '0.4rem 0.8rem', borderRadius: '4px' }}>준비중</div>
+                  <div style={{ position: 'absolute', top: '8px', right: '8px', background: '#F97316', color: '#fff', fontSize: '10px', fontWeight: '700', padding: '0.3rem 0.6rem', borderRadius: '4px' }}>준비중</div>
                 )}
-                <div style={{ fontSize: '40px', marginBottom: '1rem' }}>{item.icon}</div>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 0.5rem', color: '#334155' }}>{item.title}</h3>
-                <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>{item.desc}</p>
+                <div className="landing-extra-icon" style={{ fontSize: '36px', marginBottom: '0.75rem' }}>{item.icon}</div>
+                <h3 className="landing-extra-title" style={{ fontSize: '16px', fontWeight: '700', margin: '0 0 0.5rem', color: '#334155' }}>{item.title}</h3>
+                <p className="landing-extra-desc" style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>{item.desc}</p>
               </div>
             ))}
           </div>
@@ -143,14 +142,14 @@ export default function LandingPage({ onStartClick }: LandingPageProps) {
       </section>
 
       {/* System Overview / Screenshots */}
-      <section style={{ paddingTop: '80px', paddingBottom: '80px', background: '#fff' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 2rem' }}>
-          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <h2 className="fade-up" style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0 0 1rem', color: '#334155' }}>시스템 미리보기</h2>
-            <p className="fade-up" style={{ fontSize: '1.1rem', color: '#64748B', margin: 0 }}>실제 사용 화면을 확인하세요</p>
+      <section className="landing-content-section" style={{ paddingTop: '80px', paddingBottom: '80px', background: '#fff' }}>
+        <div className="landing-content-pad" style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 2rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <h2 className="fade-up landing-section-title" style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0 0 1rem', color: '#334155' }}>시스템 미리보기</h2>
+            <p className="fade-up landing-section-desc" style={{ fontSize: '1.1rem', color: '#64748B', margin: 0 }}>실제 사용 화면을 확인하세요</p>
           </div>
 
-          <div className="fade-up" style={{ background: '#1E1B4B', borderRadius: '12px', padding: '2rem', minHeight: '400px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
+          <div className="fade-up landing-preview-card" style={{ background: '#1E1B4B', borderRadius: '12px', padding: '2rem', minHeight: '400px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
             <div style={{ fontSize: '48px', marginBottom: '1rem' }}>📊</div>
             <h3 style={{ fontSize: '24px', fontWeight: '700', margin: '0 0 1rem', color: '#F97316' }}>공정 대시보드</h3>
             <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.8)', maxWidth: '500px', margin: '0 0 2rem' }}>
@@ -163,14 +162,14 @@ export default function LandingPage({ onStartClick }: LandingPageProps) {
       </section>
 
       {/* Success Stories */}
-      <section style={{ paddingTop: '80px', paddingBottom: '80px', background: 'linear-gradient(135deg, #F8FAFC 0%, #EEF2F5 100%)' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 2rem' }}>
-          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <h2 className="fade-up" style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0 0 1rem', color: '#334155' }}>고객들의 성공 사례</h2>
-            <p className="fade-up" style={{ fontSize: '1.1rem', color: '#64748B', margin: 0 }}>실제 사용자들의 경험을 들어보세요</p>
+      <section className="landing-content-section" style={{ paddingTop: '80px', paddingBottom: '80px', background: 'linear-gradient(135deg, #F8FAFC 0%, #EEF2F5 100%)' }}>
+        <div className="landing-content-pad" style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 2rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <h2 className="fade-up landing-section-title" style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0 0 1rem', color: '#334155' }}>고객들의 성공 사례</h2>
+            <p className="fade-up landing-section-desc" style={{ fontSize: '1.1rem', color: '#64748B', margin: 0 }}>실제 사용자들의 경험을 들어보세요</p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+          <div className="landing-review-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
             {[
               { name: '김철수', company: 'A인테리어', role: '대표', feedback: '업무 시간이 50% 줄었어요. 특히 세금계산서 자동 생성이 정말 좋습니다.', rating: '⭐⭐⭐⭐⭐' },
               { name: '이영희', company: 'B건설', role: '설계팀장', feedback: '현장 관리가 이렇게 쉬울 수 있다니. 팀 협업이 훨씬 수월해졌어요.', rating: '⭐⭐⭐⭐⭐' },
@@ -190,13 +189,13 @@ export default function LandingPage({ onStartClick }: LandingPageProps) {
       </section>
 
       {/* Process */}
-      <section style={{ paddingTop: '80px', paddingBottom: '80px', background: 'linear-gradient(135deg, #F8FAFC 0%, #EEF2F5 100%)' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 2rem' }}>
-          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <h2 className="fade-up" style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0 0 1rem', color: '#334155' }}>간단한 사용 흐름</h2>
+      <section className="landing-content-section" style={{ paddingTop: '80px', paddingBottom: '80px', background: 'linear-gradient(135deg, #F8FAFC 0%, #EEF2F5 100%)' }}>
+        <div className="landing-content-pad" style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 2rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <h2 className="fade-up landing-section-title" style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0 0 1rem', color: '#334155' }}>간단한 사용 흐름</h2>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
+          <div className="landing-process-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
             {[
               { step: '1', title: '회원가입', desc: '이메일로 1분이면 가입 완료' },
               { step: '2', title: '현장 등록', desc: '현장 정보와 고객 정보 입력' },
@@ -204,11 +203,11 @@ export default function LandingPage({ onStartClick }: LandingPageProps) {
               { step: '4', title: '수익 증대', desc: '효율 상승으로 더 많은 프로젝트 관리' }
             ].map((item, i) => (
               <div key={i} className="fade-up" style={{ textAlign: 'center' }}>
-                <div style={{ width: '60px', height: '60px', background: '#F97316', color: '#fff', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', fontWeight: '700', margin: '0 auto 1.5rem', boxShadow: '0 4px 12px rgba(249, 115, 22, 0.2)' }}>
+                <div className="landing-process-step" style={{ width: '52px', height: '52px', background: '#F97316', color: '#fff', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: '700', margin: '0 auto 1rem', boxShadow: '0 4px 12px rgba(249, 115, 22, 0.2)' }}>
                   {item.step}
                 </div>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 0.5rem', color: '#334155' }}>{item.title}</h3>
-                <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>{item.desc}</p>
+                <h3 className="landing-process-title" style={{ fontSize: '16px', fontWeight: '700', margin: '0 0 0.5rem', color: '#334155' }}>{item.title}</h3>
+                <p className="landing-process-desc" style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>{item.desc}</p>
               </div>
             ))}
           </div>
@@ -216,10 +215,10 @@ export default function LandingPage({ onStartClick }: LandingPageProps) {
       </section>
 
       {/* FAQ */}
-      <section id="faq" style={{ paddingTop: '80px', paddingBottom: '80px', background: '#fff' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 2rem' }}>
-          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <h2 className="fade-up" style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0 0 1rem', color: '#334155' }}>자주 묻는 질문</h2>
+      <section id="faq" className="landing-content-section" style={{ paddingTop: '80px', paddingBottom: '80px', background: '#fff' }}>
+        <div className="landing-content-pad" style={{ maxWidth: '900px', margin: '0 auto', padding: '0 2rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <h2 className="fade-up landing-section-title" style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0 0 1rem', color: '#334155' }}>자주 묻는 질문</h2>
           </div>
 
           <div style={{ display: 'grid', gap: '1rem' }}>
@@ -231,12 +230,12 @@ export default function LandingPage({ onStartClick }: LandingPageProps) {
               { q: '모바일에서도 사용할 수 있나요?', a: '네. 앱 설치 없이 스마트폰 브라우저에서 모든 기능을 사용할 수 있습니다. 현장에서 실측을 입력하고, 사무실에서 확인하세요.' },
               { q: '데이터는 안전한가요?', a: '모든 데이터는 고급보안으로 암호화되어 저장됩니다. 은행급 보안으로 보호되며, 정기적인 백업이 진행됩니다.' }
             ].map((item, i) => (
-              <details key={i} className="fade-up" style={{ background: '#F9FAFB', padding: '1.5rem', borderRadius: '10px', border: '1px solid #E5E7EB', cursor: 'pointer' }}>
-                <summary style={{ fontWeight: '700', color: '#334155', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <details key={i} className="fade-up landing-faq-item" style={{ background: '#F9FAFB', padding: '1.25rem', borderRadius: '10px', border: '1px solid #E5E7EB', cursor: 'pointer' }}>
+                <summary className="landing-faq-q" style={{ fontWeight: '700', color: '#334155', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '15px' }}>
                   <span>{item.q}</span>
-                  <span style={{ fontSize: '18px', transition: 'transform 300ms' }}>▼</span>
+                  <span style={{ fontSize: '16px', transition: 'transform 300ms', flexShrink: 0, marginLeft: '0.5rem' }}>▼</span>
                 </summary>
-                <p style={{ marginTop: '1rem', color: '#64748B', fontSize: '14px', lineHeight: '1.6', margin: '1rem 0 0' }}>{item.a}</p>
+                <p className="landing-faq-a" style={{ marginTop: '1rem', color: '#64748B', fontSize: '14px', lineHeight: '1.6', margin: '1rem 0 0' }}>{item.a}</p>
               </details>
             ))}
           </div>
@@ -244,23 +243,22 @@ export default function LandingPage({ onStartClick }: LandingPageProps) {
       </section>
 
       {/* Final CTA */}
-      <section style={{ paddingTop: '100px', paddingBottom: '100px', background: '#334155' }}>
-        <div className="fade-up" style={{ maxWidth: '900px', margin: '0 auto', padding: '0 2rem', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0 0 1.5rem', color: '#fff' }}>지금 시작하세요</h2>
-          <p style={{ fontSize: '1.1rem', color: 'rgba(255,255,255,0.8)', margin: '0 0 2rem', lineHeight: '1.6' }}>
-            무료 가입 후 모든 기능을 7일간 체험하세요.<br />
-            신용카드 정보는 필요 없습니다.
+      <section className="landing-cta-section" style={{ paddingTop: '80px', paddingBottom: '80px', background: '#334155' }}>
+        <div className="fade-up landing-content-pad" style={{ maxWidth: '900px', margin: '0 auto', padding: '0 2rem', textAlign: 'center' }}>
+          <h2 className="landing-cta-title" style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0 0 1rem', color: '#fff' }}>지금 시작하세요</h2>
+          <p className="landing-cta-desc" style={{ fontSize: '1.1rem', color: 'rgba(255,255,255,0.8)', margin: '0 0 2rem', lineHeight: '1.6' }}>
+            무료 가입 후 모든 기능을 7일간 체험하세요. 신용카드 정보는 필요 없습니다.
           </p>
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button onClick={onStartClick} style={{ background: '#F97316', color: '#fff', border: 'none', padding: '1rem 2rem', borderRadius: '8px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 4px 12px rgba(249, 115, 22, 0.3)', transition: 'all 200ms' }}>무료로 시작하기</button>
-            <a href="mailto:Brain_Lee@inteinvo.cc" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '2px solid rgba(255,255,255,0.3)', padding: '1rem 2rem', borderRadius: '8px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', textDecoration: 'none', display: 'inline-block', transition: 'all 200ms' }}>문의하기</a>
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button className="landing-btn" onClick={onStartClick} style={{ background: '#F97316', color: '#fff', border: 'none', padding: '1rem 2rem', borderRadius: '8px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 4px 12px rgba(249, 115, 22, 0.3)', transition: 'all 200ms' }}>무료로 시작하기</button>
+            <a className="landing-btn" href="mailto:official@magnatekorea.com" style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '2px solid rgba(255,255,255,0.3)', padding: '1rem 2rem', borderRadius: '8px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', textDecoration: 'none', display: 'inline-block', transition: 'all 200ms' }}>문의하기</a>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer style={{ borderTop: '1px solid rgba(100, 116, 139, 0.1)', padding: '3rem 2rem', background: '#F8FAFC' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem', marginBottom: '2rem', paddingBottom: '2rem', borderBottom: '1px solid #E5E7EB' }}>
+      <footer style={{ borderTop: '1px solid rgba(100, 116, 139, 0.1)', padding: '2rem 1rem', background: '#F8FAFC' }}>
+        <div className="landing-footer-grid" style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem', marginBottom: '2rem', paddingBottom: '2rem', borderBottom: '1px solid #E5E7EB' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
               <div style={{ width: '36px', height: '36px', background: '#F97316', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '18px', fontWeight: '700' }}>📐</div>
@@ -298,6 +296,8 @@ export default function LandingPage({ onStartClick }: LandingPageProps) {
 
         * {
           font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          word-break: keep-all;
+          overflow-wrap: break-word;
         }
 
         .fade-up {
@@ -317,6 +317,111 @@ export default function LandingPage({ onStartClick }: LandingPageProps) {
         @media (max-width: 768px) {
           .features-grid {
             grid-template-columns: 1fr !important;
+          }
+          .landing-hero-title {
+            font-size: 1.75rem !important;
+          }
+          .landing-hero-subtitle {
+            font-size: 0.95rem !important;
+          }
+          .landing-section-title {
+            font-size: 1.5rem !important;
+          }
+          .landing-section-desc {
+            font-size: 0.95rem !important;
+          }
+          .landing-navbar {
+            padding: 0.75rem 1rem !important;
+          }
+          .landing-navbar-links {
+            display: none !important;
+          }
+          .landing-hero-section {
+            padding-top: 100px !important;
+            padding-bottom: 50px !important;
+          }
+          .landing-content-section {
+            padding-top: 50px !important;
+            padding-bottom: 50px !important;
+          }
+          .landing-content-pad {
+            padding: 0 1rem !important;
+          }
+          .landing-cta-section {
+            padding-top: 60px !important;
+            padding-bottom: 60px !important;
+          }
+          .landing-cta-title {
+            font-size: 1.5rem !important;
+          }
+          .landing-cta-desc {
+            font-size: 0.95rem !important;
+          }
+          .landing-btn {
+            padding: 0.75rem 1.5rem !important;
+            font-size: 14px !important;
+          }
+          .landing-stat-num {
+            font-size: 1.5rem !important;
+          }
+          .landing-feature-card {
+            padding: 1.25rem !important;
+          }
+          .landing-feature-title {
+            font-size: 16px !important;
+          }
+          .landing-feature-desc {
+            font-size: 13px !important;
+          }
+          .landing-extra-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .landing-extra-card {
+            padding: 1.25rem !important;
+          }
+          .landing-extra-icon {
+            font-size: 28px !important;
+          }
+          .landing-extra-title {
+            font-size: 15px !important;
+          }
+          .landing-extra-desc {
+            font-size: 12px !important;
+          }
+          .landing-preview-card {
+            padding: 1.5rem !important;
+            min-height: 280px !important;
+          }
+          .landing-review-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .landing-process-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .landing-process-step {
+            width: 44px !important;
+            height: 44px !important;
+            font-size: 20px !important;
+            margin-bottom: 1rem !important;
+          }
+          .landing-process-title {
+            font-size: 15px !important;
+          }
+          .landing-process-desc {
+            font-size: 12px !important;
+          }
+          .landing-faq-item {
+            padding: 1rem !important;
+          }
+          .landing-faq-q {
+            font-size: 14px !important;
+          }
+          .landing-faq-a {
+            font-size: 13px !important;
+          }
+          .landing-footer-grid {
+            grid-template-columns: 1fr !important;
+            gap: 1.5rem !important;
           }
         }
 
