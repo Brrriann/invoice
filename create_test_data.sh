@@ -1,8 +1,19 @@
 #!/bin/bash
 
-# Supabase 설정
-URL="https://puofpkpwfqwyzdsrvupf.supabase.co"
-ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1b2Zwa3B3ZnF3eXpkc3J2dXBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4NTQ5OTMsImV4cCI6MjA4ODQzMDk5M30.1vDMhYabqa2Ay-TZvuDng1GuKTwKGTFB6qAImBwAE9g"
+# Supabase 설정 - 환경변수에서 로드 (.env.local 파일 또는 export로 미리 설정)
+# 사용법: export SUPABASE_URL=... && export SUPABASE_ANON_KEY=... && bash create_test_data.sh
+if [ -f .env.local ]; then
+  export $(grep -v '^#' .env.local | xargs)
+fi
+
+URL="${SUPABASE_URL}"
+ANON_KEY="${SUPABASE_ANON_KEY}"
+
+if [ -z "$URL" ] || [ -z "$ANON_KEY" ]; then
+  echo "❌ 환경변수 SUPABASE_URL, SUPABASE_ANON_KEY 가 설정되지 않았습니다."
+  echo "   .env.local 파일에 설정하거나 export로 지정 후 실행하세요."
+  exit 1
+fi
 
 echo "============================================================"
 echo "🚀 공정관리 대시보드 - 테스트 데이터 생성"

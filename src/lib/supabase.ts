@@ -1,6 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://puofpkpwfqwyzdsrvupf.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1b2Zwa3B3ZnF3eXpkc3J2dXBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4NTQ5OTMsImV4cCI6MjA4ODQzMDk5M30.1vDMhYabqa2Ay-TZvuDng1GuKTwKGTFB6qAImBwAE9g';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Supabase 환경변수가 설정되지 않았습니다. .env.local 파일을 확인해주세요.');
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);

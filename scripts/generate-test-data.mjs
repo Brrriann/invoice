@@ -2,8 +2,14 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = 'https://puofpkpwfqwyzdsrvupf.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1b2Zwa3B3ZnF3eXpkc3J2dXBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4NTQ5OTMsImV4cCI6MjA4ODQzMDk5M30.1vDMhYabqa2Ay-TZvuDng1GuKTwKGTFB6qAImBwAE9g';
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.error('❌ 환경변수 SUPABASE_URL, SUPABASE_ANON_KEY 가 설정되지 않았습니다.');
+  console.error('   export SUPABASE_URL=... && export SUPABASE_ANON_KEY=... 후 실행하세요.');
+  process.exit(1);
+}
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 

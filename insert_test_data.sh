@@ -1,11 +1,20 @@
 #!/bin/bash
 
-# Supabase 설정 - PAT 사용
-URL="https://api.supabase.com/v1/projects/puofpkpwfqwyzdsrvupf"
-PAT="sbp_6ac7f3c41cc34c04c23b3b3819113813becf04cf"
+# Supabase 설정 - PAT 사용 (환경변수에서 로드)
+# 사용법: export SUPABASE_PROJECT_ID=... && export SUPABASE_PAT=... && export SUPABASE_USER_ID=... && bash insert_test_data.sh
+if [ -f .env.local ]; then
+  export $(grep -v '^#' .env.local | xargs)
+fi
 
-# test3@test.com의 user_id (로그인으로 획득)
-USER_ID="fea184d5-74bf-42c1-a29a-a8978b87bdea"
+URL="https://api.supabase.com/v1/projects/${SUPABASE_PROJECT_ID}"
+PAT="${SUPABASE_PAT}"
+USER_ID="${SUPABASE_USER_ID}"
+
+if [ -z "$SUPABASE_PROJECT_ID" ] || [ -z "$PAT" ] || [ -z "$USER_ID" ]; then
+  echo "❌ 환경변수 SUPABASE_PROJECT_ID, SUPABASE_PAT, SUPABASE_USER_ID 가 필요합니다."
+  echo "   .env.local 파일에 설정 후 실행하세요."
+  exit 1
+fi
 
 echo "============================================================"
 echo "🚀 공정관리 대시보드 - 테스트 데이터 일괄 생성"
