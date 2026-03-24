@@ -1282,7 +1282,13 @@ function App() {
                 <div className="inquiry-form-row">
                   <div className="form-group">
                     <label>연락처 *</label>
-                    <input required value={inquiryForm.phone} onChange={e => setInquiryForm(p => ({ ...p, phone: e.target.value }))} placeholder="010-0000-0000" />
+                    <input required value={inquiryForm.phone} onChange={e => {
+                      const digits = e.target.value.replace(/\D/g, '').slice(0, 11);
+                      const formatted = digits.length <= 3 ? digits
+                        : digits.length <= 7 ? `${digits.slice(0,3)}-${digits.slice(3)}`
+                        : `${digits.slice(0,3)}-${digits.slice(3,7)}-${digits.slice(7)}`;
+                      setInquiryForm(p => ({ ...p, phone: formatted }));
+                    }} placeholder="010-0000-0000" inputMode="numeric" />
                   </div>
                   <div className="form-group">
                     <label>이메일 *</label>
