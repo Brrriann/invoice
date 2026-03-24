@@ -1199,14 +1199,6 @@ function App() {
                 <div className="user-email">{currentUser.email}</div>
               </div>
             </div>
-            <div className="contact-info">
-              <a href="mailto:official@magnatekorea.com" className="contact-link">
-                Contact: official@magnatekorea.com
-              </a>
-              <a href="https://threads.net/kyuu_ceo" target="_blank" rel="noopener noreferrer" className="contact-link">
-                @kyuu_ceo
-              </a>
-            </div>
             <div className="inquiry-card" onClick={() => { setShowInquiryModal(true); setInquiryStatus('idle'); }}>
               <div className="inquiry-card-icon">💼</div>
               <div className="inquiry-card-text">
