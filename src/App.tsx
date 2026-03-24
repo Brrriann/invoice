@@ -41,6 +41,7 @@ interface Project {
   biz_type: string;
   biz_item: string;
   biz_email: string;
+  biz_no: string;
 }
 
 interface WorkItem {
@@ -506,7 +507,8 @@ function App() {
         biz_address: '',
         biz_type: '',
         biz_item: '',
-        biz_email: ''
+        biz_email: '',
+        biz_no: ''
       });
       fetchProjects();
     } catch (error) {
@@ -584,7 +586,7 @@ function App() {
       return;
     }
 
-    const header = ["현장명", "고객사", "계약금액", "계산서상태", "발행(예정)일", "상호", "성명", "이메일", "업태", "종목", "사업장주소"];
+    const header = ["현장명", "고객사", "계약금액", "계산서상태", "발행(예정)일", "상호", "성명", "사업자등록번호", "이메일", "업태", "종목", "사업장주소"];
     const rows = filteredProjects.map(p => [
       p.site_name,
       p.customer_name,
@@ -593,6 +595,7 @@ function App() {
       p.invoice_date || "-",
       p.biz_name || "-",
       p.biz_owner || "-",
+      p.biz_no || "-",
       p.biz_email || "-",
       p.biz_type || "-",
       p.biz_item || "-",
@@ -1489,6 +1492,7 @@ function App() {
                           <div className="biz-info-grid">
                             <input placeholder="상호" value={project.biz_name || ''} onChange={e => updateProjectLocal(project.id, 'biz_name', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_name', e.target.value)} />
                             <input placeholder="성명" value={project.biz_owner || ''} onChange={e => updateProjectLocal(project.id, 'biz_owner', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_owner', e.target.value)} />
+                            <input placeholder="사업자등록번호" value={project.biz_no || ''} onChange={e => updateProjectLocal(project.id, 'biz_no', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_no', e.target.value)} />
                             <input placeholder="이메일" value={project.biz_email || ''} onChange={e => updateProjectLocal(project.id, 'biz_email', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_email', e.target.value)} />
                             <input placeholder="업태" value={project.biz_type || ''} onChange={e => updateProjectLocal(project.id, 'biz_type', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_type', e.target.value)} />
                             <input placeholder="종목" value={project.biz_item || ''} onChange={e => updateProjectLocal(project.id, 'biz_item', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_item', e.target.value)} />
