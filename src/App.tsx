@@ -1244,18 +1244,18 @@ function App() {
                   e.preventDefault();
                   setInquiryStatus('sending');
                   try {
+                    const fd = new FormData();
+                    fd.append('name', inquiryForm.name);
+                    fd.append('email', inquiryForm.email);
+                    fd.append('_replyto', inquiryForm.email);
+                    fd.append('회사명', inquiryForm.company);
+                    fd.append('연락처', inquiryForm.phone);
+                    fd.append('문의유형', inquiryForm.type);
+                    fd.append('내용', inquiryForm.message);
                     const res = await fetch('https://formspree.io/f/maqprlng', {
                       method: 'POST',
-                      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-                      body: JSON.stringify({
-                        name: inquiryForm.name,
-                        email: inquiryForm.email,
-                        _replyto: inquiryForm.email,
-                        회사명: inquiryForm.company,
-                        연락처: inquiryForm.phone,
-                        문의유형: inquiryForm.type,
-                        내용: inquiryForm.message,
-                      }),
+                      headers: { Accept: 'application/json' },
+                      body: fd,
                     });
                     if (res.ok) {
                       setInquiryStatus('sent');
