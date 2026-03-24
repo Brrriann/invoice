@@ -181,6 +181,9 @@ function App() {
 
   // --- 메인 앱 상태 ---
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showInquiryModal, setShowInquiryModal] = useState(false);
+  const [inquiryForm, setInquiryForm] = useState({ name: '', company: '', phone: '', type: '그룹웨어', message: '' });
+  const [inquiryStatus, setInquiryStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [view, setView] = useState<'quotation' | 'measurement' | 'dashboard' | 'blog'>('dashboard');
   const [dashboardMode, setDashboardMode] = useState<'list' | 'calendar' | 'invoice'>('list');
   const [invoiceFilter, setInvoiceFilter] = useState<'전체' | '미발급' | '발급완료'>('전체');
@@ -1204,12 +1207,114 @@ function App() {
                 @kyuu_ceo
               </a>
             </div>
+            <div className="inquiry-card" onClick={() => { setShowInquiryModal(true); setInquiryStatus('idle'); }}>
+              <div className="inquiry-card-icon">💼</div>
+              <div className="inquiry-card-text">
+                <div className="inquiry-card-title">맞춤 소프트웨어 문의</div>
+                <div className="inquiry-card-sub">그룹웨어 · 업무 자동화 · 대시보드</div>
+              </div>
+              <span className="inquiry-card-arrow">→</span>
+            </div>
             <button className="btn-logout" onClick={handleLogout}>로그아웃</button>
           </div>
         </div>
       </aside>
 
       {/* Mobile toggle */}
+      {/* 맞춤 소프트웨어 문의 모달 */}
+      {showInquiryModal && (
+        <div className="modal-overlay" onClick={() => setShowInquiryModal(false)}>
+          <div className="modal-box inquiry-modal" onClick={e => e.stopPropagation()}>
+            <div className="inquiry-modal-header">
+              <div>
+                <div className="inquiry-modal-title">💼 맞춤 소프트웨어 문의</div>
+                <div className="inquiry-modal-subtitle">그룹웨어 · 사내 소프트웨어 · 업무 자동화 · 업무 간결화 · 대시보드 개인화</div>
+              </div>
+              <button className="modal-close" onClick={() => setShowInquiryModal(false)}>✕</button>
+            </div>
+
+            <div className="inquiry-phone-bar">
+              <span>📞 대표전화</span>
+              <a href="tel:15338763" className="inquiry-phone-num">1533-8763</a>
+              <span className="inquiry-phone-note">평일 09:00 ~ 18:00</span>
+            </div>
+
+            {inquiryStatus === 'sent' ? (
+              <div className="inquiry-sent">
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>✅</div>
+                <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '0.5rem' }}>문의가 접수되었습니다!</div>
+                <div style={{ color: '#64748B', fontSize: '13px' }}>빠른 시일 내에 연락드리겠습니다.</div>
+                <button className="btn-primary" style={{ marginTop: '1.5rem' }} onClick={() => setShowInquiryModal(false)}>닫기</button>
+              </div>
+            ) : (
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setInquiryStatus('sending');
+                  try {
+                    const res = await fetch('https://formspree.io/f/2949180540869148551', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                      body: JSON.stringify({
+                        이름: inquiryForm.name,
+                        회사명: inquiryForm.company,
+                        연락처: inquiryForm.phone,
+                        문의유형: inquiryForm.type,
+                        내용: inquiryForm.message,
+                      }),
+                    });
+                    if (res.ok) {
+                      setInquiryStatus('sent');
+                      setInquiryForm({ name: '', company: '', phone: '', type: '그룹웨어', message: '' });
+                    } else {
+                      setInquiryStatus('error');
+                    }
+                  } catch {
+                    setInquiryStatus('error');
+                  }
+                }}
+                className="inquiry-form"
+              >
+                <div className="inquiry-form-row">
+                  <div className="form-group">
+                    <label>이름 *</label>
+                    <input required value={inquiryForm.name} onChange={e => setInquiryForm(p => ({ ...p, name: e.target.value }))} placeholder="홍길동" />
+                  </div>
+                  <div className="form-group">
+                    <label>회사명 *</label>
+                    <input required value={inquiryForm.company} onChange={e => setInquiryForm(p => ({ ...p, company: e.target.value }))} placeholder="(주)예시" />
+                  </div>
+                </div>
+                <div className="inquiry-form-row">
+                  <div className="form-group">
+                    <label>연락처 *</label>
+                    <input required value={inquiryForm.phone} onChange={e => setInquiryForm(p => ({ ...p, phone: e.target.value }))} placeholder="010-0000-0000" />
+                  </div>
+                  <div className="form-group">
+                    <label>문의 유형</label>
+                    <select value={inquiryForm.type} onChange={e => setInquiryForm(p => ({ ...p, type: e.target.value }))}>
+                      <option>그룹웨어</option>
+                      <option>사내 소프트웨어</option>
+                      <option>업무 자동화</option>
+                      <option>업무 간결화</option>
+                      <option>대시보드 개인화</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>문의 내용</label>
+                  <textarea rows={4} value={inquiryForm.message} onChange={e => setInquiryForm(p => ({ ...p, message: e.target.value }))} placeholder="어떤 업무를 자동화하고 싶으신지, 현재 어떤 문제가 있는지 간략하게 적어주세요." />
+                </div>
+                {inquiryStatus === 'error' && <div style={{ color: '#EF4444', fontSize: '13px', marginBottom: '0.5rem' }}>전송에 실패했습니다. 다시 시도해주세요.</div>}
+                <button type="submit" className="btn-primary inquiry-submit" disabled={inquiryStatus === 'sending'}>
+                  {inquiryStatus === 'sending' ? '전송 중...' : '문의 보내기'}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
       <button className="sidebar-toggle no-print" onClick={() => setSidebarOpen(!sidebarOpen)}>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
