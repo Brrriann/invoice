@@ -1244,7 +1244,7 @@ function App() {
                   e.preventDefault();
                   setInquiryStatus('sending');
                   try {
-                    const res = await fetch('https://formspree.io/f/2949180540869148551', {
+                    const res = await fetch('https://formspree.io/f/maqprlng', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
                       body: JSON.stringify({
