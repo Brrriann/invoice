@@ -182,7 +182,7 @@ function App() {
   // --- 메인 앱 상태 ---
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showInquiryModal, setShowInquiryModal] = useState(false);
-  const [inquiryForm, setInquiryForm] = useState({ name: '', company: '', phone: '', type: '그룹웨어', message: '' });
+  const [inquiryForm, setInquiryForm] = useState({ name: '', company: '', phone: '', email: '', type: '그룹웨어', message: '' });
   const [inquiryStatus, setInquiryStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [view, setView] = useState<'quotation' | 'measurement' | 'dashboard' | 'blog'>('dashboard');
   const [dashboardMode, setDashboardMode] = useState<'list' | 'calendar' | 'invoice'>('list');
@@ -1248,7 +1248,9 @@ function App() {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
                       body: JSON.stringify({
-                        이름: inquiryForm.name,
+                        name: inquiryForm.name,
+                        email: inquiryForm.email,
+                        _replyto: inquiryForm.email,
                         회사명: inquiryForm.company,
                         연락처: inquiryForm.phone,
                         문의유형: inquiryForm.type,
@@ -1257,7 +1259,7 @@ function App() {
                     });
                     if (res.ok) {
                       setInquiryStatus('sent');
-                      setInquiryForm({ name: '', company: '', phone: '', type: '그룹웨어', message: '' });
+                      setInquiryForm({ name: '', company: '', phone: '', email: '', type: '그룹웨어', message: '' });
                     } else {
                       setInquiryStatus('error');
                     }
@@ -1283,6 +1285,12 @@ function App() {
                     <input required value={inquiryForm.phone} onChange={e => setInquiryForm(p => ({ ...p, phone: e.target.value }))} placeholder="010-0000-0000" />
                   </div>
                   <div className="form-group">
+                    <label>이메일 *</label>
+                    <input required type="email" value={inquiryForm.email} onChange={e => setInquiryForm(p => ({ ...p, email: e.target.value }))} placeholder="example@company.com" />
+                  </div>
+                </div>
+                <div className="inquiry-form-row">
+                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                     <label>문의 유형</label>
                     <select value={inquiryForm.type} onChange={e => setInquiryForm(p => ({ ...p, type: e.target.value }))}>
                       <option>그룹웨어</option>
