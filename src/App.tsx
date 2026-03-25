@@ -312,7 +312,6 @@ function App() {
     } catch { return defaultInvoiceExportSettings; }
   });
   const [selectedInvoiceIds, setSelectedInvoiceIds] = useState<Set<string>>(new Set());
-  const [showSupplierPanel, setShowSupplierPanel] = useState(false);
   const [ocrLoading, setOcrLoading] = useState<Record<string, boolean>>({});
   const [ocrPickerId, setOcrPickerId] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -1723,10 +1722,12 @@ function App() {
                         <div className="invoice-payment-row">
                           <div className="status-node">
                             <div className="node-label">계산서</div>
-                            <select value={project.invoice_status} onChange={e => handleProjectUpdateImmediate(project.id, 'invoice_status', e.target.value)} className={`status-select ${project.invoice_status}`}>
-                              <option value="미발급">미발급</option>
-                              <option value="발급완료">발급완료</option>
-                            </select>
+                            <button
+                              className={`btn-invoice-status ${project.invoice_status === '발급완료' ? 'done' : 'pending'}`}
+                              onClick={() => handleProjectUpdateImmediate(project.id, 'invoice_status', project.invoice_status === '발급완료' ? '미발급' : '발급완료')}
+                            >
+                              {project.invoice_status === '발급완료' ? '✓ 발급완료' : '미발급'}
+                            </button>
                             <input type="date" value={project.invoice_date || ''} onChange={e => handleProjectUpdateImmediate(project.id, 'invoice_date', e.target.value)} />
                           </div>
                           <div className="status-node">
@@ -2029,10 +2030,12 @@ function App() {
                               <td>{p.customer_name}</td>
                               <td className="right">{Math.floor(p.total_amount || 0).toLocaleString()}원</td>
                               <td>
-                                <select value={p.invoice_status} onChange={e => handleProjectUpdateImmediate(p.id, 'invoice_status', e.target.value)} className={`invoice-badge ${p.invoice_status}`}>
-                                  <option value="미발급">미발급</option>
-                                  <option value="발급완료">발급완료</option>
-                                </select>
+                                <button
+                                  className={`btn-invoice-status ${p.invoice_status === '발급완료' ? 'done' : 'pending'}`}
+                                  onClick={() => handleProjectUpdateImmediate(p.id, 'invoice_status', p.invoice_status === '발급완료' ? '미발급' : '발급완료')}
+                                >
+                                  {p.invoice_status === '발급완료' ? '✓ 발급완료' : '미발급'}
+                                </button>
                               </td>
                               <td>
                                 <input type="date" value={p.invoice_date || ''} onChange={e => handleProjectUpdateImmediate(p.id, 'invoice_date', e.target.value)} />
