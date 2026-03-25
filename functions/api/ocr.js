@@ -83,7 +83,7 @@ export async function onRequestPost(context) {
 해석이나 설명 없이 텍스트만 출력하세요.`;
 
     const models = [
-      'microsoft/phi-4-multimodal-instruct',
+      'meta/llama-3.2-90b-vision-instruct',
       'meta/llama-3.2-11b-vision-instruct',
     ];
 
