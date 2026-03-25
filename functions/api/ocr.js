@@ -18,6 +18,50 @@ export async function onRequestOptions(context) {
   return new Response(null, { status: 204, headers: corsHeaders(origin) });
 }
 
+// 추출된 텍스트에서 사업자 정보 파싱
+function parseBizText(text) {
+  const result = {
+    biz_no: '', biz_name: '', biz_owner: '',
+    biz_address: '', biz_type: '', biz_item: '', biz_email: ''
+  };
+
+  // 사업자등록번호: 000-00-00000
+  const bizNoMatch = text.match(/(\d{3}-\d{2}-\d{5})/);
+  if (bizNoMatch) result.biz_no = bizNoMatch[1];
+
+  // 상호: 콜론 이후 텍스트 (공백 포함)
+  const bizNameMatch = text.match(/상\s*호\s*[：:]\s*(.+?)(?:\n|성\s*명|$)/s)
+    || text.match(/상\s*호[^가-힣]*([가-힣].+?)(?:\n|$)/);
+  if (bizNameMatch) result.biz_name = bizNameMatch[1].trim().split('\n')[0].trim();
+
+  // 성명 / 대표자: 한글 2-5자
+  const ownerMatch = text.match(/성\s*명\s*[：:]\s*([가-힣]{2,5})/)
+    || text.match(/대\s*표\s*자\s*[：:]\s*([가-힣]{2,5})/)
+    || text.match(/성\s*명[^가-힣]*([가-힣]{2,5})/);
+  if (ownerMatch) result.biz_owner = ownerMatch[1].trim();
+
+  // 사업장 소재지
+  const addressMatch = text.match(/사\s*업\s*장\s*소\s*재\s*지\s*[：:]\s*(.+?)(?:\n|사\s*업|$)/s)
+    || text.match(/소\s*재\s*지[^가-힣]*(.+?)(?:\n|$)/);
+  if (addressMatch) result.biz_address = addressMatch[1].trim().split('\n')[0].trim();
+
+  // 업태: 첫 번째 항목만
+  const typeMatch = text.match(/업\s*태\s*[：:]\s*([^\n종목]+)/)
+    || text.match(/\[?업태\]?\s*([가-힣]+)/);
+  if (typeMatch) result.biz_type = typeMatch[1].trim().split(/[\s,]/)[0];
+
+  // 종목: 첫 번째 항목만
+  const itemMatch = text.match(/종\s*목\s*[：:]\s*([^\n]+)/)
+    || text.match(/\[?종목\]?\s*([가-힣]+)/);
+  if (itemMatch) result.biz_item = itemMatch[1].trim().split(/[\n,]/)[0].trim();
+
+  // 이메일
+  const emailMatch = text.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
+  if (emailMatch) result.biz_email = emailMatch[0];
+
+  return result;
+}
+
 export async function onRequestPost(context) {
   const origin = context.request.headers.get('Origin') || '';
   const headers = { 'Content-Type': 'application/json', ...corsHeaders(origin) };
@@ -33,25 +77,20 @@ export async function onRequestPost(context) {
       return new Response(JSON.stringify({ error: 'API 키가 설정되지 않았습니다.' }), { status: 500, headers });
     }
 
-    // phi-4-multimodal 우선, 실패 시 llama-3.2-11b-vision 폴백
+    // Step 1: 이미지에서 텍스트 전체 추출 (OCR)
+    const ocrPrompt = `이 사업자등록증 이미지에 적힌 텍스트를 모두 그대로 읽어서 출력하세요.
+특수문자, 띄어쓰기, 줄바꿈을 최대한 원본 그대로 유지하세요.
+해석이나 설명 없이 텍스트만 출력하세요.`;
+
     const models = [
       'microsoft/phi-4-multimodal-instruct',
       'meta/llama-3.2-11b-vision-instruct',
     ];
 
-    const prompt = `이 사업자등록증에서 다음 정보를 JSON 형식으로 추출해주세요.
-다른 설명 없이 JSON만 출력하세요:
-{
-  "biz_no": "사업자등록번호 (000-00-00000 형식)",
-  "biz_name": "상호",
-  "biz_owner": "대표자 성명",
-  "biz_address": "사업장 소재지",
-  "biz_type": "업태",
-  "biz_item": "종목",
-  "biz_email": "이메일 (없으면 빈 문자열)"
-}`;
+    let rawText = '';
+    let usedModel = '';
+    let lastError = '';
 
-    let lastError = null;
     for (const model of models) {
       try {
         const res = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
@@ -66,39 +105,42 @@ export async function onRequestPost(context) {
               role: 'user',
               content: [
                 { type: 'image_url', image_url: { url: `data:${mimeType};base64,${imageBase64}` } },
-                { type: 'text', text: prompt },
+                { type: 'text', text: ocrPrompt },
               ],
             }],
-            max_tokens: 512,
+            max_tokens: 1024,
             temperature: 0.1,
           }),
         });
 
         if (!res.ok) {
-          const errText = await res.text();
-          lastError = `${model}: HTTP ${res.status} - ${errText}`;
+          lastError = `${model}: HTTP ${res.status}`;
           continue;
         }
 
         const data = await res.json();
-        const content = data.choices?.[0]?.message?.content || '';
-
-        // JSON 추출
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) {
-          lastError = `${model}: JSON 파싱 실패 - ${content}`;
-          continue;
-        }
-
-        const parsed = JSON.parse(jsonMatch[0]);
-        return new Response(JSON.stringify({ success: true, data: parsed, model }), { headers });
+        rawText = data.choices?.[0]?.message?.content || '';
+        usedModel = model;
+        if (rawText.trim()) break;
 
       } catch (e) {
         lastError = `${model}: ${e.message}`;
       }
     }
 
-    return new Response(JSON.stringify({ error: `모든 모델 실패: ${lastError}` }), { status: 502, headers });
+    if (!rawText.trim()) {
+      return new Response(JSON.stringify({ error: `텍스트 추출 실패: ${lastError}` }), { status: 502, headers });
+    }
+
+    // Step 2: 정규식으로 구조화
+    const parsed = parseBizText(rawText);
+
+    return new Response(JSON.stringify({
+      success: true,
+      data: parsed,
+      model: usedModel,
+      rawText, // 디버그용
+    }), { headers });
 
   } catch (e) {
     return new Response(JSON.stringify({ error: `서버 오류: ${e.message}` }), { status: 500, headers });
