@@ -149,11 +149,22 @@ export async function onRequestPost(context) {
     // Step 2: 정규식으로 구조화
     const parsed = parseBizText(rawText);
 
+    // 디버그: 영 문자 매칭 여부 및 실제 코드포인트 확인
+    const yungChar = [...rawText].find(c => /영/.test(c));
+    const yungIdx = rawText.indexOf('영');
+    const debugOwner = {
+      hasYung: yungIdx >= 0,
+      yungCodePoint: yungIdx >= 0 ? rawText.codePointAt(yungIdx).toString(16) : null,
+      charsAroundYung: yungIdx >= 0 ? [...rawText.slice(Math.max(0, yungIdx-2), yungIdx+8)].map(c => c.codePointAt(0).toString(16)).join(' ') : null,
+      matchResult: rawText.match(/영\s*:\s*([가-힣]{2,5})/)?.[1] || null,
+    };
+
     return new Response(JSON.stringify({
       success: true,
       data: parsed,
       model: usedModel,
       rawText, // 디버그용
+      debugOwner,
     }), { headers });
 
   } catch (e) {
