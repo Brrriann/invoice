@@ -2191,6 +2191,7 @@ function App() {
                             <th>계산서 상태</th>
                             <th>발행(예정)일</th>
                             <th>수금상태</th>
+                            <th></th>
                           </tr>
                         </thead>
                         <tbody>
@@ -2215,6 +2216,9 @@ function App() {
                               </td>
                               <td>
                                 <span className={`status-badge ${p.payment_status}`}>{p.payment_status}</span>
+                              </td>
+                              <td>
+                                <button className="btn-print-statement" onClick={() => printTransactionStatement(p)}>🖨️ 거래명세서</button>
                               </td>
                             </tr>
                           ))}
