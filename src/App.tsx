@@ -1764,7 +1764,7 @@ function App() {
                             {/* OCR 버튼 */}
                             <div className="biz-ocr-row">
                               {ocrLoading[project.id] ? (
-                                <span className="ocr-loading">🔍 인식 중...</span>
+                                <span className="ocr-loading">🔍 정확한 처리를 위해 AI가 분석하고 있습니다. 30초 가량 소요됩니다...</span>
                               ) : ('ontouchstart' in window || navigator.maxTouchPoints > 0) ? (
                                 <button className="btn-ocr" onClick={() => setOcrPickerId(project.id)}>📷 사업자등록증 OCR</button>
                               ) : (
