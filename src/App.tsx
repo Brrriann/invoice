@@ -703,6 +703,178 @@ function App() {
     }
   };
 
+  const printTransactionStatement = (p: Project) => {
+    const s = invoiceExportSettings;
+    const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    const total = p.total_amount || 0;
+    const supply = s.taxType === '01' ? Math.round(total / 1.1) : total;
+    const tax = s.taxType === '01' ? total - supply : 0;
+    const issueDate = p.invoice_date
+      ? new Date(p.invoice_date).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })
+      : today;
+
+    const html = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>거래명세서 - ${p.site_name || p.customer_name}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Malgun Gothic', '맑은 고딕', sans-serif; font-size: 12px; color: #111; background: #fff; padding: 20px; }
+  .page { max-width: 794px; margin: 0 auto; }
+
+  /* 제목 */
+  .doc-title { text-align: center; font-size: 26px; font-weight: 800; letter-spacing: 10px; margin-bottom: 4px; }
+  .doc-sub { text-align: center; font-size: 11px; color: #666; margin-bottom: 18px; }
+
+  /* 상단 정보 박스 */
+  .info-row { display: flex; gap: 12px; margin-bottom: 14px; }
+  .info-box { flex: 1; border: 1.5px solid #222; border-radius: 4px; overflow: hidden; }
+  .info-box-title { background: #1e293b; color: #fff; font-weight: 700; font-size: 11px; padding: 5px 10px; letter-spacing: 2px; }
+  .info-table { width: 100%; border-collapse: collapse; }
+  .info-table td { padding: 4px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+  .info-table td:first-child { width: 72px; color: #555; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .info-table tr:last-child td { border-bottom: none; }
+
+  /* 합계 바 */
+  .total-bar { display: flex; align-items: center; gap: 0; border: 1.5px solid #1e293b; border-radius: 4px; overflow: hidden; margin-bottom: 14px; }
+  .total-bar-item { flex: 1; padding: 8px 14px; text-align: center; border-right: 1px solid #cbd5e1; }
+  .total-bar-item:last-child { border-right: none; }
+  .total-bar-item .tb-label { font-size: 10px; color: #64748b; font-weight: 600; margin-bottom: 3px; }
+  .total-bar-item .tb-value { font-size: 15px; font-weight: 800; color: #1e293b; }
+  .total-bar-item.highlight .tb-value { color: #0f4c8a; font-size: 17px; }
+
+  /* 품목 테이블 */
+  .items-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  .items-table th { background: #1e293b; color: #fff; font-size: 11px; font-weight: 600; padding: 7px 8px; text-align: center; }
+  .items-table td { padding: 6px 8px; border-bottom: 1px solid #e2e8f0; text-align: center; font-size: 12px; }
+  .items-table td.left { text-align: left; }
+  .items-table td.right { text-align: right; font-variant-numeric: tabular-nums; }
+  .items-table tr:nth-child(even) td { background: #f8fafc; }
+  .items-table tfoot td { font-weight: 700; background: #f1f5f9; border-top: 2px solid #1e293b; }
+
+  /* 비고 */
+  .notes-box { border: 1px solid #cbd5e1; border-radius: 4px; padding: 8px 12px; min-height: 48px; margin-bottom: 20px; }
+  .notes-label { font-size: 10px; color: #64748b; font-weight: 700; margin-bottom: 4px; }
+
+  /* 하단 서명 */
+  .sign-row { display: flex; justify-content: flex-end; gap: 20px; }
+  .sign-box { border: 1.5px solid #222; border-radius: 4px; padding: 10px 24px; text-align: center; min-width: 120px; }
+  .sign-box .sign-label { font-size: 10px; color: #64748b; margin-bottom: 20px; }
+  .sign-box .sign-name { font-size: 13px; font-weight: 700; border-top: 1px solid #cbd5e1; padding-top: 6px; }
+
+  .divider { height: 2px; background: #1e293b; margin: 6px 0 14px; }
+
+  @media print {
+    body { padding: 0; }
+    @page { margin: 12mm; size: A4; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="doc-title">거 래 명 세 서</div>
+  <div class="doc-sub">작성일: ${issueDate}</div>
+  <div class="divider"></div>
+
+  <div class="info-row">
+    <!-- 공급받는자 -->
+    <div class="info-box">
+      <div class="info-box-title">▶ 공급받는자</div>
+      <table class="info-table">
+        <tr><td>상호</td><td><strong>${p.biz_name || p.customer_name || '-'}</strong></td></tr>
+        <tr><td>대표자</td><td>${p.biz_owner || '-'}</td></tr>
+        <tr><td>사업자번호</td><td>${p.biz_no || '-'}</td></tr>
+        <tr><td>주소</td><td>${p.biz_address || '-'}</td></tr>
+        <tr><td>현장명</td><td>${p.site_name || '-'}</td></tr>
+        ${p.biz_email ? `<tr><td>이메일</td><td>${p.biz_email}</td></tr>` : ''}
+      </table>
+    </div>
+    <!-- 공급자 -->
+    <div class="info-box">
+      <div class="info-box-title">▶ 공급자</div>
+      <table class="info-table">
+        <tr><td>상호</td><td><strong>${s.supplierName || '-'}</strong></td></tr>
+        <tr><td>대표자</td><td>${s.supplierOwner || '-'}</td></tr>
+        <tr><td>사업자번호</td><td>${s.supplierBizNo || '-'}</td></tr>
+        <tr><td>주소</td><td>${s.supplierAddress || '-'}</td></tr>
+        <tr><td>업태/종목</td><td>${[s.supplierType, s.supplierItem].filter(Boolean).join(' / ') || '-'}</td></tr>
+        ${s.supplierEmail ? `<tr><td>이메일</td><td>${s.supplierEmail}</td></tr>` : ''}
+      </table>
+    </div>
+  </div>
+
+  <!-- 합계 바 -->
+  <div class="total-bar">
+    <div class="total-bar-item highlight">
+      <div class="tb-label">합계금액</div>
+      <div class="tb-value">₩${total.toLocaleString()}</div>
+    </div>
+    <div class="total-bar-item">
+      <div class="tb-label">공급가액</div>
+      <div class="tb-value">₩${supply.toLocaleString()}</div>
+    </div>
+    <div class="total-bar-item">
+      <div class="tb-label">세액 (${s.taxType === '01' ? '10%' : '면세'})</div>
+      <div class="tb-value">₩${tax.toLocaleString()}</div>
+    </div>
+  </div>
+
+  <!-- 품목 테이블 -->
+  <table class="items-table">
+    <thead>
+      <tr>
+        <th style="width:40px">번호</th>
+        <th class="left">품목</th>
+        <th style="width:60px">수량</th>
+        <th style="width:110px">단가</th>
+        <th style="width:110px">공급가액</th>
+        <th style="width:90px">세액</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td class="left">${s.itemName || '공사'}${p.site_name ? ' (' + p.site_name + ')' : ''}</td>
+        <td>1</td>
+        <td class="right">₩${supply.toLocaleString()}</td>
+        <td class="right">₩${supply.toLocaleString()}</td>
+        <td class="right">₩${tax.toLocaleString()}</td>
+      </tr>
+      ${Array.from({length: 4}).map(() => `<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>`).join('')}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="4" style="text-align:right; padding-right:12px;">합 계</td>
+        <td class="right">₩${supply.toLocaleString()}</td>
+        <td class="right">₩${tax.toLocaleString()}</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <!-- 비고 -->
+  ${p.notes ? `
+  <div class="notes-box">
+    <div class="notes-label">비 고</div>
+    <div>${p.notes}</div>
+  </div>` : ''}
+
+  <!-- 서명란 -->
+  <div class="sign-row">
+    <div class="sign-box">
+      <div class="sign-label">공급자 확인</div>
+      <div class="sign-name">${s.supplierName || ''}</div>
+    </div>
+  </div>
+</div>
+<script>window.onload = function(){ window.print(); }</script>
+</body>
+</html>`;
+
+    const w = window.open('', '_blank', 'width=900,height=700');
+    if (w) { w.document.write(html); w.document.close(); }
+  };
+
   const extractBizInfoFromOCR = async (projectId: string, file: File) => {
     const base64 = await new Promise<string>((resolve) => {
       const reader = new FileReader();
@@ -1738,6 +1910,7 @@ function App() {
                               <option value="완료">완료</option>
                             </select>
                             <input type="date" value={project.payment_date || ''} onChange={e => handleProjectUpdateImmediate(project.id, 'payment_date', e.target.value)} />
+                            <button className="btn-print-statement" onClick={() => printTransactionStatement(project)}>🖨️ 거래명세서</button>
                           </div>
                         </div>
                       </div>

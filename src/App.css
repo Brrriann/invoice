@@ -1860,6 +1860,22 @@
 .invoice-badge.요청 { background: #dbeafe; color: #1e40af; }
 .invoice-badge.완료, .invoice-badge.발급완료 { background: #dcfce7; color: #166534; }
 
+/* 거래명세서 출력 버튼 */
+.btn-print-statement {
+  margin-top: 6px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #1e293b;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.btn-print-statement:hover { background: #334155; }
+
 /* 발급상태 토글 버튼 */
 .btn-invoice-status {
   padding: 4px 10px;
