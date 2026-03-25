@@ -34,11 +34,12 @@ function parseBizText(text) {
     || text.match(/상\s*호[^가-힣]*([가-힣].+?)(?:\n|$)/);
   if (bizNameMatch) result.biz_name = bizNameMatch[1].trim().split('\n')[0].trim();
 
-  // 성명 / 대표자: 한글 2-5자
-  const ownerMatch = text.match(/성\s*명\s*[：:]\s*([가-힣]{2,5})/)
-    || text.match(/대\s*표\s*자\s*[：:]\s*([가-힣]{2,5})/)
-    || text.match(/성\s*명[^가-힣]*([가-힣]{2,5})/);
-  if (ownerMatch) result.biz_owner = ownerMatch[1].trim();
+  // 성명 / 대표자: 한글 2-5자 (공백 포함 처리, '명:' 단독 패턴 추가)
+  const ownerMatch = text.match(/성\s*명\s*[：:]\s*([가-힣][\s가-힣]{1,9})/)
+    || text.match(/대\s*표\s*자\s*[：:]\s*([가-힣][\s가-힣]{1,9})/)
+    || text.match(/명\s*[：:]\s*([가-힣][\s가-힣]{1,9})/)
+    || text.match(/성\s*명[^가-힣]*([가-힣][\s가-힣]{1,9})/);
+  if (ownerMatch) result.biz_owner = ownerMatch[1].trim().replace(/\s+/g, '').slice(0, 5);
 
   // 사업장 소재지
   const addressMatch = text.match(/사\s*업\s*장\s*소\s*재\s*지\s*[：:]\s*(.+?)(?:\n|사\s*업|$)/s)
@@ -55,8 +56,11 @@ function parseBizText(text) {
     || text.match(/\[?종목\]?\s*([가-힣]+)/);
   if (itemMatch) result.biz_item = itemMatch[1].trim().split(/[\n,]/)[0].trim();
 
-  // 이메일
-  const emailMatch = text.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
+  // 이메일: 공백 정규화 후 매칭 (OCR이 @ 앞뒤나 . 뒤에 공백 삽입하는 경우 처리)
+  const normalizedForEmail = text
+    .replace(/\s*@\s*/g, '@')
+    .replace(/([a-zA-Z0-9])\s*\.\s*([a-zA-Z])/g, '$1.$2');
+  const emailMatch = normalizedForEmail.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
   if (emailMatch) result.biz_email = emailMatch[0];
 
   return result;
