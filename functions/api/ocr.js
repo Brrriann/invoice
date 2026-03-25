@@ -34,12 +34,25 @@ function parseBizText(text) {
     || text.match(/상\s*호[^가-힣]*([가-힣].+?)(?:\n|$)/);
   if (bizNameMatch) result.biz_name = bizNameMatch[1].trim().split('\n')[0].trim();
 
-  // 성명 / 대표자: 한글 2-5자 (공백 포함 처리, '명:' 단독 패턴 추가)
-  const ownerMatch = text.match(/성\s*명\s*[：:]\s*([가-힣][\s가-힣]{1,9})/)
-    || text.match(/대\s*표\s*자\s*[：:]\s*([가-힣][\s가-힣]{1,9})/)
-    || text.match(/명\s*[：:]\s*([가-힣][\s가-힣]{1,9})/)
-    || text.match(/성\s*명[^가-힣]*([가-힣][\s가-힣]{1,9})/);
-  if (ownerMatch) result.biz_owner = ownerMatch[1].trim().replace(/\s+/g, '').slice(0, 5);
+  // 성명 / 대표자: 줄 단위 검색 → 콜론 뒤 연속 한글 2-5자만 추출 (생년월일 등 오버매칭 방지)
+  const textLines = text.split(/\n/);
+  for (const line of textLines) {
+    if (/성\s*명|대\s*표\s*자/.test(line)) {
+      // 우선: 연속 한글 (공백 없는 이름 e.g. 김나윤)
+      const m1 = line.match(/[：:]\s*([가-힣]{2,5})/);
+      if (m1) { result.biz_owner = m1[1]; break; }
+      // 차선: 글자 사이 공백 있는 이름 (e.g. 김 나 윤), 숫자/2연속공백 전까지만
+      const m2 = line.match(/[：:]\s*((?:[가-힣]\s?){2,7})(?=\s{2,}|\s*\d|$)/);
+      if (m2) { result.biz_owner = m2[1].replace(/\s+/g, '').slice(0, 5); break; }
+    }
+  }
+  // fallback: 전체 텍스트에서 연속 한글 검색
+  if (!result.biz_owner) {
+    const m = text.match(/성\s*명\s*[：:]\s*([가-힣]{2,5})/)
+      || text.match(/대\s*표\s*자\s*[：:]\s*([가-힣]{2,5})/)
+      || text.match(/명\s*[：:]\s*([가-힣]{2,5})/);
+    if (m) result.biz_owner = m[1];
+  }
 
   // 사업장 소재지
   const addressMatch = text.match(/사\s*업\s*장\s*소\s*재\s*지\s*[：:]\s*(.+?)(?:\n|사\s*업|$)/s)
@@ -56,12 +69,19 @@ function parseBizText(text) {
     || text.match(/\[?종목\]?\s*([가-힣]+)/);
   if (itemMatch) result.biz_item = itemMatch[1].trim().split(/[\n,]/)[0].trim();
 
-  // 이메일: 공백 정규화 후 매칭 (OCR이 @ 앞뒤나 . 뒤에 공백 삽입하는 경우 처리)
-  const normalizedForEmail = text
-    .replace(/\s*@\s*/g, '@')
-    .replace(/([a-zA-Z0-9])\s*\.\s*([a-zA-Z])/g, '$1.$2');
-  const emailMatch = normalizedForEmail.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
-  if (emailMatch) result.biz_email = emailMatch[0];
+  // 이메일: @ 기호 위치 기준으로 앞뒤 영역 추출 후 공백 완전 제거 → 매칭
+  const atIdx = text.indexOf('@');
+  if (atIdx > 0) {
+    const region = text.slice(Math.max(0, atIdx - 40), atIdx + 60).replace(/\s+/g, '');
+    const regionMatch = region.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
+    if (regionMatch) result.biz_email = regionMatch[0];
+  }
+  // fallback: 전체 텍스트 공백 정규화
+  if (!result.biz_email) {
+    const normalized = text.replace(/\s*@\s*/g, '@').replace(/([a-zA-Z0-9])\s*\.\s*([a-zA-Z])/g, '$1.$2');
+    const emailMatch = normalized.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
+    if (emailMatch) result.biz_email = emailMatch[0];
+  }
 
   return result;
 }
