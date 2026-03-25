@@ -34,25 +34,30 @@ function parseBizText(text) {
     || text.match(/상\s*호[^가-힣]*([가-힣].+?)(?:\n|$)/);
   if (bizNameMatch) result.biz_name = bizNameMatch[1].trim().split('\n')[0].trim();
 
-  // 성명 / 대표자: 줄 단위 검색 → 콜론 옵셔널, 연속 한글 2-5자만 추출
+  // 성명 / 대표자: 줄 단위 검색
+  // OCR이 '성 명' → '영' 으로 오인식하는 경우 포함, 1-2자 라벨+콜론 패턴도 추가
   const textLines = text.split(/\n/);
   for (const line of textLines) {
-    if (/성\s*명|대\s*표\s*자/.test(line)) {
-      // 우선: 연속 한글 (콜론 있든 없든)
-      const m1 = line.match(/성\s*명[\s:：]*([가-힣]{2,5})/)
-        || line.match(/대\s*표\s*자[\s:：]*([가-힣]{2,5})/)
-        || line.match(/명[\s:：]+([가-힣]{2,5})/);
-      if (m1) { result.biz_owner = m1[1]; break; }
-      // 차선: 글자 사이 공백 있는 이름 (e.g. 김 나 윤), 숫자/2연속공백 전까지만
-      const m2 = line.match(/명[\s:：]*((?:[가-힣]\s?){2,7})(?=\s{2,}|\s*\d|$)/);
-      if (m2) { result.biz_owner = m2[1].replace(/\s+/g, '').slice(0, 5); break; }
+    const trimmed = line.trim();
+    // 정상 패턴: 성명, 대표자 포함 줄
+    if (/성\s*명|대\s*표\s*자/.test(trimmed)) {
+      const m = trimmed.match(/성\s*명[\s:：]*([가-힣]{2,5})/)
+        || trimmed.match(/대\s*표\s*자[\s:：]*([가-힣]{2,5})/)
+        || trimmed.match(/명[\s:：]*((?:[가-힣]\s?){2,7})(?=\s{2,}|\s*\d|$)/);
+      if (m) { result.biz_owner = m[1].replace(/\s+/g, '').slice(0, 5); break; }
+    }
+    // OCR 오인식 대응: '영: 김나윤' 같은 1-2자 한글 라벨 + 콜론 + 한글 이름 패턴
+    // 단, 상호/주소/업태 등 다른 필드와 겹치지 않도록 이름 길이 2-5자 제한
+    if (!result.biz_owner && /^[가-힣]{1,2}[\s:：]+[가-힣]{2,5}\s*$/.test(trimmed)) {
+      const m = trimmed.match(/^[가-힣]{1,2}[\s:：]+([가-힣]{2,5})\s*$/);
+      if (m) result.biz_owner = m[1];
     }
   }
-  // fallback: 전체 텍스트에서 콜론 옵셔널로 검색
+  // fallback: 전체 텍스트
   if (!result.biz_owner) {
     const m = text.match(/성\s*명[\s:：]*([가-힣]{2,5})/)
       || text.match(/대\s*표\s*자[\s:：]*([가-힣]{2,5})/)
-      || text.match(/명[\s:：]+([가-힣]{2,5})/);
+      || text.match(/[가-힣]{1,2}[\s:：]+([가-힣]{2,5})(?=\s*\n)/);
     if (m) result.biz_owner = m[1];
   }
 
@@ -104,7 +109,9 @@ export async function onRequestPost(context) {
     }
 
     // Step 1: 이미지에서 텍스트 전체 추출 (OCR)
-    const ocrPrompt = `이 사업자등록증 이미지에 적힌 텍스트를 모두 그대로 읽어서 출력하세요.
+    const ocrPrompt = `이 사업자등록증 이미지에 적힌 모든 텍스트를 그대로 읽어서 출력하세요.
+빨간색, 파란색 등 색상과 관계없이 이미지에 보이는 모든 글자를 포함하세요.
+이메일 주소(@ 포함)가 있으면 반드시 포함하세요.
 특수문자, 띄어쓰기, 줄바꿈을 최대한 원본 그대로 유지하세요.
 해석이나 설명 없이 텍스트만 출력하세요.`;
 
