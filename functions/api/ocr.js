@@ -34,13 +34,20 @@ function parseBizText(text) {
     || text.match(/상\s*호[^가-힣]*([가-힣].+?)(?:\n|$)/);
   if (bizNameMatch) result.biz_name = bizNameMatch[1].trim().split('\n')[0].trim();
 
-  // 성명 / 대표자
-  // OCR이 '성 명' → '영' 으로 오인식하는 케이스 명시적 처리
-  const ownerMatch = text.match(/영\s*:\s*([가-힣]{2,5})/)
-    || text.match(/성\s*명[\s:：]*([가-힣]{2,5})/)
-    || text.match(/대\s*표\s*자[\s:：]*([가-힣]{2,5})/)
-    || text.match(/명\s*:\s*([가-힣]{2,5})/);
-  if (ownerMatch) result.biz_owner = ownerMatch[1];
+  // 성명: '상호' 줄과 '생년' 사이 구간에서 콜론 뒤 2~5자 한글 이름 추출
+  // (OCR이 라벨을 '영:', '명:', '성명:' 등 다양하게 오인식하므로 라벨 무시)
+  const nameSection = text.match(/상\s*호[^\n]*\n([\s\S]*?)생\s*년/);
+  if (nameSection) {
+    const nameMatch = nameSection[1].match(/[：:]\s*([가-힣]{2,5})/);
+    if (nameMatch) result.biz_owner = nameMatch[1];
+  }
+  // fallback: 라벨 직접 매칭
+  if (!result.biz_owner) {
+    const ownerMatch = text.match(/성\s*명[\s:：]*([가-힣]{2,5})/)
+      || text.match(/대\s*표\s*자[\s:：]*([가-힣]{2,5})/)
+      || text.match(/[영명]\s*:\s*([가-힣]{2,5})/);
+    if (ownerMatch) result.biz_owner = ownerMatch[1];
+  }
 
   // 사업장 소재지
   const addressMatch = text.match(/사\s*업\s*장\s*소\s*재\s*지\s*[：:]\s*(.+?)(?:\n|사\s*업|$)/s)
@@ -149,22 +156,43 @@ export async function onRequestPost(context) {
     // Step 2: 정규식으로 구조화
     const parsed = parseBizText(rawText);
 
-    // 디버그: 영 문자 매칭 여부 및 실제 코드포인트 확인
-    const yungChar = [...rawText].find(c => /영/.test(c));
-    const yungIdx = rawText.indexOf('영');
-    const debugOwner = {
-      hasYung: yungIdx >= 0,
-      yungCodePoint: yungIdx >= 0 ? rawText.codePointAt(yungIdx).toString(16) : null,
-      charsAroundYung: yungIdx >= 0 ? [...rawText.slice(Math.max(0, yungIdx-2), yungIdx+8)].map(c => c.codePointAt(0).toString(16)).join(' ') : null,
-      matchResult: rawText.match(/영\s*:\s*([가-힣]{2,5})/)?.[1] || null,
-    };
+    // Step 3: 이메일이 추출되지 않은 경우 전용 2차 호출
+    if (!parsed.biz_email && !rawText.includes('@')) {
+      try {
+        const emailPrompt = `이 이미지에서 이메일 주소(@ 기호가 포함된 텍스트)를 찾아서 이메일 주소만 출력하세요. 빨간색이나 다른 색상의 글씨도 포함합니다. 이메일이 없으면 "없음"이라고만 출력하세요.`;
+        const emailRes = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: usedModel,
+            messages: [{
+              role: 'user',
+              content: [
+                { type: 'image_url', image_url: { url: `data:${mimeType};base64,${imageBase64}` } },
+                { type: 'text', text: emailPrompt },
+              ],
+            }],
+            max_tokens: 64,
+            temperature: 0,
+          }),
+        });
+        if (emailRes.ok) {
+          const emailData = await emailRes.json();
+          const emailRaw = emailData.choices?.[0]?.message?.content || '';
+          const emailMatch = emailRaw.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
+          if (emailMatch) parsed.biz_email = emailMatch[0];
+        }
+      } catch (_) { /* 이메일 추출 실패는 무시 */ }
+    }
 
     return new Response(JSON.stringify({
       success: true,
       data: parsed,
       model: usedModel,
-      rawText, // 디버그용
-      debugOwner,
+      rawText,
     }), { headers });
 
   } catch (e) {
