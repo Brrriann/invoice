@@ -126,6 +126,30 @@ interface SavedMeasurement {
   special_notes: string;
 }
 
+// --- 홈택스 엑셀 설정 ---
+interface InvoiceExportSettings {
+  issueDate: string;
+  taxType: '01' | '02';
+  purposeType: '01' | '02';
+  itemName: string;
+  supplierBizNo: string;
+  supplierName: string;
+  supplierOwner: string;
+  supplierEmail: string;
+  supplierType: string;
+  supplierItem: string;
+  supplierAddress: string;
+}
+
+const defaultInvoiceExportSettings: InvoiceExportSettings = {
+  issueDate: new Date().toISOString().split('T')[0],
+  taxType: '01',
+  purposeType: '02',
+  itemName: '인테리어 공사',
+  supplierBizNo: '', supplierName: '', supplierOwner: '',
+  supplierEmail: '', supplierType: '', supplierItem: '', supplierAddress: '',
+};
+
 const PROJECT_COLORS = [
   { bg: '#dbeafe', text: '#1e3a8a', border: '#93c5fd' },
   { bg: '#dcfce7', text: '#14532d', border: '#86efac' },
@@ -281,6 +305,16 @@ function App() {
   const [companyIntro, setCompanyIntro] = useState('');
   const [showIntroInPrint, setShowIntroInPrint] = useState(false);
   const [expandedBizInfo, setExpandedBizInfo] = useState<Set<string>>(new Set());
+  const [invoiceExportSettings, setInvoiceExportSettings] = useState<InvoiceExportSettings>(() => {
+    try {
+      const saved = localStorage.getItem('invoiceExportSettings');
+      return saved ? { ...defaultInvoiceExportSettings, ...JSON.parse(saved) } : defaultInvoiceExportSettings;
+    } catch { return defaultInvoiceExportSettings; }
+  });
+  const [selectedInvoiceIds, setSelectedInvoiceIds] = useState<Set<string>>(new Set());
+  const [showSupplierPanel, setShowSupplierPanel] = useState(false);
+  const [ocrLoading, setOcrLoading] = useState<Record<string, boolean>>({});
+  const [ocrPickerId, setOcrPickerId] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [searchQuotation, setSearchQuotation] = useState('');
   const [searchMeasurement, setSearchMeasurement] = useState('');
@@ -584,32 +618,139 @@ function App() {
   };
 
   const exportFilteredProjectsToExcel = (filteredProjects: Project[]) => {
-    if (filteredProjects.length === 0) {
-      alert("출력할 데이터가 없습니다.");
-      return;
-    }
+    if (filteredProjects.length === 0) { alert("출력할 데이터가 없습니다."); return; }
+    const s = invoiceExportSettings;
+    const issueDateStr = s.issueDate.replace(/-/g, '');
+    const issueDay = s.issueDate.split('-')[2] || '01';
 
-    const header = ["현장명", "고객사", "계약금액", "계산서상태", "발행(예정)일", "상호", "성명", "사업자등록번호", "이메일", "업태", "종목", "사업장주소"];
-    const rows = filteredProjects.map(p => [
-      p.site_name,
-      p.customer_name,
-      p.total_amount,
-      p.invoice_status,
-      p.invoice_date || "-",
-      p.biz_name || "-",
-      p.biz_owner || "-",
-      p.biz_no || "-",
-      p.biz_email || "-",
-      p.biz_type || "-",
-      p.biz_item || "-",
-      p.biz_address || "-"
-    ]);
+    const hometaxHeaders = [
+      '전자(세금)계산서 종류(01:일반,02:영세율)', '작성일자(YYYYMMDD)',
+      '공급자 등록번호', '공급자 종사업장번호', '공급자 상호', '공급자 성명',
+      '공급자 사업장주소', '공급자 업태', '공급자 종목', '공급자 이메일',
+      '공급받는자 등록번호', '공급받는자 종사업장번호', '공급받는자 상호',
+      '공급받는자 성명', '공급받는자 사업장주소', '공급받는자 업태',
+      '공급받는자 종목', '공급받는자 이메일1', '공급받는자 이메일2',
+      '공급가액 합계', '세액 합계', '비고',
+      '일자1', '품목1', '규격1', '수량1', '단가1', '공급가액1', '세액1', '품목비고1',
+      '일자2', '품목2', '규격2', '수량2', '단가2', '공급가액2', '세액2', '품목비고2',
+      '일자3', '품목3', '규격3', '수량3', '단가3', '공급가액3', '세액3', '품목비고3',
+      '일자4', '품목4', '규격4', '수량4', '단가4', '공급가액4', '세액4', '품목비고4',
+      '현금', '수표', '어음', '외상미수금', '영수(01)/청구(02)',
+    ];
 
-    const worksheet = XLSX.utils.aoa_to_sheet([header, ...rows]);
+    const rows = filteredProjects.map(p => {
+      const total = p.total_amount || 0;
+      const supplyCost = s.taxType === '01' ? Math.round(total / 1.1) : total;
+      const taxAmt    = s.taxType === '01' ? total - supplyCost : 0;
+      const bizNo  = (p.biz_no || '').replace(/-/g, '');
+      const dateStr = p.invoice_date ? p.invoice_date.replace(/-/g, '') : issueDateStr;
+      const day     = p.invoice_date ? p.invoice_date.split('-')[2] : issueDay;
+
+      const row: (string | number)[] = new Array(59).fill('');
+      row[0]  = s.taxType;
+      row[1]  = dateStr;
+      row[2]  = s.supplierBizNo.replace(/-/g, '');
+      row[3]  = '';
+      row[4]  = s.supplierName;
+      row[5]  = s.supplierOwner;
+      row[6]  = s.supplierAddress;
+      row[7]  = s.supplierType;
+      row[8]  = s.supplierItem;
+      row[9]  = s.supplierEmail;
+      row[10] = bizNo;
+      row[11] = '';
+      row[12] = p.biz_name    || '';
+      row[13] = p.biz_owner   || '';
+      row[14] = p.biz_address || '';
+      row[15] = p.biz_type    || '';
+      row[16] = p.biz_item    || '';
+      row[17] = p.biz_email   || '';
+      row[18] = '';
+      row[19] = supplyCost;
+      row[20] = taxAmt;
+      row[21] = p.notes || '';
+      row[22] = day;
+      row[23] = s.itemName;
+      row[24] = '';
+      row[25] = 1;
+      row[26] = supplyCost;
+      row[27] = supplyCost;
+      row[28] = taxAmt;
+      row[29] = p.site_name || '';
+      row[58] = s.purposeType;
+      return row;
+    });
+
+    const worksheet = XLSX.utils.aoa_to_sheet([hometaxHeaders, ...rows]);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "계산서 발행 리스트");
-    
-    XLSX.writeFile(workbook, `계산서발행현황_${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.utils.book_append_sheet(workbook, worksheet, '엑셀업로드양식');
+    XLSX.writeFile(workbook, `홈택스_세금계산서_${issueDateStr}.xlsx`);
+  };
+
+  const markExportedAsComplete = async (exportedProjects: Project[]) => {
+    const today = new Date().toISOString().split('T')[0];
+    const pendingIds = exportedProjects.filter(p => p.invoice_status !== '발급완료').map(p => p.id);
+    if (pendingIds.length === 0) return;
+    setProjects(prev => prev.map(p =>
+      pendingIds.includes(p.id) ? { ...p, invoice_status: '발급완료', invoice_date: p.invoice_date || today } : p
+    ));
+    if (!currentUser) return;
+    for (const id of pendingIds) {
+      const p = projects.find(x => x.id === id);
+      await updateSecure('projects', currentUser.id, id, {
+        invoice_status: '발급완료',
+        invoice_date: p?.invoice_date || today
+      }).catch(() => {});
+    }
+  };
+
+  const extractBizInfoFromOCR = async (projectId: string, file: File) => {
+    const base64 = await new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve((e.target?.result as string).split(',')[1]);
+      reader.readAsDataURL(file);
+    });
+    const mimeType = file.type || 'image/jpeg';
+
+    setOcrLoading(prev => ({ ...prev, [projectId]: true }));
+    try {
+      const response = await fetch('/api/ocr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: base64, mimeType }),
+      });
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        alert(`OCR 실패: ${result.error || '알 수 없는 오류'}`);
+        return;
+      }
+
+      const updates: Partial<Project> = {};
+      const d = result.data;
+      if (d.biz_no)      updates.biz_no      = d.biz_no;
+      if (d.biz_name)    updates.biz_name    = d.biz_name;
+      if (d.biz_owner)   updates.biz_owner   = d.biz_owner;
+      if (d.biz_address) updates.biz_address = d.biz_address;
+      if (d.biz_type)    updates.biz_type    = d.biz_type;
+      if (d.biz_item)    updates.biz_item    = d.biz_item;
+      if (d.biz_email)   updates.biz_email   = d.biz_email;
+
+      if (Object.keys(updates).length === 0) {
+        alert('사업자 정보를 인식하지 못했습니다.\n사업자등록증 사진인지 확인해주세요.');
+        return;
+      }
+
+      setProjects(prev => prev.map(p => p.id === projectId ? { ...p, ...updates } : p));
+
+      if (currentUser) {
+        const { error } = await supabase.from('projects').update(updates).eq('id', projectId);
+        if (error) alert(`DB 저장 실패: ${error.message}`);
+        else alert(`✅ ${Object.keys(updates).length}개 항목이 자동 입력되었습니다!`);
+      }
+    } finally {
+      setOcrLoading(prev => ({ ...prev, [projectId]: false }));
+    }
   };
 
   const updateProjectLocal = (id: string, field: keyof Project, value: string | number | '미발급' | '발급완료' | '미수금' | '일부수금' | '완료') => {
@@ -1330,6 +1471,25 @@ function App() {
       <div className="main-layout no-print">
         {view === 'dashboard' ? (
           <div className="dashboard-container">
+            {/* 모바일 OCR 바텀시트 */}
+            {ocrPickerId && (
+              <div className="ocr-picker-overlay" onClick={() => setOcrPickerId(null)}>
+                <div className="ocr-picker-sheet" onClick={e => e.stopPropagation()}>
+                  <p className="ocr-picker-title">사업자등록증 불러오기</p>
+                  <label className="ocr-picker-option">
+                    📷 카메라로 촬영
+                    <input type="file" accept="image/*" capture="environment" style={{display:'none'}}
+                      onChange={e => { if (e.target.files?.[0]) extractBizInfoFromOCR(ocrPickerId, e.target.files[0]); setOcrPickerId(null); }} />
+                  </label>
+                  <label className="ocr-picker-option">
+                    🖼️ 사진 보관함
+                    <input type="file" accept="image/*" style={{display:'none'}}
+                      onChange={e => { if (e.target.files?.[0]) extractBizInfoFromOCR(ocrPickerId, e.target.files[0]); setOcrPickerId(null); }} />
+                  </label>
+                  <button className="ocr-picker-cancel" onClick={() => setOcrPickerId(null)}>취소</button>
+                </div>
+              </div>
+            )}
             <div className="page-header">
               <h1>공정 관리 대시보드</h1>
               <div className="page-header-actions">
@@ -1601,6 +1761,20 @@ function App() {
                         </button>
                         {expandedBizInfo.has(project.id) && (
                           <div className="biz-info-grid">
+                            {/* OCR 버튼 */}
+                            <div className="biz-ocr-row">
+                              {ocrLoading[project.id] ? (
+                                <span className="ocr-loading">🔍 인식 중...</span>
+                              ) : ('ontouchstart' in window || navigator.maxTouchPoints > 0) ? (
+                                <button className="btn-ocr" onClick={() => setOcrPickerId(project.id)}>📷 사업자등록증 OCR</button>
+                              ) : (
+                                <>
+                                  <input type="file" accept="image/*" style={{display:'none'}} id={`ocr-input-${project.id}`}
+                                    onChange={e => { if (e.target.files?.[0]) extractBizInfoFromOCR(project.id, e.target.files[0]); }} />
+                                  <button className="btn-ocr" onClick={() => document.getElementById(`ocr-input-${project.id}`)?.click()}>📷 사업자등록증 OCR</button>
+                                </>
+                              )}
+                            </div>
                             <input placeholder="상호" value={project.biz_name || ''} onChange={e => updateProjectLocal(project.id, 'biz_name', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_name', e.target.value)} />
                             <input placeholder="성명" value={project.biz_owner || ''} onChange={e => updateProjectLocal(project.id, 'biz_owner', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_owner', e.target.value)} />
                             <input placeholder="사업자등록번호" value={project.biz_no || ''} onChange={e => updateProjectLocal(project.id, 'biz_no', e.target.value)} onBlur={e => syncProjectToDB(project.id, 'biz_no', e.target.value)} />
@@ -1716,18 +1890,82 @@ function App() {
               </div>
             ) : (
               <div className="invoice-container">
+                {/* 공급자 설정 패널 */}
+                <div className="supplier-panel-toggle">
+                  <button className="btn-supplier-toggle" onClick={() => setShowSupplierPanel(v => !v)}>
+                    ⚙️ 공급자 정보 {showSupplierPanel ? '접기' : '설정'}
+                  </button>
+                  {showSupplierPanel && (
+                    <div className="supplier-panel">
+                      <div className="supplier-panel-grid">
+                        <div>
+                          <label>과세유형</label>
+                          <select value={invoiceExportSettings.taxType} onChange={e => setInvoiceExportSettings(p => ({...p, taxType: e.target.value as '01'|'02'}))}>
+                            <option value="01">과세 (10%)</option>
+                            <option value="02">면세 (영세율)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label>영수/청구</label>
+                          <select value={invoiceExportSettings.purposeType} onChange={e => setInvoiceExportSettings(p => ({...p, purposeType: e.target.value as '01'|'02'}))}>
+                            <option value="01">영수</option>
+                            <option value="02">청구</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label>발행일자</label>
+                          <input type="date" value={invoiceExportSettings.issueDate} onChange={e => setInvoiceExportSettings(p => ({...p, issueDate: e.target.value}))} />
+                        </div>
+                        <div>
+                          <label>품목명</label>
+                          <input placeholder="예: 인테리어 공사" value={invoiceExportSettings.itemName} onChange={e => setInvoiceExportSettings(p => ({...p, itemName: e.target.value}))} />
+                        </div>
+                        <div>
+                          <label>공급자 사업자번호</label>
+                          <input placeholder="0000000000 (하이픈 없이)" value={invoiceExportSettings.supplierBizNo} onChange={e => setInvoiceExportSettings(p => ({...p, supplierBizNo: e.target.value}))} />
+                        </div>
+                        <div>
+                          <label>공급자 상호</label>
+                          <input placeholder="상호명" value={invoiceExportSettings.supplierName} onChange={e => setInvoiceExportSettings(p => ({...p, supplierName: e.target.value}))} />
+                        </div>
+                        <div>
+                          <label>공급자 성명</label>
+                          <input placeholder="대표자명" value={invoiceExportSettings.supplierOwner} onChange={e => setInvoiceExportSettings(p => ({...p, supplierOwner: e.target.value}))} />
+                        </div>
+                        <div>
+                          <label>공급자 이메일</label>
+                          <input placeholder="email@example.com" value={invoiceExportSettings.supplierEmail} onChange={e => setInvoiceExportSettings(p => ({...p, supplierEmail: e.target.value}))} />
+                        </div>
+                        <div>
+                          <label>공급자 업태</label>
+                          <input placeholder="건설" value={invoiceExportSettings.supplierType} onChange={e => setInvoiceExportSettings(p => ({...p, supplierType: e.target.value}))} />
+                        </div>
+                        <div>
+                          <label>공급자 종목</label>
+                          <input placeholder="인테리어공사" value={invoiceExportSettings.supplierItem} onChange={e => setInvoiceExportSettings(p => ({...p, supplierItem: e.target.value}))} />
+                        </div>
+                        <div className="supplier-address-field">
+                          <label>공급자 사업장주소</label>
+                          <input placeholder="사업장 주소" value={invoiceExportSettings.supplierAddress} onChange={e => setInvoiceExportSettings(p => ({...p, supplierAddress: e.target.value}))} />
+                        </div>
+                      </div>
+                      <div className="supplier-panel-actions">
+                        <button className="btn-save-supplier" onClick={() => { localStorage.setItem('invoiceExportSettings', JSON.stringify(invoiceExportSettings)); alert('저장되었습니다.'); }}>💾 저장</button>
+                        <button className="btn-reset-supplier" onClick={() => { localStorage.removeItem('invoiceExportSettings'); setInvoiceExportSettings(defaultInvoiceExportSettings); }}>초기화</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div className="invoice-filter-bar">
                   {(() => {
-                    // 현재 검색어가 적용된 프로젝트 목록
                     const searchedProjects = projects.filter(p => {
                       if (!searchProject) return true;
                       const q = searchProject.toLowerCase();
                       return (p.site_name || '').toLowerCase().includes(q) || (p.customer_name || '').toLowerCase().includes(q);
                     });
-
                     const unissuedCount = searchedProjects.filter(p => p.invoice_status !== '발급완료').length;
                     const issuedCount = searchedProjects.filter(p => p.invoice_status === '발급완료').length;
-
                     return (
                       <div className="filter-group">
                         <button className={invoiceFilter === '전체' ? 'active' : ''} onClick={() => setInvoiceFilter('전체')}>전체 ({searchedProjects.length})</button>
@@ -1738,46 +1976,27 @@ function App() {
                   })()}
                   {(() => {
                     const filteredForTotal = projects
-                      .filter(p => {
-                        if (!searchProject) return true;
-                        const q = searchProject.toLowerCase();
-                        return (p.site_name || '').toLowerCase().includes(q) || (p.customer_name || '').toLowerCase().includes(q);
-                      })
-                      .filter(p => {
-                        if (invoiceFilter === '전체') return true;
-                        if (invoiceFilter === '미발급') return p.invoice_status !== '발급완료';
-                        if (invoiceFilter === '발급완료') return p.invoice_status === '발급완료';
-                        return true;
-                      });
-                    
+                      .filter(p => { if (!searchProject) return true; const q = searchProject.toLowerCase(); return (p.site_name||'').toLowerCase().includes(q)||(p.customer_name||'').toLowerCase().includes(q); })
+                      .filter(p => { if (invoiceFilter==='전체') return true; if (invoiceFilter==='미발급') return p.invoice_status!=='발급완료'; if (invoiceFilter==='발급완료') return p.invoice_status==='발급완료'; return true; });
                     const totalSum = filteredForTotal.reduce((sum, p) => sum + (p.total_amount || 0), 0);
-                    
                     return (
                       <div className="invoice-summary">
                         {invoiceFilter === '발급완료' ? '발급완료 합계' : '미발급 합계'}: <span className="highlight">₩{Math.floor(totalSum).toLocaleString()}</span>
                       </div>
                     );
                   })()}
-                  <button 
-                    className="btn-excel-export-list" 
-                    onClick={() => {
-                      const toExport = projects
-                        .filter(p => {
-                          if (!searchProject) return true;
-                          const q = searchProject.toLowerCase();
-                          return (p.site_name || '').toLowerCase().includes(q) || (p.customer_name || '').toLowerCase().includes(q);
-                        })
-                        .filter(p => {
-                          if (invoiceFilter === '전체') return true;
-                          if (invoiceFilter === '미발급') return p.invoice_status !== '발급완료';
-                          if (invoiceFilter === '발급완료') return p.invoice_status === '발급완료';
-                          return true;
-                        });
-                      exportFilteredProjectsToExcel(toExport);
-                    }}
-                  >
-                    📊 선택된 리스트 엑셀 다운로드
-                  </button>
+                  {(() => {
+                    const filteredProjects = projects
+                      .filter(p => { if (!searchProject) return true; const q = searchProject.toLowerCase(); return (p.site_name||'').toLowerCase().includes(q)||(p.customer_name||'').toLowerCase().includes(q); })
+                      .filter(p => { if (invoiceFilter==='전체') return true; if (invoiceFilter==='미발급') return p.invoice_status!=='발급완료'; if (invoiceFilter==='발급완료') return p.invoice_status==='발급완료'; return true; });
+                    const selectedCount = selectedInvoiceIds.size;
+                    const toExport = selectedCount > 0 ? filteredProjects.filter(p => selectedInvoiceIds.has(p.id)) : filteredProjects;
+                    return (
+                      <button className="btn-excel-export-list" onClick={() => { exportFilteredProjectsToExcel(toExport); markExportedAsComplete(toExport); }}>
+                        📊 {selectedCount > 0 ? `선택 ${selectedCount}건 ` : ''}홈택스 엑셀 다운로드
+                      </button>
+                    );
+                  })()}
                 </div>
 
                 <div className="search-bar" style={{marginBottom: '20px'}}>
@@ -1787,55 +2006,53 @@ function App() {
                 </div>
 
                 <div className="invoice-list-table">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>현장명</th>
-                        <th>고객사</th>
-                        <th>계약금액</th>
-                        <th>계산서 상태</th>
-                        <th>발행(예정)일</th>
-                        <th>수금상태</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {projects
-                        .filter(p => {
-                          if (invoiceFilter === '전체') return true;
-                          if (invoiceFilter === '미발급') return p.invoice_status !== '발급완료';
-                          if (invoiceFilter === '발급완료') return p.invoice_status === '발급완료';
-                          return true;
-                        })
-                        .filter(p => {
-                          if (!searchProject) return true;
-                          const q = searchProject.toLowerCase();
-                          return (p.site_name || '').toLowerCase().includes(q) || (p.customer_name || '').toLowerCase().includes(q);
-                        })
-                        .map(p => (
-                          <tr key={p.id}>
-                            <td className="bold">{p.site_name}</td>
-                            <td>{p.customer_name}</td>
-                            <td className="right">{Math.floor(p.total_amount || 0).toLocaleString()}원</td>
-                            <td>
-                              <select 
-                                value={p.invoice_status} 
-                                onChange={e => handleProjectUpdateImmediate(p.id, 'invoice_status', e.target.value)}
-                                className={`invoice-badge ${p.invoice_status}`}
-                              >
-                                <option value="미발급">미발급</option>
-                                <option value="발급완료">발급완료</option>
-                              </select>
-                            </td>
-                            <td>
-                              <input type="date" value={p.invoice_date || ''} onChange={e => handleProjectUpdateImmediate(p.id, 'invoice_date', e.target.value)} />
-                            </td>
-                            <td>
-                              <span className={`status-badge ${p.payment_status}`}>{p.payment_status}</span>
-                            </td>
+                  {(() => {
+                    const filteredProjects = projects
+                      .filter(p => { if (invoiceFilter==='전체') return true; if (invoiceFilter==='미발급') return p.invoice_status!=='발급완료'; if (invoiceFilter==='발급완료') return p.invoice_status==='발급완료'; return true; })
+                      .filter(p => { if (!searchProject) return true; const q = searchProject.toLowerCase(); return (p.site_name||'').toLowerCase().includes(q)||(p.customer_name||'').toLowerCase().includes(q); });
+                    const allSelected = filteredProjects.length > 0 && filteredProjects.every(p => selectedInvoiceIds.has(p.id));
+                    return (
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>
+                              <input type="checkbox" checked={allSelected} onChange={() => setSelectedInvoiceIds(prev => { const next = new Set(prev); if (allSelected) filteredProjects.forEach(p => next.delete(p.id)); else filteredProjects.forEach(p => next.add(p.id)); return next; })} />
+                            </th>
+                            <th>현장명</th>
+                            <th>고객사</th>
+                            <th>계약금액</th>
+                            <th>계산서 상태</th>
+                            <th>발행(예정)일</th>
+                            <th>수금상태</th>
                           </tr>
-                        ))}
-                    </tbody>
-                  </table>
+                        </thead>
+                        <tbody>
+                          {filteredProjects.map(p => (
+                            <tr key={p.id} className={selectedInvoiceIds.has(p.id) ? 'selected-row' : ''}>
+                              <td>
+                                <input type="checkbox" checked={selectedInvoiceIds.has(p.id)} onChange={() => setSelectedInvoiceIds(prev => { const next = new Set(prev); if (next.has(p.id)) next.delete(p.id); else next.add(p.id); return next; })} />
+                              </td>
+                              <td className="bold">{p.site_name}</td>
+                              <td>{p.customer_name}</td>
+                              <td className="right">{Math.floor(p.total_amount || 0).toLocaleString()}원</td>
+                              <td>
+                                <select value={p.invoice_status} onChange={e => handleProjectUpdateImmediate(p.id, 'invoice_status', e.target.value)} className={`invoice-badge ${p.invoice_status}`}>
+                                  <option value="미발급">미발급</option>
+                                  <option value="발급완료">발급완료</option>
+                                </select>
+                              </td>
+                              <td>
+                                <input type="date" value={p.invoice_date || ''} onChange={e => handleProjectUpdateImmediate(p.id, 'invoice_date', e.target.value)} />
+                              </td>
+                              <td>
+                                <span className={`status-badge ${p.payment_status}`}>{p.payment_status}</span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    );
+                  })()}
                 </div>
               </div>
             )}

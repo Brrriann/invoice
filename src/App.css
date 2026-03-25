@@ -1271,6 +1271,88 @@
   grid-column: 1 / -1;
 }
 
+.biz-ocr-row {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-ocr {
+  padding: 6px 12px;
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-ocr:hover { background: #4f46e5; }
+
+.ocr-loading {
+  font-size: 12px;
+  color: #6366f1;
+  font-weight: 600;
+}
+
+/* 모바일 OCR 바텀시트 */
+.ocr-picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+}
+
+.ocr-picker-sheet {
+  width: 100%;
+  background: white;
+  border-radius: 16px 16px 0 0;
+  padding: 20px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ocr-picker-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #374151;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.ocr-picker-option {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1f2937;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  gap: 10px;
+}
+
+.ocr-picker-option:hover { background: #f9fafb; }
+
+.ocr-picker-cancel {
+  margin-top: 8px;
+  padding: 14px;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  width: 100%;
+}
+
 /* --- Calendar --- */
 .calendar-card {
   background: var(--color-surface);
@@ -1556,6 +1638,114 @@
   border-radius: var(--radius-lg);
   padding: 22px;
   border: 1px solid var(--color-border);
+}
+
+/* 공급자 패널 */
+.supplier-panel-toggle {
+  margin-bottom: 16px;
+}
+
+.btn-supplier-toggle {
+  padding: 8px 14px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.btn-supplier-toggle:hover { background: #e2e8f0; }
+
+.supplier-panel {
+  margin-top: 12px;
+  padding: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+}
+
+.supplier-panel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.supplier-panel-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.supplier-panel-grid label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.supplier-panel-grid input,
+.supplier-panel-grid select {
+  padding: 7px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 13px;
+  background: white;
+}
+
+.supplier-address-field {
+  grid-column: span 2;
+}
+
+.supplier-panel-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-save-supplier {
+  padding: 7px 16px;
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-reset-supplier {
+  padding: 7px 14px;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: #64748b;
+  cursor: pointer;
+}
+
+/* 체크박스 선택 행 */
+.selected-row {
+  background: #eff6ff !important;
+}
+
+.invoice-list-table th:first-child,
+.invoice-list-table td:first-child {
+  width: 36px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .supplier-panel-grid { grid-template-columns: repeat(2, 1fr); }
+  .supplier-address-field { grid-column: span 2; }
+}
+
+@media (max-width: 480px) {
+  .supplier-panel-grid { grid-template-columns: 1fr; }
+  .supplier-address-field { grid-column: span 1; }
 }
 
 .invoice-filter-bar {
