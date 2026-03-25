@@ -1891,70 +1891,63 @@ function App() {
             ) : (
               <div className="invoice-container">
                 {/* 공급자 설정 패널 */}
-                <div className="supplier-panel-toggle">
-                  <button className="btn-supplier-toggle" onClick={() => setShowSupplierPanel(v => !v)}>
-                    ⚙️ 공급자 정보 {showSupplierPanel ? '접기' : '설정'}
-                  </button>
-                  {showSupplierPanel && (
-                    <div className="supplier-panel">
-                      <div className="supplier-panel-grid">
-                        <div>
-                          <label>과세유형</label>
-                          <select value={invoiceExportSettings.taxType} onChange={e => setInvoiceExportSettings(p => ({...p, taxType: e.target.value as '01'|'02'}))}>
-                            <option value="01">과세 (10%)</option>
-                            <option value="02">면세 (영세율)</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label>영수/청구</label>
-                          <select value={invoiceExportSettings.purposeType} onChange={e => setInvoiceExportSettings(p => ({...p, purposeType: e.target.value as '01'|'02'}))}>
-                            <option value="01">영수</option>
-                            <option value="02">청구</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label>발행일자</label>
-                          <input type="date" value={invoiceExportSettings.issueDate} onChange={e => setInvoiceExportSettings(p => ({...p, issueDate: e.target.value}))} />
-                        </div>
-                        <div>
-                          <label>품목명</label>
-                          <input placeholder="예: 인테리어 공사" value={invoiceExportSettings.itemName} onChange={e => setInvoiceExportSettings(p => ({...p, itemName: e.target.value}))} />
-                        </div>
-                        <div>
-                          <label>공급자 사업자번호</label>
-                          <input placeholder="0000000000 (하이픈 없이)" value={invoiceExportSettings.supplierBizNo} onChange={e => setInvoiceExportSettings(p => ({...p, supplierBizNo: e.target.value}))} />
-                        </div>
-                        <div>
-                          <label>공급자 상호</label>
-                          <input placeholder="상호명" value={invoiceExportSettings.supplierName} onChange={e => setInvoiceExportSettings(p => ({...p, supplierName: e.target.value}))} />
-                        </div>
-                        <div>
-                          <label>공급자 성명</label>
-                          <input placeholder="대표자명" value={invoiceExportSettings.supplierOwner} onChange={e => setInvoiceExportSettings(p => ({...p, supplierOwner: e.target.value}))} />
-                        </div>
-                        <div>
-                          <label>공급자 이메일</label>
-                          <input placeholder="email@example.com" value={invoiceExportSettings.supplierEmail} onChange={e => setInvoiceExportSettings(p => ({...p, supplierEmail: e.target.value}))} />
-                        </div>
-                        <div>
-                          <label>공급자 업태</label>
-                          <input placeholder="건설" value={invoiceExportSettings.supplierType} onChange={e => setInvoiceExportSettings(p => ({...p, supplierType: e.target.value}))} />
-                        </div>
-                        <div>
-                          <label>공급자 종목</label>
-                          <input placeholder="인테리어공사" value={invoiceExportSettings.supplierItem} onChange={e => setInvoiceExportSettings(p => ({...p, supplierItem: e.target.value}))} />
-                        </div>
-                        <div className="supplier-address-field">
-                          <label>공급자 사업장주소</label>
-                          <input placeholder="사업장 주소" value={invoiceExportSettings.supplierAddress} onChange={e => setInvoiceExportSettings(p => ({...p, supplierAddress: e.target.value}))} />
-                        </div>
-                      </div>
-                      <div className="supplier-panel-actions">
-                        <button className="btn-save-supplier" onClick={() => { localStorage.setItem('invoiceExportSettings', JSON.stringify(invoiceExportSettings)); alert('저장되었습니다.'); }}>💾 저장</button>
-                        <button className="btn-reset-supplier" onClick={() => { localStorage.removeItem('invoiceExportSettings'); setInvoiceExportSettings(defaultInvoiceExportSettings); }}>초기화</button>
-                      </div>
+                <div className="supplier-panel">
+                  <div className="supplier-panel-grid">
+                    <div>
+                      <label>과세유형</label>
+                      <select value={invoiceExportSettings.taxType} onChange={e => setInvoiceExportSettings(p => ({...p, taxType: e.target.value as '01'|'02'}))}>
+                        <option value="01">과세 (10%)</option>
+                        <option value="02">면세 (영세율)</option>
+                      </select>
                     </div>
-                  )}
+                    <div>
+                      <label>영수/청구</label>
+                      <select value={invoiceExportSettings.purposeType} onChange={e => setInvoiceExportSettings(p => ({...p, purposeType: e.target.value as '01'|'02'}))}>
+                        <option value="01">영수</option>
+                        <option value="02">청구</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label>발행일자</label>
+                      <input type="date" value={invoiceExportSettings.issueDate} onChange={e => setInvoiceExportSettings(p => ({...p, issueDate: e.target.value}))} />
+                    </div>
+                    <div>
+                      <label>품목명</label>
+                      <input placeholder="예: 인테리어 공사" value={invoiceExportSettings.itemName} onChange={e => setInvoiceExportSettings(p => ({...p, itemName: e.target.value}))} />
+                    </div>
+                    <div>
+                      <label>공급자 사업자번호</label>
+                      <input placeholder="0000000000 (하이픈 없이)" value={invoiceExportSettings.supplierBizNo} onChange={e => setInvoiceExportSettings(p => ({...p, supplierBizNo: e.target.value}))} />
+                    </div>
+                    <div>
+                      <label>공급자 상호</label>
+                      <input placeholder="상호명" value={invoiceExportSettings.supplierName} onChange={e => setInvoiceExportSettings(p => ({...p, supplierName: e.target.value}))} />
+                    </div>
+                    <div>
+                      <label>공급자 성명</label>
+                      <input placeholder="대표자명" value={invoiceExportSettings.supplierOwner} onChange={e => setInvoiceExportSettings(p => ({...p, supplierOwner: e.target.value}))} />
+                    </div>
+                    <div>
+                      <label>공급자 이메일</label>
+                      <input placeholder="email@example.com" value={invoiceExportSettings.supplierEmail} onChange={e => setInvoiceExportSettings(p => ({...p, supplierEmail: e.target.value}))} />
+                    </div>
+                    <div>
+                      <label>공급자 업태</label>
+                      <input placeholder="건설" value={invoiceExportSettings.supplierType} onChange={e => setInvoiceExportSettings(p => ({...p, supplierType: e.target.value}))} />
+                    </div>
+                    <div>
+                      <label>공급자 종목</label>
+                      <input placeholder="인테리어공사" value={invoiceExportSettings.supplierItem} onChange={e => setInvoiceExportSettings(p => ({...p, supplierItem: e.target.value}))} />
+                    </div>
+                    <div className="supplier-address-field">
+                      <label>공급자 사업장주소</label>
+                      <input placeholder="사업장 주소" value={invoiceExportSettings.supplierAddress} onChange={e => setInvoiceExportSettings(p => ({...p, supplierAddress: e.target.value}))} />
+                    </div>
+                  </div>
+                  <div className="supplier-panel-actions">
+                    <button className="btn-save-supplier" onClick={() => { localStorage.setItem('invoiceExportSettings', JSON.stringify(invoiceExportSettings)); alert('저장되었습니다.'); }}>💾 저장</button>
+                    <button className="btn-reset-supplier" onClick={() => { localStorage.removeItem('invoiceExportSettings'); setInvoiceExportSettings(defaultInvoiceExportSettings); }}>초기화</button>
+                  </div>
                 </div>
 
                 <div className="invoice-filter-bar">
