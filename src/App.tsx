@@ -859,13 +859,6 @@ function App() {
     <div>${p.notes}</div>
   </div>` : ''}
 
-  <!-- 서명란 -->
-  <div class="sign-row">
-    <div class="sign-box">
-      <div class="sign-label">공급자 확인</div>
-      <div class="sign-name">${s.supplierName || ''}</div>
-    </div>
-  </div>
 </div>
 <script>window.onload = function(){ window.print(); }</script>
 </body>
@@ -1910,7 +1903,6 @@ function App() {
                               <option value="완료">완료</option>
                             </select>
                             <input type="date" value={project.payment_date || ''} onChange={e => handleProjectUpdateImmediate(project.id, 'payment_date', e.target.value)} />
-                            <button className="btn-print-statement" onClick={() => printTransactionStatement(project)}>🖨️ 거래명세서</button>
                           </div>
                         </div>
                       </div>
