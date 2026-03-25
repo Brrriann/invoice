@@ -34,23 +34,25 @@ function parseBizText(text) {
     || text.match(/상\s*호[^가-힣]*([가-힣].+?)(?:\n|$)/);
   if (bizNameMatch) result.biz_name = bizNameMatch[1].trim().split('\n')[0].trim();
 
-  // 성명 / 대표자: 줄 단위 검색 → 콜론 뒤 연속 한글 2-5자만 추출 (생년월일 등 오버매칭 방지)
+  // 성명 / 대표자: 줄 단위 검색 → 콜론 옵셔널, 연속 한글 2-5자만 추출
   const textLines = text.split(/\n/);
   for (const line of textLines) {
     if (/성\s*명|대\s*표\s*자/.test(line)) {
-      // 우선: 연속 한글 (공백 없는 이름 e.g. 김나윤)
-      const m1 = line.match(/[：:]\s*([가-힣]{2,5})/);
+      // 우선: 연속 한글 (콜론 있든 없든)
+      const m1 = line.match(/성\s*명[\s:：]*([가-힣]{2,5})/)
+        || line.match(/대\s*표\s*자[\s:：]*([가-힣]{2,5})/)
+        || line.match(/명[\s:：]+([가-힣]{2,5})/);
       if (m1) { result.biz_owner = m1[1]; break; }
       // 차선: 글자 사이 공백 있는 이름 (e.g. 김 나 윤), 숫자/2연속공백 전까지만
-      const m2 = line.match(/[：:]\s*((?:[가-힣]\s?){2,7})(?=\s{2,}|\s*\d|$)/);
+      const m2 = line.match(/명[\s:：]*((?:[가-힣]\s?){2,7})(?=\s{2,}|\s*\d|$)/);
       if (m2) { result.biz_owner = m2[1].replace(/\s+/g, '').slice(0, 5); break; }
     }
   }
-  // fallback: 전체 텍스트에서 연속 한글 검색
+  // fallback: 전체 텍스트에서 콜론 옵셔널로 검색
   if (!result.biz_owner) {
-    const m = text.match(/성\s*명\s*[：:]\s*([가-힣]{2,5})/)
-      || text.match(/대\s*표\s*자\s*[：:]\s*([가-힣]{2,5})/)
-      || text.match(/명\s*[：:]\s*([가-힣]{2,5})/);
+    const m = text.match(/성\s*명[\s:：]*([가-힣]{2,5})/)
+      || text.match(/대\s*표\s*자[\s:：]*([가-힣]{2,5})/)
+      || text.match(/명[\s:：]+([가-힣]{2,5})/);
     if (m) result.biz_owner = m[1];
   }
 
